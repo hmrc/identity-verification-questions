@@ -1,5 +1,5 @@
 # microservice specific routes
 
 GET        /hello-world             uk.gov.hmrc.questionrepository.controllers.MicroserviceHelloWorldController.hello
-POST       /questions                                   controllers.QuestionController.PostQuestion
-POST       /answers                                     controllers.QuestionController.PostAnswer
+POST       /questions               uk.gov.hmrc.questionrepository.controllers.QuestionController.PostQuestion
+POST       /answers                 uk.gov.hmrc.questionrepository.controllers.QuestionController.PostAnswer
