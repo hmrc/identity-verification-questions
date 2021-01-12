@@ -6,6 +6,22 @@ val appName = "question-repository"
 
 val silencerVersion = "1.7.0"
 
+lazy val scoverageSettings = {
+  import scoverage._
+  Seq(
+    ScoverageKeys.coverageExcludedPackages :=
+      """<empty>;
+        |Reverse.*;
+        |.*BuildInfo.*;
+        |.*TestVerifyPersonalIdentityController.*;
+        |.*views.*;
+        |.*Routes.*;
+        |.*RoutesPrefix.*;""".stripMargin,
+    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageFailOnMinimum := false,
+    ScoverageKeys.coverageHighlighting := true
+  )}
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
   .settings(
@@ -26,6 +42,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(playDefaultPort := 1010)
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
+  .settings(scoverageSettings: _*)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers ++= Seq(
     Resolver.bintrayRepo("hmrc", "releases"),

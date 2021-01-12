@@ -1,3 +1,8 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ */
+
 package uk.gov.hmrc.questionrepository.controllers
 
 import org.scalatest.matchers.should.Matchers
