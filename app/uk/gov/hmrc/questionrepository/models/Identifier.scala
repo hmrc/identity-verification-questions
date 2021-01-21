@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 
-import play.api.libs.json.{Format, JsDefined, JsResult, JsString, JsValue, Json, Reads, Writes, __}
+import play.api.libs.json.{Format, Json, Writes, __}
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 
 sealed trait Identifier
