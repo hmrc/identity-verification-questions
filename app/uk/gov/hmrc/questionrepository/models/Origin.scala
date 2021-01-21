@@ -10,13 +10,13 @@ import play.api.libs.json.{Format, Json}
 case class Origin(value: String) {
   require(Origin.isValid(value), s"Invalid value $value for origin, it must match to [0-9a-zA-Z_-]")
 
-  override val toString = value
+  override val toString: String = value
 }
 
 object Origin {
   implicit val format: Format[Origin] = Json.format[Origin]
 
-  def isValid(value: String) = {
+  def isValid(value: String): Boolean = {
     value.length >= 2 && value.length <= 50 && value.matches("[0-9a-zA-Z_-]+")
   }
 }
