@@ -6,51 +6,62 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
+import play.api.libs.json.Json
 
 class SelectionSpec extends UnitSpec{
 
   "when creating a selection it " should {
 
-    "allow valid values with min and max" in {
-      val origin = Origin("valid_string")
-      val selection = Selection(origin,"selections_placeholder",Some(5),Some(1))
+    "allow valid values with min and max" in new Setup {
+
+      val selection = Selection(origin,identifiers, Some(5),Some(1))
       selection.origin.value shouldBe ("valid_string")
+      selection.selections.head shouldBe ninoIdentifier
       selection.max shouldBe Some(5)
       selection.min shouldBe Some(1)
     }
 
-    "allow valid values without min and max" in {
-      val origin = Origin("valid_string")
-      val selection = Selection(origin,"selections_placeholder",None,None)
+    "allow valid values without min and max" in new Setup {
+      val selection = Selection(origin, identifiers)
       selection.origin.value shouldBe ("valid_string")
     }
 
-    "not allow with only one min or max" in {
-      val origin = Origin("valid_string")
+    "not allow with only one min or max" in new Setup {
       an[IllegalArgumentException] shouldBe thrownBy {
-        Selection(origin, "selections_placeholder", Some(5), None)
+        Selection(origin, identifiers, Some(5))
       }
       an[IllegalArgumentException] shouldBe thrownBy {
-        Selection(origin, "selections_placeholder", None, Some(1))
-      }
-    }
-
-    "not allow a max to be smaller then a min" in {
-      val origin = Origin("valid_string")
-      an[IllegalArgumentException] shouldBe thrownBy {
-        Selection(origin, "selections_placeholder", Some(5), Some(8))
+        Selection(origin, identifiers, None, Some(1))
       }
     }
 
-    "not allow a min to be zero or smaller" in {
-      val origin = Origin("valid_string")
+    "not allow a max to be smaller then a min" in new Setup {
       an[IllegalArgumentException] shouldBe thrownBy {
-        Selection(origin, "selections_placeholder", Some(5), Some(0))
-      }
-      an[IllegalArgumentException] shouldBe thrownBy {
-        Selection(origin, "selections_placeholder", Some(5), Some(-1))
+        Selection(origin, identifiers, Some(5), Some(8))
       }
     }
+
+    "not allow a min to be zero or smaller" in new Setup {
+      an[IllegalArgumentException] shouldBe thrownBy {
+        Selection(origin, identifiers, Some(5), Some(0))
+      }
+      an[IllegalArgumentException] shouldBe thrownBy {
+        Selection(origin, identifiers, Some(5), Some(-1))
+      }
+    }
+
+    "serialize to json" in new Setup {
+      val selection = Selection(origin,identifiers, Some(5),Some(1))
+      val json = Json.toJson(identifiers)
+      json.toString shouldBe s"""[{"nino":"AA000000D"}]"""
+    }
+  }
+
+  trait Setup {
+    val origin = Origin("valid_string")
+    val ninoIdentifier = NinoI("AA000000D")
+//    val identifiers: Identifier = NinoI("AA000000D")
+    val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
   }
 
 }

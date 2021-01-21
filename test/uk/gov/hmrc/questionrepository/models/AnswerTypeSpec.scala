@@ -14,7 +14,7 @@ class AnswerTypeSpec extends UnitSpec {
     "create json for STR" in {
       val strType = STR
 
-      Json.toJson(strType) shouldBe "STR"
+      Json.toJson(strType).toString shouldBe s""""STR""""
     }
   }
 
