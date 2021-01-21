@@ -5,18 +5,18 @@
 
 package uk.gov.hmrc.questionrepository.models
 
-import play.api.libs.json.{Format, JsString, JsSuccess, Json, Reads, Writes, __}
+import play.api.libs.json.{JsString, JsSuccess, Reads, Writes}
 
 
 sealed trait AnswerType {
   def value: String
 }
 
-case object STR extends AnswerType {val value = this.productPrefix}
+case object STR extends AnswerType {val value: String = this.productPrefix}
 
-case object INT extends AnswerType {val value = this.productPrefix}
+case object INT extends AnswerType {val value: String = this.productPrefix}
 
-case object DBL extends AnswerType {val value = this.productPrefix}
+case object DBL extends AnswerType {val value: String = this.productPrefix}
 
 
 object AnswerType{

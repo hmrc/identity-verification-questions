@@ -15,14 +15,14 @@ class QuestionControllerSpec extends Utils.UnitSpec {
 
   "POST /questions" should {
     "return 501 Not Implemented" in new Setup {
-      val result: Future[Result] = controller.PostQuestion()(fakeRequest)
+      val result: Future[Result] = controller.question()(fakeRequest)
       status(result) shouldBe NOT_IMPLEMENTED
     }
   }
 
   "POST /answers" should {
     "return 501 Not Implemented" in new Setup {
-      val result: Future[Result] = controller.PostAnswer()(fakeRequest)
+      val result: Future[Result] = controller.answer()(fakeRequest)
       status(result) shouldBe NOT_IMPLEMENTED
     }
   }
