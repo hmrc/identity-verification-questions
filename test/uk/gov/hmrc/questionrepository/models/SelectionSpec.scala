@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 
 class SelectionSpec extends UnitSpec{
 
@@ -14,7 +14,7 @@ class SelectionSpec extends UnitSpec{
 
     "allow valid values with min and max" in new Setup {
 
-      val selection = Selection(origin,identifiers, Some(5),Some(1))
+      val selection: Selection = Selection(origin,identifiers, Some(5),Some(1))
       selection.origin.value shouldBe ("valid_string")
       selection.selections.head shouldBe ninoIdentifier
       selection.max shouldBe Some(5)
@@ -22,7 +22,7 @@ class SelectionSpec extends UnitSpec{
     }
 
     "allow valid values without min and max" in new Setup {
-      val selection = Selection(origin, identifiers)
+      val selection: Selection = Selection(origin, identifiers)
       selection.origin.value shouldBe ("valid_string")
     }
 
@@ -51,15 +51,15 @@ class SelectionSpec extends UnitSpec{
     }
 
     "serialize to json" in new Setup {
-      val selection = Selection(origin,identifiers, Some(5),Some(1))
-      val json = Json.toJson(identifiers)
+      val selection: Selection = Selection(origin,identifiers, Some(5),Some(1))
+      val json: JsValue = Json.toJson(identifiers)
       json.toString shouldBe s"""[{"nino":"AA000000D"}]"""
     }
   }
 
   trait Setup {
-    val origin = Origin("valid_string")
-    val ninoIdentifier = NinoI("AA000000D")
+    val origin: Origin = Origin("valid_string")
+    val ninoIdentifier: NinoI = NinoI("AA000000D")
 //    val identifiers: Identifier = NinoI("AA000000D")
     val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
   }

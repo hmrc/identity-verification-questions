@@ -9,7 +9,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
-import uk.gov.hmrc.questionrepository.models.{Identifier, NinoI, Origin, Selection}
+import uk.gov.hmrc.questionrepository.models.{NinoI, Origin, Selection}
 
 import scala.concurrent.Future
 
@@ -34,9 +34,9 @@ class QuestionControllerSpec extends Utils.UnitSpec {
     }
   }
   trait Setup {
-    val selection = Selection(Origin("ma"),Seq(NinoI("AA000000D")),Some(3), Some(1))
-    val jsonBody = Json.toJson(selection)
-    val badJson = Json.parse("""
+    val selection: Selection = Selection(Origin("ma"),Seq(NinoI("AA000000D")),Some(3), Some(1))
+    val jsonBody: JsValue = Json.toJson(selection)
+    val badJson: JsValue = Json.parse("""
                             |{
                             |   "origin":{"value":"ma"},
                             |   "selections":[{"nino":"AA000000D"}],

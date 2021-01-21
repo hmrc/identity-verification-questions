@@ -40,11 +40,6 @@ object Identifier {
   implicit val identifierReads: Reads[Identifier] =
     __.read[NinoI].map(n => n:Identifier) orElse __.read[SaUtrI].map(s => s:Identifier)
 
-//  implicit val writes: Writes[Identifier] = Writes[Identifier] {
-//    case n: NinoI => Json.toJson[NinoI](n)
-//    case s: SaUtrI => Json.toJson[SaUtrI](s)
-//  }
-
   implicit def writes[I <: Identifier]: Writes[I] = new Writes[I] {
     def writes(i: I): JsValue = i match {
       case n: NinoI => Json.toJson[NinoI](n)
