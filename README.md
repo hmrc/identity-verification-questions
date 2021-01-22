@@ -15,7 +15,7 @@ Service to provide verification questions for all services that require them, fi
  Send a json body containing the question origin, a sequence of identifies for the questions, max number of questions (Optional) and min number of questions (Optional) such as: 
  ```
      { 
-       "origin": {"value":"lost-credentials"},
+       "origin": "lost-credentials",
        "selections": [{"nino":"AA000000A"}],
        "max": "5",
        "min": "3"

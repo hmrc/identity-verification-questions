@@ -3,8 +3,6 @@ package controllers
 import iUtils.BaseISpec
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Injecting
-import com.github.tomakehurst.wiremock.client.WireMock.{post, stubFor, _}
-import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 class QuestionControllerispec extends BaseISpec with Injecting {
 
@@ -24,14 +22,14 @@ class QuestionControllerispec extends BaseISpec with Injecting {
 
   "POST /questions" should {
     val journeyPath = "/question-repository/questions"
-    "return 501 if provided with invalid json" in {
+    "return 400 if provided with invalid json" in {
       val response = await(resourceRequest(journeyPath).post(invalidQuestionRequest))
-      response.status shouldBe 501
+      response.status shouldBe 400
     }
 
-    "return 200 if provided with invalid json" in {
+    "return 501 if provided with invalid json" in {
       val response = await(resourceRequest(journeyPath).post(validQuestionRequest))
-      response.status shouldBe 200
+      response.status shouldBe 501
     }
   }
 

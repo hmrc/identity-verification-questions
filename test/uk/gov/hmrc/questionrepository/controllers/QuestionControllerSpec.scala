@@ -21,7 +21,7 @@ class QuestionControllerSpec extends Utils.UnitSpec {
       status(result) shouldBe NOT_IMPLEMENTED
     }
 
-    "return 400 Not Implemented" in new Setup {
+    "return 400 Bad request" in new Setup {
       val result: Future[Result] = controller.question()(fakeBadRequest)
       status(result) shouldBe BAD_REQUEST
     }
