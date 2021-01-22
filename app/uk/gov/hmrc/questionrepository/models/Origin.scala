@@ -14,8 +14,9 @@ case class Origin(value: String) {
 }
 
 object Origin {
-  implicit val format: Format[Origin] = Json.format[Origin]
+//  implicit val format: Format[Origin] = Json.format[Origin]
 
+  implicit val format:
   def isValid(value: String): Boolean = {
     value.length >= 2 && value.length <= 50 && value.matches("[0-9a-zA-Z_-]+")
   }
