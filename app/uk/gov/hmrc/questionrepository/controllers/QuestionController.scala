@@ -13,7 +13,6 @@ import uk.gov.hmrc.questionrepository.models.Selection
 
 import scala.concurrent.Future
 
-
 @Singleton()
 class QuestionController @Inject()(implicit cc: ControllerComponents)
   extends BackendController(cc){

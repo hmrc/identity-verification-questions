@@ -5,12 +5,13 @@
 
 package uk.gov.hmrc.questionrepository.controllers
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.Future
 
+@Singleton()
 class AnswerController  @Inject()(implicit cc: ControllerComponents)
   extends BackendController(cc){
 
