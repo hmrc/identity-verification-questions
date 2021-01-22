@@ -3,8 +3,10 @@ package controllers
 import iUtils.BaseISpec
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Injecting
+import com.github.tomakehurst.wiremock.client.WireMock.{post, stubFor, _}
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
-class QuestionControllerispec extends BaseISpec with Injecting{
+class QuestionControllerispec extends BaseISpec with Injecting {
 
   val validQuestionRequest: JsObject = Json.obj(
     "origin" -> Json.obj("value" -> "lost-credentials"),

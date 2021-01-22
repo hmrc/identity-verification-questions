@@ -27,7 +27,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     majorVersion                     := 0,
     scalaVersion                     := "2.12.12",
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
+    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.it,
     // ***************
     // Use the silencer plugin to suppress warnings
     scalacOptions += "-P:silencer:pathFilters=routes",

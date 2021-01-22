@@ -17,6 +17,9 @@ object AppDependencies {
     "com.typesafe.play"       %% "play-test"                % current  % Test,
     "com.vladsch.flexmark"    %  "flexmark-all"             % "0.36.8" % "test, it",
     "org.scalatestplus.play"  %% "scalatestplus-play"       % "4.0.3"  % "test, it"
+  )
 
+  val it = Seq(
+    "com.github.tomakehurst" % "wiremock-jre8" % "2.26.3" % "it"
   )
 }
