@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 
 class SelectionSpec extends UnitSpec{
 
@@ -53,7 +53,11 @@ class SelectionSpec extends UnitSpec{
     "serialize to json" in new Setup {
       val selection: Selection = Selection(origin,identifiers, Some(5),Some(1))
       val json: JsValue = Json.toJson(selection)
-      json.toString shouldBe s"""{"origin":{"value":"valid_string"},"selections":[{"nino":"AA000000D"}],"max":5,"min":1}"""
+      json shouldBe selectionJson
+    }
+
+    "deserialization from json" in new Setup {
+      selectionJson.validate[Selection] shouldBe JsSuccess(Selection(origin, identifiers, Some(5), Some(1)))
     }
   }
 
@@ -61,6 +65,7 @@ class SelectionSpec extends UnitSpec{
     val origin: Origin = Origin("valid_string")
     val ninoIdentifier: NinoI = NinoI("AA000000D")
     val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
+    val selectionJson = Json.parse(s"""{"origin":"valid_string","selections":[{"nino":"AA000000D"}],"max":5,"min":1}""")
   }
 
 }

@@ -6,6 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
+import play.api.libs.json.Json
 
 class OriginSpec extends UnitSpec {
 
@@ -37,6 +38,13 @@ class OriginSpec extends UnitSpec {
       an[IllegalArgumentException] shouldBe thrownBy {
         Origin(invalidString)
       }
+    }
+
+    "serialize origin creates valid json" in {
+      val validString = "-aA_login-origin_zZ_"
+      val origin = Origin(validString)
+
+      Json.toJson(origin).toString shouldBe s""""$validString""""
     }
   }
 }
