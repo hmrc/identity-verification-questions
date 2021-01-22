@@ -14,9 +14,20 @@ class ReturningJsonSpec extends UnitSpec{
     "allow valid inputs" in {
       val Str = STR
       val json = Json.toJson(Str)
-      val returningJson = ReturningJson("valid_question", "this is a valid question",None, None, None)
-      val returningJsonWithOptionals = ReturningJson("valid_question", "this is a valid question",
-        Some("this is a valid question in welsh"), Some(Str), Some("[A-Z][A-Z]/d"))
+      val returningJson = ReturningJson(
+                                        "valid_question",
+                                        "this is a valid question",
+                                        None,
+                                        None,
+                                        None
+      )
+      val returningJsonWithOptionals = ReturningJson(
+                                        "valid_question",
+                                        "this is a valid question",
+                                        Some("this is a valid question in welsh"),
+                                        Some(Str),
+                                        Some("[A-Z][A-Z]/d")
+      )
 
       returningJson.quid shouldBe "valid_question"
       returningJson.questionEn shouldBe "this is a valid question"

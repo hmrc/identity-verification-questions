@@ -21,18 +21,12 @@ class QuestionControllerSpec extends Utils.UnitSpec {
       status(result) shouldBe NOT_IMPLEMENTED
     }
 
-    "return 400 Not Implemented" in new Setup {
+    "return 400 BadRequest" in new Setup {
       val result: Future[Result] = controller.question()(fakeBadRequest)
       status(result) shouldBe BAD_REQUEST
     }
   }
 
-  "POST /answers" should {
-    "return 501 Not Implemented" in new Setup {
-      val result: Future[Result] = controller.answer()(fakeRequest)
-      status(result) shouldBe NOT_IMPLEMENTED
-    }
-  }
   trait Setup {
     val selection: Selection = Selection(Origin("ma"),Seq(NinoI("AA000000D")),Some(3), Some(1))
     val jsonBody: JsValue = Json.toJson(selection)

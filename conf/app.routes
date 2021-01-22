@@ -1,4 +1,4 @@
 # microservice specific routes
 
 POST       /questions               uk.gov.hmrc.questionrepository.controllers.QuestionController.question
-POST       /answers                 uk.gov.hmrc.questionrepository.controllers.QuestionController.answer
+POST       /answers                 uk.gov.hmrc.questionrepository.controllers.AnswerController.answer
