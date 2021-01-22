@@ -16,13 +16,46 @@ class AnswerTypeSpec extends UnitSpec {
 
       Json.toJson(strType).toString shouldBe s""""STR""""
     }
+
+    "create json for INT" in {
+      val strType = INT
+
+      Json.toJson(strType).toString shouldBe s""""INT""""
+    }
+
+    "create json for DBL" in {
+      val strType = DBL
+
+      Json.toJson(strType).toString shouldBe s""""DBL""""
+    }
   }
 
   "deserializing AnswerTypes" should {
-    "create AnswerType objects" in {
+    "create STR object" in {
       val json = Json.parse(s""""STR"""")
 
       json.validate[AnswerType] shouldBe JsSuccess(STR)
+    }
+
+    "create INT object" in {
+      val json = Json.parse(s""""INT"""")
+
+      json.validate[AnswerType] shouldBe JsSuccess(INT)
+    }
+
+    "create DBL object" in {
+      val json = Json.parse(s""""DBL"""")
+
+      json.validate[AnswerType] shouldBe JsSuccess(DBL)
+    }
+
+
+    "not allow invalid AnswerType" in {
+      val json = Json.parse(s""""DOH"""")
+
+      an[IllegalArgumentException] shouldBe thrownBy {
+        json.validate[AnswerType]
+      }
     }
   }
 }

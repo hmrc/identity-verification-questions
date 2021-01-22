@@ -24,6 +24,7 @@ object AnswerType{
     case JsString("STR") => JsSuccess(STR)
     case JsString("INT") => JsSuccess(INT)
     case JsString("DBL") => JsSuccess(DBL)
+    case e => throw new IllegalArgumentException(s"unknown AnswerType $e")
   }
 
   implicit val answerTypeWrites: Writes[AnswerType] = Writes { answerType =>

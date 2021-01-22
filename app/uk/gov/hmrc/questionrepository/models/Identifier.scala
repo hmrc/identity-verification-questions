@@ -12,14 +12,11 @@ import uk.gov.hmrc.domain.{Nino, SaUtr}
 sealed trait Identifier
 
 case class NinoI(value: Nino) extends Identifier {
-  require(NinoI.isValid(value), s"nino ${value.nino} is invalid")
   override val toString: String = value.nino
 }
 
 object NinoI {
   implicit val format: Format[NinoI] = Json.format[NinoI]
-
-  def isValid(value: Nino): Boolean = Nino.isValid(value.nino)
 
   def apply(nino: Nino): NinoI = new NinoI(nino)
   def apply(ninoStr: String): NinoI = apply(Nino(ninoStr))

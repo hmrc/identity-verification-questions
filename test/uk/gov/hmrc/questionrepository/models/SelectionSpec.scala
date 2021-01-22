@@ -52,15 +52,14 @@ class SelectionSpec extends UnitSpec{
 
     "serialize to json" in new Setup {
       val selection: Selection = Selection(origin,identifiers, Some(5),Some(1))
-      val json: JsValue = Json.toJson(identifiers)
-      json.toString shouldBe s"""[{"nino":"AA000000D"}]"""
+      val json: JsValue = Json.toJson(selection)
+      json.toString shouldBe s"""{"origin":{"value":"valid_string"},"selections":[{"nino":"AA000000D"}],"max":5,"min":1}"""
     }
   }
 
   trait Setup {
     val origin: Origin = Origin("valid_string")
     val ninoIdentifier: NinoI = NinoI("AA000000D")
-//    val identifiers: Identifier = NinoI("AA000000D")
     val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
   }
 
