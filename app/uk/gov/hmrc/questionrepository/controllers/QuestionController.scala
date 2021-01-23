@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.JsValue
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.questionrepository.models.Selection
 
@@ -21,9 +21,4 @@ class QuestionController @Inject()(implicit cc: ControllerComponents)
     withJsonBody[Selection] { Selection =>
       Future.successful(NotImplemented("Not yet implemented for request:" + request)) }
   }
-
-  def answer(): Action[AnyContent] =  Action.async{ implicit request =>
-    Future.successful(NotImplemented("Not yet implemented for request:" + request))
-  }
-
 }

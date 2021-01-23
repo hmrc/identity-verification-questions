@@ -7,9 +7,7 @@ package uk.gov.hmrc.questionrepository.controllers
 
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
-
 import scala.concurrent.Future
 
 class AnswerControllerSpec extends Utils.UnitSpec {
@@ -23,6 +21,6 @@ class AnswerControllerSpec extends Utils.UnitSpec {
 
   trait Setup {
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    val controller = new QuestionController()(Stubs.stubMessagesControllerComponents())
+    val controller = new AnswerController()(Stubs.stubMessagesControllerComponents())
   }
 }
