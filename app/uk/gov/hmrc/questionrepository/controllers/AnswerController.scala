@@ -8,15 +8,15 @@ package uk.gov.hmrc.questionrepository.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.questionrepository.config.AppConfig
 
 import scala.concurrent.Future
 
 @Singleton()
-class MicroserviceHelloWorldController @Inject()(appConfig: AppConfig, cc: ControllerComponents)
-    extends BackendController(cc) {
+class AnswerController  @Inject()(implicit cc: ControllerComponents)
+  extends BackendController(cc){
 
-  def hello(): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok("Hello world"))
+  def answer(): Action[AnyContent] =  Action.async{ implicit request =>
+    Future.successful(NotImplemented("Not yet implemented for request:" + request))
   }
+
 }
