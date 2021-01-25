@@ -13,10 +13,10 @@ class QuestionControllerISpec extends BaseISpec {
   )
 
   val invalidQuestionRequest: JsObject = Json.obj(
-    "origin" -> Json.obj("value" -> "lost-credentials"),
-    "selections" -> Json.obj("nino" -> "AA000000A"),
-    "max" -> "5",
-    "min" -> "8"
+    "origin" -> "lost-credentials",
+    "selections" -> Json.arr(Json.obj("nino" -> "AA000000A")),
+    "max" -> 5,
+    "min" -> 8
   )
 
   "POST /questions" should {
