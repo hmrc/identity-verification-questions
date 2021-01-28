@@ -15,7 +15,7 @@ class SelectionSpec extends UnitSpec{
     "allow valid values with min and max" in new Setup {
 
       val selection: Selection = Selection(origin,identifiers, Some(5),Some(1))
-      selection.origin.value shouldBe ("valid_string")
+      selection.origin.value shouldBe "valid_string"
       selection.selections.head shouldBe ninoIdentifier
       selection.max shouldBe Some(5)
       selection.min shouldBe Some(1)
@@ -23,7 +23,7 @@ class SelectionSpec extends UnitSpec{
 
     "allow valid values without min and max" in new Setup {
       val selection: Selection = Selection(origin, identifiers)
-      selection.origin.value shouldBe ("valid_string")
+      selection.origin.value shouldBe "valid_string"
     }
 
     "not allow with only one min or max" in new Setup {
@@ -65,7 +65,7 @@ class SelectionSpec extends UnitSpec{
     val origin: Origin = Origin("valid_string")
     val ninoIdentifier: NinoI = NinoI("AA000000D")
     val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
-    val selectionJson = Json.parse(s"""{"origin":"valid_string","selections":[{"nino":"AA000000D"}],"max":5,"min":1}""")
+    val selectionJson: JsValue = Json.parse(s"""{"origin":"valid_string","selections":[{"nino":"AA000000D"}],"max":5,"min":1}""")
   }
 
 }

@@ -14,6 +14,7 @@ import play.api.http.{HeaderNames, MimeTypes, Status}
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, ResultExtractors, Writeables}
+import org.mockito.scalatest.MockitoSugar
 
 import scala.concurrent.Future
 
@@ -27,7 +28,8 @@ trait UnitSpec
     with DefaultAwaitTimeout
     with ResultExtractors
     with Writeables
-    with FutureAwaits {
+    with FutureAwaits
+    with MockitoSugar {
 
   def contentAsHtml(result: Future[Result]): Document = Jsoup.parse(contentAsString(result))
 

@@ -8,18 +8,13 @@ package uk.gov.hmrc.questionrepository.models
 import play.api.libs.json.{JsString, JsSuccess, Reads, Writes}
 
 
-sealed trait AnswerType {
-  def value: String
-}
+sealed trait AnswerType
 
-case object STR extends AnswerType {val value: String = this.productPrefix}
+case object STR extends AnswerType
+case object INT extends AnswerType
+case object DBL extends AnswerType
 
-case object INT extends AnswerType {val value: String = this.productPrefix}
-
-case object DBL extends AnswerType {val value: String = this.productPrefix}
-
-
-object AnswerType{
+object AnswerType {
   implicit val answerTypeReads: Reads[AnswerType] = Reads {
     case JsString("STR") => JsSuccess(STR)
     case JsString("INT") => JsSuccess(INT)
@@ -28,6 +23,6 @@ object AnswerType{
   }
 
   implicit val answerTypeWrites: Writes[AnswerType] = Writes { answerType =>
-    JsString(answerType.value)
+    JsString(answerType.toString)
   }
 }

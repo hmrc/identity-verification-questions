@@ -32,7 +32,7 @@ class AppConfigSpec extends UnitSpec {
 
   trait Setup extends TestData{
     def testConfig: Map[String, Any] = Map.empty
-    val config = Configuration.from(testConfig)
+    val config: Configuration = Configuration.from(testConfig)
     lazy val servicesConfig = new ServicesConfig(config)
     lazy val appConfig = new AppConfig(config, servicesConfig)
   }

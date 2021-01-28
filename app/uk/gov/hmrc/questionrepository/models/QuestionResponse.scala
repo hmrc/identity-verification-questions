@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.models
 
 import play.api.libs.json.{Format, Json}
 
-case class QuestionResponse(quid:String, questionEn:String, questionCy: Option[String] = None, answerType: Option[AnswerType] = None, regex: Option[String] = None) {
+case class QuestionResponse(questionId:QuestionId, questionEn:String, questionCy: Option[String] = None, answerType: Option[AnswerType] = None, regex: Option[String] = None) {
 
 }
 

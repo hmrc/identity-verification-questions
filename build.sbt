@@ -17,7 +17,7 @@ lazy val scoverageSettings = {
         |.*views.*;
         |.*Routes.*;
         |.*RoutesPrefix.*;""".stripMargin,
-    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageMinimum := 90,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true
   )}
