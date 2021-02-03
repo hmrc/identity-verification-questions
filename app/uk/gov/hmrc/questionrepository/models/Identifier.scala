@@ -9,10 +9,13 @@ package uk.gov.hmrc.questionrepository.models
 import play.api.libs.json.{Format, JsValue, Json, Reads, Writes, __}
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 
-sealed trait Identifier
+sealed trait Identifier {
+  val identifierType: String
+}
 
 case class NinoI(value: Nino) extends Identifier {
   override val toString: String = value.nino
+  override val identifierType: String = "nino"
 }
 
 object NinoI {
@@ -24,6 +27,7 @@ object NinoI {
 
 case class SaUtrI(value: SaUtr) extends Identifier {
   override val toString: String = value.utr
+  override val identifierType: String = "utr"
 }
 
 object SaUtrI {

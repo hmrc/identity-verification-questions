@@ -26,7 +26,7 @@ class QuestionIdSpec extends UnitSpec {
       }
     }
 
-    "not allow strings loger than 20 characters" in {
+    "not allow strings longer than 20 characters" in {
       val toLong = "123456789012345678901"
 
       an[IllegalArgumentException] shouldBe thrownBy {
