@@ -5,7 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.controllers
 
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.tools.Stubs

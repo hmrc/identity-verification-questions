@@ -8,7 +8,7 @@ package uk.gov.hmrc.questionrepository.services
 import Utils.UnitSpec
 import uk.gov.hmrc.questionrepository.models._
 
-class AnswersServiceSpec extends UnitSpec{
+class AnswersServiceSpec extends UnitSpec {
 
   "when calling checkAnswers it  " should {
     "return a Future of QuestionResult with a result of Unknown" in new SetUp {
