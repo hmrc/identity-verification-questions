@@ -101,6 +101,18 @@ class ConfigHelper @Inject()(config: Configuration)
                                                         getEnabledOrigins(serviceName),
                                                         getRequiredIdentifiers(serviceName))
   }
+
+  protected def getHodConfItem(serviceName: String): Either[HodConfigMissing, HodConf] = {
+    val authToken = config.getOptional[String](s"microservice.services.$serviceName.hod.authorizationToken")
+    val envHeader = config.getOptional[String](s"microservice.services.$serviceName.hod.environmentHeader")
+    (authToken, envHeader) match {
+      case (Some(a), Some(e)) => Right(HodConf(a, e))
+      case (None, Some(_)) => Left(MissingAuthorizationToken)
+      case (Some(_), None) => Left(MissingEnvironmentHeader)
+      case _ => Left(MissingAllConfig)
+    }
+  }
+
 }
 
 sealed trait DateParsingIssue
@@ -108,3 +120,9 @@ case class InvalidDateFound(key: String, badDate : String) extends DateParsingIs
 case object DateMissing extends DateParsingIssue
 
 case class Outage(startDate : LocalDateTime, endDate : LocalDateTime)
+
+case class HodConf(authorizationToken: String, environmentHeader: String)
+sealed trait HodConfigMissing
+case object MissingAuthorizationToken extends HodConfigMissing
+case object MissingEnvironmentHeader extends HodConfigMissing
+case object MissingAllConfig extends HodConfigMissing

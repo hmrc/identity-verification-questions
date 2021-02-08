@@ -236,6 +236,40 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         }
       }
     }
+
+    "getting hodConfiguration" should {
+      "return HodConf for serviceName" when {
+        "all hod config values are present for service" in new Setup {
+          override def testConfig: Map[String, Any] = baseConfig ++ hodAuthorizationToken ++ hodEnvironmentHeader
+
+          appConfig.hodConfiguration("test") shouldBe Right(HodConf("authToken", "envHeader"))
+        }
+      }
+
+      "return MissingAuthorizationToken for serviceName" when {
+        "hod config AuthorizationToken value is missing for service" in new Setup {
+          override def testConfig: Map[String, Any] = baseConfig ++ hodEnvironmentHeader
+
+          appConfig.hodConfiguration("test") shouldBe Left(MissingAuthorizationToken)
+        }
+      }
+
+      "return MissingEnvironmentHeader for serviceName" when {
+        "hod config EnvironmentHeader value is missing for service" in new Setup {
+          override def testConfig: Map[String, Any] = baseConfig ++ hodAuthorizationToken
+
+          appConfig.hodConfiguration("test") shouldBe Left(MissingEnvironmentHeader)
+        }
+      }
+
+      "return MissingAllConfig for serviceName" when {
+        "all hod config is missing for service" in new Setup {
+          override def testConfig: Map[String, Any] = baseConfig
+
+          appConfig.hodConfiguration("test") shouldBe Left(MissingAllConfig)
+        }
+      }
+    }
   }
 
   trait Setup extends TestData {
@@ -300,6 +334,9 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val testDisabled = List("seiss", "ddt")
     val testEnabled = List("dwp-iv")
     val testIdentifiers = List ("nino", "utr")
+
+    val hodAuthorizationToken: Map[String, Any] = Map("microservice.services.test.hod.authorizationToken" -> "authToken")
+    val hodEnvironmentHeader: Map[String, Any] = Map("microservice.services.test.hod.environmentHeader" -> "envHeader")
 
   }
 }

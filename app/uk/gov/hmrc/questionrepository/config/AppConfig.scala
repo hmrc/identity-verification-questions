@@ -27,6 +27,15 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   lazy val circuitBreakerUnavailableDurationInSec: Int = getIntOrDefault("circuit.breaker.unavailablePeriodDurationInSec", 60)
   lazy val circuitBreakerUnstableDurationInSec: Int = getIntOrDefault("circuit.breaker.unstablePeriodDurationInSec", 300)
 
+  def serviceCbNumberOfCallsToTrigger(serviceName: String): Option[Int] =
+    config.getOptional[Int](s"microservice.services.$serviceName.circuitBreaker.numberOfCallsToTrigger")
+  def serviceCbUnavailableDurationInSec(serviceName: String): Option[Int] =
+    config.getOptional[Int](s"microservice.services.$serviceName.circuitBreaker.unavailableDurationInSec")
+  def serviceCbUnstableDurationInSec(serviceName: String): Option[Int] =
+    config.getOptional[Int](s"microservice.services.$serviceName.circuitBreaker.unstableDurationInSec")
+
   def serviceStatus(serviceName: String): ServiceState = ServiceState(serviceName)
+
+  def hodConfiguration(serviceName: String) = getHodConfItem(serviceName)
 
 }

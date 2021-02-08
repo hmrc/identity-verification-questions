@@ -7,12 +7,15 @@ package uk.gov.hmrc.questionrepository.services
 
 import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.questionrepository.connectors.utilities.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.{Identifier, Origin, Question, Selection}
 import play.api.Logging
+import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
+
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class QuestionService extends UsingCircuitBreaker
+abstract class QuestionService @Inject()(implicit val appConfig: AppConfig) extends UsingCircuitBreaker
   with Logging {
 
   type Record
@@ -22,6 +25,8 @@ abstract class QuestionService extends UsingCircuitBreaker
   def connector: QuestionConnector[Record]
 
   def isAvailable(origin: Origin, identifiers: Seq[Identifier]): Boolean
+
+  def evidenceTransformer(records: Seq[Record]): Seq[Question]
 
   /** All the HODs return 404s for an unknown Nino, so these
    *  should never trigger the circuit breaker. The only exception
@@ -40,7 +45,7 @@ abstract class QuestionService extends UsingCircuitBreaker
   def questions(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
     if (isAvailable(selection.origin, selection.selections)) {
       withCircuitBreaker {
-        connector.getRecords(selection.selections).map(sr => sr.map(r => Question("key", Seq(r.toString))).toList)
+        connector.getRecords(selection.selections).map(evidenceTransformer)
       } recover {
         case _: NotFoundException => Seq()
         case t: Throwable =>
@@ -51,5 +56,4 @@ abstract class QuestionService extends UsingCircuitBreaker
       Future.successful(Seq())
     }
   }
-
 }

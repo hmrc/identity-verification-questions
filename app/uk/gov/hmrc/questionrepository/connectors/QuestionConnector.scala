@@ -3,7 +3,7 @@
  *
  */
 
-package uk.gov.hmrc.questionrepository.connectors.utilities
+package uk.gov.hmrc.questionrepository.connectors
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.models.Identifier

@@ -8,17 +8,28 @@ package uk.gov.hmrc.questionrepository.services.utilities
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 
+/**
+ *  attempts to retrieve circuit breaker config for service serviceName
+ *  if none exists then falls back to default circuit breaker settings
+ */
 trait CircuitBreakerConfiguration {
   def appConfig: AppConfig
 
   def serviceName: String
 
+  lazy val numberOfCallsToTrigger: Int =
+    appConfig.serviceCbNumberOfCallsToTrigger(serviceName).fold(appConfig.circuitBreakerNumberOfCallsToTrigger)(noctt => noctt)
+  lazy val unavailableDurationInSec: Int =
+    appConfig.serviceCbUnavailableDurationInSec(serviceName).fold(appConfig.circuitBreakerUnavailableDurationInSec)(udis => udis)
+  lazy val unstableDurationInSec: Int =
+    appConfig.serviceCbUnstableDurationInSec(serviceName).fold(appConfig.circuitBreakerUnstableDurationInSec)(udis => udis)
+
   lazy val circuitBreakerConfig: CircuitBreakerConfig = {
     CircuitBreakerConfig(
       serviceName,
-      appConfig.circuitBreakerNumberOfCallsToTrigger,
-      appConfig.circuitBreakerUnavailableDurationInSec * 1000,
-      appConfig.circuitBreakerUnstableDurationInSec * 1000
+      numberOfCallsToTrigger,
+      unavailableDurationInSec * 1000,
+      unstableDurationInSec * 1000
     )
   }
 }

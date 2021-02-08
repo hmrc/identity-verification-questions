@@ -11,7 +11,7 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
-import uk.gov.hmrc.questionrepository.connectors.utilities.QuestionConnector
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.{Identifier, NinoI, Origin, Question, SaUtrI, Selection}
 
 import java.time.LocalDateTime
@@ -197,9 +197,9 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override def connector: QuestionConnector[TestRecord] = self.connector
 
-      override implicit val appConfig: AppConfig = mockAppConfig
-
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("test", 2, 1000, 1000)
+
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question("key", Seq(r.toString))).toList
     }
   }
 

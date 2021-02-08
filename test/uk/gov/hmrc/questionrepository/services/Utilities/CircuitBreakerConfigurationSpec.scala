@@ -26,6 +26,14 @@ class CircuitBreakerConfigurationSpec extends UnitSpec {
 
       circuitBreakerConfiguration.circuitBreakerConfig shouldBe configuredCircuitBreakerConfig
     }
+
+    "retrieve service specific configured values from config" in new Setup {
+      override def testConfig: Map[String, Any] = baseConfig ++
+        numberOfCallsToTrigger ++ unavailablePeriodDurationInSec ++ unstablePeriodDurationInSec ++
+        serviceNumberOfCallsToTrigger ++ serviceUnavailablePeriodDurationInSec ++ serviceUnstablePeriodDurationInSec
+
+      circuitBreakerConfiguration.circuitBreakerConfig shouldBe servceiSpecificCircuitBreakerConfig
+    }
   }
 
   trait Setup extends TestData {
@@ -37,12 +45,13 @@ class CircuitBreakerConfigurationSpec extends UnitSpec {
 
     val circuitBreakerConfiguration = new CircuitBreakerConfiguration {
       override def appConfig: AppConfig = mockAppConfig
-      override def serviceName = "test"
+      override def serviceName = testServiceName
     }
 
   }
 
   trait TestData {
+    val testServiceName = "test"
     val metrics: Map[String, Any] = Map(
       "microservice.metrics.graphite.host" -> "graphite",
       "microservice.metrics.graphite.port" -> "2003",
@@ -68,7 +77,13 @@ class CircuitBreakerConfigurationSpec extends UnitSpec {
     val unavailablePeriodDurationInSec: Map[String, Any] = Map("circuit.breaker.unavailablePeriodDurationInSec" -> 70)
     val unstablePeriodDurationInSec: Map[String, Any] = Map("circuit.breaker.unstablePeriodDurationInSec" -> 310)
 
+    val serviceNumberOfCallsToTrigger: Map[String, Any] = Map(s"microservice.services.$testServiceName.circuitBreaker.numberOfCallsToTrigger" -> 40)
+    val serviceUnavailablePeriodDurationInSec: Map[String, Any] = Map(s"microservice.services.$testServiceName.circuitBreaker.unavailableDurationInSec" -> 80)
+    val serviceUnstablePeriodDurationInSec: Map[String, Any] = Map(s"microservice.services.$testServiceName.circuitBreaker.unstableDurationInSec" -> 320)
+
+
     val defaultCircuitBreakerConfig = CircuitBreakerConfig("test", 20 , 60 * 1000, 300 * 1000)
     val configuredCircuitBreakerConfig = CircuitBreakerConfig("test", 30, 70 * 1000, 310 * 1000)
+    val servceiSpecificCircuitBreakerConfig = CircuitBreakerConfig("test", 40, 80 * 1000, 320 * 1000)
   }
 }

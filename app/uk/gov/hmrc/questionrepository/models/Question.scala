@@ -5,4 +5,4 @@
 
 package uk.gov.hmrc.questionrepository.models
 
-case class Question(questionKey: String, answers: Seq[String])
+case class Question(questionKey: String, answers: Seq[String], info: Map[String, String] = Map.empty)
