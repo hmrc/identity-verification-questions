@@ -5,6 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.config
 
+import Utils.testData.AppConfigTestData
 import ch.qos.logback.classic.Level
 import Utils.{LogCapturing, UnitSpec}
 import play.api.Configuration
@@ -270,6 +271,32 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         }
       }
     }
+
+    "return a baseUrl for specified service" in new Setup {
+      override def testConfig: Map[String, Any] = baseConfig ++ serviceBaseUrl
+
+      appConfig.serviceBaseUrl("test") shouldBe "http://localhost:8080"
+    }
+
+    "throw an Exception if baseUrl not in config for service" in new Setup {
+      override def testConfig: Map[String, Any] = baseConfig
+      an[RuntimeException] shouldBe thrownBy {
+        appConfig.serviceBaseUrl("test")
+      }
+    }
+
+    "return the bufferInMonths for requested service" in new Setup {
+      override def testConfig: Map[String, Any] = baseConfig ++ bufferInMonthsForService
+
+      appConfig.bufferInMonthsForService("testService") shouldBe 2
+    }
+
+    "throw an Exception if bufferInMonths not in config for service" in new Setup {
+      override def testConfig: Map[String, Any] = baseConfig
+      an[RuntimeException] shouldBe thrownBy {
+        appConfig.bufferInMonthsForService("testService")
+      }
+    }
   }
 
   trait Setup extends TestData {
@@ -279,27 +306,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     lazy val appConfig = new AppConfig(config, servicesConfig)
   }
 
-  trait TestData {
-    val metrics: Map[String, Any] = Map(
-      "microservice.metrics.graphite.host" -> "graphite",
-      "microservice.metrics.graphite.port" -> "2003",
-      "microservice.metrics.graphite.prefix" -> "play.${appName}.",
-      "microservice.metrics.graphite.enabled" -> "false"
-    )
-
-    val auditing: Map[String, Any] = Map(
-      "auditing.enabled" -> "true",
-      "auditing.traceRequests" -> "true",
-      "auditing.consumer.baseUri.host" -> "localhost",
-      "auditing.consumer.baseUri.port" -> "8100"
-    )
-
-    val auth: Map[String, Any] = Map(
-      "microservice.services.auth.host" -> "localhost",
-      "microservice.services.auth.port" -> "1111"
-    )
-
-    val baseConfig: Map[String, Any] = metrics ++ auditing ++ auth
+  trait TestData extends AppConfigTestData {
 
     val numberOfCallsToTrigger: Map[String, Any] = Map("circuit.breaker.numberOfCallsToTrigger" -> 30)
     val unavailablePeriodDurationInSec: Map[String, Any] = Map("circuit.breaker.unavailablePeriodDurationInSec" -> 70)
@@ -338,5 +345,12 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val hodAuthorizationToken: Map[String, Any] = Map("microservice.services.test.hod.authorizationToken" -> "authToken")
     val hodEnvironmentHeader: Map[String, Any] = Map("microservice.services.test.hod.environmentHeader" -> "envHeader")
 
+    val serviceBaseUrl: Map[String, Any] = Map(
+      "microservice.services.test.protocol" -> "http",
+      "microservice.services.test.host" -> "localhost",
+      "microservice.services.test.port" -> 8080
+    )
+
+    val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.testService.bufferInMonths" -> 2)
   }
 }

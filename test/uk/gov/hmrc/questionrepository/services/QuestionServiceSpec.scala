@@ -172,6 +172,16 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         }
       }
     }
+
+    "calling multiple Question Services" should {
+      "return Seq of Questions" in new Setup {
+        when(mockAppConfig.serviceStatus(any)).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+        val services = Seq(service, service2)
+        val selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
+
+        Future.sequence(services.map(_.questions(selection))).map(_.flatten).futureValue shouldBe Seq()
+      }
+    }
   }
 
 
@@ -193,6 +203,18 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     lazy val service = new TestService {
       override val serviceName = "test"
+      override type Record = TestRecord
+
+      override def connector: QuestionConnector[TestRecord] = self.connector
+
+      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("test", 2, 1000, 1000)
+
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question("key", Seq(r.toString))).toList
+
+    }
+
+    lazy val service2 = new TestService {
+      override val serviceName = "test2"
       override type Record = TestRecord
 
       override def connector: QuestionConnector[TestRecord] = self.connector
