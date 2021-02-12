@@ -19,13 +19,12 @@ object Employment{
     }
     JsSuccess(Employment(payments))
   }
-}
 
-case class P60Response(p60Response: Seq[Employment])
-
-object P60Response {
-  implicit val p60ResponseReads: Reads[P60Response] = Reads[P60Response] { json =>
-    val employments = (json \ "individual" \ "employments" \ "employment").as[Seq[Employment]]
-    JsSuccess(P60Response(employments))
+  implicit val p60ResponseReads = Reads[Seq[Employment]] { json =>
+    val employments = (json \ "individual" \ "employments" \ "employment").asOpt[Seq[Employment]] match {
+      case Some(employments) => employments
+      case _ => Seq()
+    }
+    JsSuccess(employments)
   }
 }
