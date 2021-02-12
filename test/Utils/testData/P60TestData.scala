@@ -305,6 +305,22 @@ trait P60TestData {
       |    }
       |}""".stripMargin)
 
+  val p60ResponseWithoutEmploymentJson = Json.parse(
+    """{
+      |    "queryResult": 0,
+      |    "request": {
+      |        "nino": "SM081915",
+      |        "relatedTaxYear": "14-15",
+      |        "requestId": "M1433328147816"
+      |    },
+      |    "individual": {
+      |        "currentNino": "SM081915",
+      |        "relatedTaxYear": "14-15",
+      |        "employments": {
+      |        }
+      |    }
+      |}""".stripMargin)
+
   val p60ResponseWithoutOptionalFieldsJson = Json.parse(
     """
       |{
@@ -419,4 +435,103 @@ trait P60TestData {
       |  }
       |}""".stripMargin)
 
+  val p60ResponseWithoutmandatoryMonetaryAmountFieldJson = Json.parse(
+    """
+      |{
+      |  "queryResult": 0,
+      |  "request": {
+      |    "nino": "AA084113",
+      |    "relatedTaxYear": "15-16",
+      |    "requestId": "M1449317187820"
+      |  },
+      |  "individual": {
+      |    "currentNino": "AA084113",
+      |    "relatedTaxYear": "15-16",
+      |    "employments": {
+      |      "employment": [
+      |        {
+      |          "empRefs": {
+      |            "officeNo": "754",
+      |            "payeRef": "SZ00031",
+      |            "aoRef": "754PD00002328"
+      |          },
+      |          "currentPayId": "AA084113",
+      |          "payments": {
+      |            "inYear": [
+      |              {
+      |                "payId": "AA084113",
+      |                "payFreq": "M1",
+      |                "monthNo": "1",
+      |                "periodsCovered": 1,
+      |                "aggregatedEarnings": true,
+      |                "hoursWorked": "30 hrs or more",
+      |                "taxCode": {
+      |                  "value": "1060L"
+      |                },
+      |                "starter": {
+      |                  "startDate": "2012-10-22",
+      |                  "startDec": "C"
+      |                },
+      |                "pmtDate": "2015-06-24",
+      |                "rcvdDate": "2015-0-20",
+      |                "pmtConfidence": 4,
+      |                "taxYear": "15-16"
+      |              },
+      |              {
+      |                "payId": "AA084113",
+      |                "payFreq": "M1",
+      |                "monthNo": "3",
+      |                "periodsCovered": 1,
+      |                "aggregatedEarnings": true,
+      |                "hoursWorked": "30 hrs or more",
+      |                "mandatoryMonetaryAmount": [
+      |                  {
+      |                    "type": "TaxablePayYTD",
+      |                    "amount": 4000
+      |                  },
+      |                  {
+      |                    "type": "TotalTaxYTD",
+      |                    "amount": 270
+      |                  },
+      |                  {
+      |                    "type": "TaxDeductedOrRefunded",
+      |                    "amount": 90
+      |                  },
+      |                  {
+      |                    "type": "TaxablePay",
+      |                    "amount": 1333.33
+      |                  }
+      |                ],
+      |                "niLettersAndValues": [
+      |                  {
+      |                    "niLetter": "L",
+      |                    "scon": "S1002306X",
+      |                    "niFigure": [
+      |                      {
+      |                        "type": "EmpeeContribnsInPd",
+      |                        "amount": 5
+      |                      },
+      |                      {
+      |                        "type": "EmpeeContribnsYTD",
+      |                        "amount": 34.82
+      |                      }
+      |                    ]
+      |                  }
+      |                ],
+      |                "taxCode": {
+      |                  "value": "1060L"
+      |                },
+      |                "pmtDate": "2015-06-25",
+      |                "rcvdDate": "2015-06-25",
+      |                "pmtConfidence": 0,
+      |                "taxYear": "15-16"
+      |              }
+      |            ]
+      |          },
+      |          "sequenceNumber": 1
+      |        }
+      |      ]
+      |    }
+      |  }
+      |}""".stripMargin)
 }
