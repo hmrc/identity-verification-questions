@@ -12,7 +12,8 @@ import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.{Identifier, NinoI, Origin, Question, SaUtrI, Selection}
+import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
 
 import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
@@ -92,12 +93,13 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       "return empty list if service is available" when {
         "connector throws error" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+          override def connectorResult: Future[Seq[TestRecord]] = badRequestResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "Unexpected response from test"
+            errorLogs.head.getMessage shouldBe "test, threw exception uk.gov.hmrc.http.BadRequestException: bad bad bad request, origin: alala, identifiers: AA000000D,12345678"
           }
         }
 
@@ -107,8 +109,9 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.ERROR)
-            errorLogs.size shouldBe 0
+            val errorLogs = logs.filter(_.getLevel == Level.INFO)
+            errorLogs.size shouldBe 1
+            errorLogs.head.getMessage shouldBe "test, no records returned for selection, origin: alala, identifiers: AA000000D,12345678"
           }
         }
       }
@@ -121,8 +124,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.ERROR)
-            errorLogs.size shouldBe 0
+            logs.size shouldBe 0
           }
         }
 
@@ -133,8 +135,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.ERROR)
-            errorLogs.size shouldBe 0
+            logs.size shouldBe 0
           }
         }
 
@@ -145,8 +146,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.ERROR)
-            errorLogs.size shouldBe 0
+            logs.size shouldBe 0
           }
         }
 
@@ -157,8 +157,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(saUtrIdentifier))).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.ERROR)
-            errorLogs.size shouldBe 0
+            logs.size shouldBe 0
           }
         }
       }
@@ -194,7 +193,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     def connectorResult: Future[Seq[TestRecord]] = illegalAccessResult
 
     def connector = new QuestionConnector[TestRecord] {
-      def getRecords(identifiers: Seq[Identifier])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[TestRecord]] = connectorResult
+      def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[TestRecord]] = connectorResult
     }
 
     import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability

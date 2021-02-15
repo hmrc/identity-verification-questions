@@ -15,12 +15,12 @@ import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Connector
 
 import scala.concurrent.{ExecutionContext, Future}
 import Utils.testData.P60TestData
-import ch.qos.logback.classic.Level
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.questionrepository.models.{NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.Identifier._
 import uk.gov.hmrc.questionrepository.models.Payment.Payment
-
+import uk.gov.hmrc.questionrepository.models.{Origin, Selection}
+import ch.qos.logback.classic.Level
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,43 +36,16 @@ class P60ConnectorSpec extends UnitSpec with GuiceOneAppPerSuite with LogCapturi
 
         val expectedResponse = Seq(paymentOne, paymentTwo, paymentFour)
 
-        connector.getRecords(Seq(ninoIdentifier, utrIdentifier)).futureValue shouldBe expectedResponse
+        connector.getRecords(selectionNino).futureValue shouldBe expectedResponse
       }
     }
 
-    "return an empty sequence" when {
-      "valid identifiers provided but not found returned" in new Setup {
-        override def getResponse: Future[HttpResponse] = Future.successful(HttpResponse.apply(NOT_FOUND,""))
-
-        when(mockAppConfig.hodConfiguration(any)).thenReturn(Right(HodConf("authToken", "envHeader")))
-        when(mockAppConfig.serviceBaseUrl(any)).thenReturn("http://localhost:8080")
-        when(mockAppConfig.bufferInMonthsForService(any)).thenReturn(2)
-
-        connector.getRecords(Seq(ninoIdentifier, utrIdentifier)).futureValue shouldBe Seq()
-      }
-
-      "valid identifiers provided but error generated" in new Setup {
-        override def getResponse: Future[HttpResponse] = Future.successful(HttpResponse.apply(REQUEST_TIMEOUT,""))
-
-        when(mockAppConfig.hodConfiguration(any)).thenReturn(Right(HodConf("authToken", "envHeader")))
-        when(mockAppConfig.serviceBaseUrl(any)).thenReturn("http://localhost:8080")
-        when(mockAppConfig.bufferInMonthsForService(any)).thenReturn(2)
-
-        withCaptureOfLoggingFrom[P60ConnectorSpec] { logs =>
-          connector.getRecords(Seq(ninoIdentifier, utrIdentifier)).futureValue shouldBe Seq()
-          val warnLogs = logs.filter(_.getLevel == Level.WARN)
-          warnLogs.count(_.getMessage == "Error in requesting P60 payments for tax year 19-20, error: GET of 'http://localhost:8080/rti/individual/payments/nino/AA000000/tax-year/19-20' returned 408. Response body: ''") shouldBe 1
-        }
-      }
-    }
-
-    "result in RuntimeException" when {
+    "returns empty sequence and logs a warning" when {
       "no nino in identifiers" in new Setup {
-        when(mockAppConfig.serviceBaseUrl(any)).thenReturn("http://localhost:8080")
-        when(mockAppConfig.bufferInMonthsForService(any)).thenReturn(2)
-
-        an[RuntimeException] shouldBe thrownBy {
-          connector.getRecords(Seq(utrIdentifier))
+        withCaptureOfLoggingFrom[P60ConnectorSpec] { logs =>
+          connector.getRecords(selectionNoNino).futureValue shouldBe Seq()
+          val warnLogs = logs.filter(_.getLevel == Level.WARN)
+          warnLogs.count(_.getMessage == "testService, No nino identifier for selection, origin: testOrigin, identifiers: 12345678") shouldBe 1
         }
       }
     }
@@ -115,5 +88,10 @@ class P60ConnectorSpec extends UnitSpec with GuiceOneAppPerSuite with LogCapturi
 
      val ninoIdentifier = NinoI("AA000000D")
      val utrIdentifier = SaUtrI("12345678")
+
+     val origin = Origin("testOrigin")
+
+     val selectionNino = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
+     val selectionNoNino = Selection(origin, Seq(utrIdentifier))
    }
 }

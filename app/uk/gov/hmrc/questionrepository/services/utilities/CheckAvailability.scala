@@ -6,7 +6,8 @@
 package uk.gov.hmrc.questionrepository.services.utilities
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.{Identifier, Origin}
+import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.Origin
 
 import java.time.LocalDateTime
 
@@ -19,7 +20,7 @@ trait CheckAvailability {
    private lazy val serviceStatus = appConfig.serviceStatus(serviceName)
 
    private def hasRequiredIdentifiers(identifiers: Seq[Identifier]): Boolean =
-      serviceStatus.requiredIdentifiers.forall(identifiers.map(_.identifierType).contains)
+      serviceStatus.requiredIdentifiers.forall(identifiers.map(_.identifierType.toString).contains)
 
    private def isDisabledByTime(dateToCheck: LocalDateTime = LocalDateTime.now()): Boolean =
       serviceStatus.outage match {

@@ -8,6 +8,8 @@ package uk.gov.hmrc.questionrepository.models
 import Utils.UnitSpec
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.Identifier.Search._
 
 class IdentifierSpec extends UnitSpec {
 
@@ -117,6 +119,58 @@ class IdentifierSpec extends UnitSpec {
 
       val json = Json.parse(validJson)
       json.validate[Seq[Identifier]] shouldBe JsSuccess(Seq(NinoI("AA000000D"), SaUtrI("123456789")))
+    }
+  }
+
+  "when searching a Seq[Identifier]" should {
+    "return an Option[NinoI] == first NinoI in list and None for SaUTRI" when {
+      "multiple NinoI and no SaUtrI in sequence" in {
+        val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"), NinoI("NP123456D"))
+
+        identifiers.nino shouldBe Some(NinoI("AA000000D"))
+        identifiers.saUtr shouldBe None
+      }
+
+      "one NinoI and no SaUtrI in sequence" in {
+        val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
+
+        identifiers.nino shouldBe Some(NinoI("AA000000D"))
+        identifiers.saUtr shouldBe None
+      }
+    }
+
+    "return an Option[SaUtrI] == first SaUtrI in list and None for NinoI" when {
+      "multiple SaUtrI and no NinoI in sequence" in {
+        val identifiers: Seq[Identifier] = Seq(SaUtrI("123456789"), SaUtrI("987654321"))
+
+        identifiers.saUtr shouldBe Some(SaUtrI("123456789"))
+        identifiers.nino shouldBe None
+      }
+
+      "one NinoI and no SaUtrI in sequence" in {
+        val identifiers: Seq[Identifier] = Seq(SaUtrI("123456789"))
+
+        identifiers.saUtr shouldBe Some(SaUtrI("123456789"))
+        identifiers.nino shouldBe None
+      }
+    }
+
+    "return an Option[SaUtrI] and Option[NinoI]" when {
+      "both in sequence" in {
+        val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"), SaUtrI("123456789"))
+
+        identifiers.saUtr shouldBe Some(SaUtrI("123456789"))
+        identifiers.nino shouldBe Some(NinoI("AA000000D"))
+      }
+    }
+
+    "return an None for SaUtrI and None for NinoI" when {
+      "neither in sequence" in {
+        val identifiers: Seq[Identifier] = Seq()
+
+        identifiers.saUtr shouldBe None
+        identifiers.nino shouldBe None
+      }
     }
   }
 }
