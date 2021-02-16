@@ -34,12 +34,12 @@ class P60Service @Inject()(connector: P60Connector)(implicit override val appCon
       (if (taxYears.size > 1) Map("previousTaxYear" -> taxYears.head.display) else Map())
 
     val PaymentToDateAnswers: Seq[Question] = records.flatMap(_.taxablePayYTD).filter(_ > 0).map(convertAnswer) match {
-      case answers if answers.nonEmpty => Seq(Question("P60-PaymentToDate", answers.map(_.toString), additionalInfoMap))
-      case _ => Nil
+      case Nil => Nil
+      case answers => Seq(Question("P60-PaymentToDate", answers.map(_.toString), additionalInfoMap))
     }
     val EmployeeNIContributionsAnswers: Seq[Question] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(convertAnswer) match {
-      case answers if answers.nonEmpty => Seq(Question("P60-EmployeeNIContributions", answers.map(_.toString), additionalInfoMap))
-      case _ => Nil
+      case Nil => Nil
+      case answers => Seq(Question("P60-EmployeeNIContributions", answers.map(_.toString), additionalInfoMap))
     }
     PaymentToDateAnswers ++ EmployeeNIContributionsAnswers
   }
