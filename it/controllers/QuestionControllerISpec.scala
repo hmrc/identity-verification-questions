@@ -7,14 +7,14 @@ class QuestionControllerISpec extends BaseISpec {
 
   val validQuestionRequest: JsObject = Json.obj(
     "origin" -> "lost-credentials",
-    "selections" -> Json.arr(Json.obj("nino" -> "AA000000A")),
+    "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A")),
     "max" -> 3,
     "min" -> 1
   )
 
   val invalidQuestionRequest: JsObject = Json.obj(
     "origin" -> "lost-credentials",
-    "selections" -> Json.arr(Json.obj("nino" -> "AA000000A")),
+    "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A")),
     "max" -> 5,
     "min" -> 8
   )

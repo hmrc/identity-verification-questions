@@ -6,12 +6,12 @@
 package uk.gov.hmrc.questionrepository.connectors
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.questionrepository.models.Identifier
+import uk.gov.hmrc.questionrepository.models.Selection
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait QuestionConnector[T] {
 
-  def getRecords(identifiers: Seq[Identifier])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[T]]
+  def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[T]]
 
 }

@@ -7,6 +7,7 @@ package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
 import play.api.libs.json.{JsSuccess, JsValue, Json}
+import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
 
 class AnswerCheckSpec extends UnitSpec {
 

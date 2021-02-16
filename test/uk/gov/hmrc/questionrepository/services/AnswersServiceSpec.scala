@@ -6,6 +6,7 @@
 package uk.gov.hmrc.questionrepository.services
 
 import Utils.UnitSpec
+import uk.gov.hmrc.questionrepository.models.Identifier._
 import uk.gov.hmrc.questionrepository.models._
 
 class AnswersServiceSpec extends UnitSpec {

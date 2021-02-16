@@ -3,6 +3,7 @@ package controllers
 import iUtils.BaseISpec
 import play.api.libs.json.{JsString, JsSuccess, Json}
 import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.questionrepository.models.Identifier._
 import uk.gov.hmrc.questionrepository.models._
 
 class AnswerControllerISpec extends BaseISpec {

@@ -9,7 +9,8 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
-import uk.gov.hmrc.questionrepository.models.{NinoI, Origin, Selection}
+import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
+import uk.gov.hmrc.questionrepository.models.{Origin, Selection}
 
 import scala.concurrent.Future
 

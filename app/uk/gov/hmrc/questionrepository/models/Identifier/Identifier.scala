@@ -3,19 +3,19 @@
  *
  */
 
-package uk.gov.hmrc.questionrepository.models
+package uk.gov.hmrc.questionrepository.models.Identifier
 
-
-import play.api.libs.json.{Format, JsValue, Json, Reads, Writes, __}
+import play.api.libs.json._
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 
 sealed trait Identifier {
-  val identifierType: String
+  val identifierType: IdentifierType
 }
 
 case class NinoI(value: Nino) extends Identifier {
   override val toString: String = value.nino
-  override val identifierType: String = "nino"
+  override val identifierType: IdentifierType = NinoType
+  def first8 = value.nino.take(8)
 }
 
 object NinoI {
@@ -27,7 +27,7 @@ object NinoI {
 
 case class SaUtrI(value: SaUtr) extends Identifier {
   override val toString: String = value.utr
-  override val identifierType: String = "utr"
+  override val identifierType: IdentifierType = UtrType
 }
 
 object SaUtrI {
@@ -46,5 +46,25 @@ object Identifier {
       case n: NinoI => Json.toJson[NinoI](n)
       case s: SaUtrI => Json.toJson[SaUtrI](s)
     }
+  }
+}
+
+sealed trait IdentifierType
+case object NinoType extends IdentifierType {
+  override val toString = "nino"
+}
+case object UtrType extends IdentifierType {
+  override val toString = "utr"
+}
+
+object Search {
+  implicit class FindIdentifier(is: Seq[Identifier]) {
+    private def findOne[T](i: IdentifierType): Option[T] = is.find(_.identifierType == i).asInstanceOf[Option[T]] //match {
+//      case Some(i: T) => Some(i)
+//      case _ => None
+//    }
+
+    lazy val nino: Option[NinoI] = findOne[NinoI](NinoType)
+    lazy val saUtr: Option[SaUtrI] = findOne[SaUtrI](UtrType)
   }
 }

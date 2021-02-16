@@ -38,4 +38,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def hodConfiguration(serviceName: String) = getHodConfItem(serviceName)
 
+  def serviceBaseUrl(serviceName: String) = servicesConfig.baseUrl(serviceName)
+
+  def bufferInMonthsForService(serviceName: String) = config.get[Int](s"microservice.services.$serviceName.bufferInMonths")
+
 }

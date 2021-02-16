@@ -6,6 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.questionrepository.models.Identifier._
 
 case class AnswerCheck(origin: Origin, selections: Seq[Identifier], answers: Seq[AnswerDetails])
 
