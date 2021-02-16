@@ -15,6 +15,7 @@ sealed trait Identifier {
 case class NinoI(value: Nino) extends Identifier {
   override val toString: String = value.nino
   override val identifierType: IdentifierType = NinoType
+  def first8 = value.nino.take(8)
 }
 
 object NinoI {

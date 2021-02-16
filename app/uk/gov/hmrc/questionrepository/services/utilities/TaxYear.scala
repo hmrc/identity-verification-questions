@@ -23,6 +23,11 @@ case class TaxYear(startYear: Int) extends Ordered[TaxYear] {
 
   def forwards(years: Int) = TaxYear(startYear + years)
 
+  def yearForUrl: String = {
+    def takeYY(value: Int) = value % 100
+    takeYY(startYear) + "-" + takeYY(finishYear)
+  }
+
   override def compare(that: TaxYear): Int = startYear.compare(that.startYear)
 }
 

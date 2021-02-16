@@ -32,22 +32,22 @@ abstract class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig:
   override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Payment]] = {
 
     def getRecordsForYear(nino: NinoI, tYear: TaxYear): Future[Seq[Employment]] = {
-      val yearForUrl = {
-        def takeYY(value: Int) = value % 100
 
-        takeYY(tYear.startYear) + "-" + takeYY(tYear.finishYear)
-      }
-
-      val url = s"${appConfig.serviceBaseUrl(serviceName)}/rti/individual/payments/nino/${nino.toString.take(8)}/tax-year/$yearForUrl"
+      val url = s"${appConfig.serviceBaseUrl(serviceName)}/rti/individual/payments/nino/${nino.first8}/tax-year/${tYear.yearForUrl}"
 
       http.GET[Seq[Employment]](url)(implicitly, headersForDES, ec)
     }
 
-    selection.identifiers.nino match {
-      case Some(nino) => Future.sequence(getTaxYears.map(tYear => getRecordsForYear(nino, tYear))).map(_.flatten).map(_.flatMap(_.paymentsByDateDescending.headOption.toSeq))
-      case _ =>
-        logger.warn(s"$serviceName, No nino identifier for selection, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
-        Future.successful(Seq.empty[Payment])
+    selection.identifiers.nino.map { nino =>
+        val futureSeqSeqEmployment=Future.sequence(getTaxYears.map(tYear => getRecordsForYear(nino, tYear)))
+        val futureEmployments=futureSeqSeqEmployment.map(_.flatten)
+        for {
+          employments <- futureEmployments
+          newest = employments.flatMap(_.newest)
+        } yield newest
+    }.getOrElse {
+      logger.warn(s"$serviceName, No nino identifier for selection, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
+      Future.successful(Seq.empty[Payment])
     }
   }
 }

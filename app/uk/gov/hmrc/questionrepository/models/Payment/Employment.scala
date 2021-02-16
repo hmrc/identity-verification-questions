@@ -9,6 +9,7 @@ import play.api.libs.json.{JsSuccess, Reads}
 
 case class Employment(payments: Seq[Payment]) {
   def paymentsByDateDescending: Seq[Payment] = payments.sortWith((p1, p2) => p1.paymentDate.isAfter(p2.paymentDate))
+  def newest: Seq[Payment] = paymentsByDateDescending.headOption.toSeq
 }
 
 object Employment{
