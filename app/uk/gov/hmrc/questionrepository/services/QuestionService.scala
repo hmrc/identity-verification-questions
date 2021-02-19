@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.services
 
 import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
 import play.api.Logging
 import uk.gov.hmrc.questionrepository.config.AppConfig
@@ -16,7 +16,7 @@ import uk.gov.hmrc.questionrepository.models.Identifier._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class QuestionService @Inject()(implicit val appConfig: AppConfig) extends UsingCircuitBreaker
+abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ex: ExecutionContext) extends UsingCircuitBreaker
   with Logging {
 
   type Record
@@ -43,12 +43,12 @@ abstract class QuestionService @Inject()(implicit val appConfig: AppConfig) exte
     case _ => true
   }
 
-  def questions(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
+  def questions(selection: Selection)(implicit hc: HeaderCarrier): Future[Seq[Question]] = {
     if (isAvailable(selection.origin, selection.identifiers)) {
       withCircuitBreaker {
         connector.getRecords(selection).map(evidenceTransformer)
       } recover {
-        case _: NotFoundException => {
+        case e: UpstreamErrorResponse if e.statusCode == 404 => {
           logger.info(s"$serviceName, no records returned for selection, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
           Seq()
         }

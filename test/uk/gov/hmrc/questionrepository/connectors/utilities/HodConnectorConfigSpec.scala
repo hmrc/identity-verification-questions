@@ -47,20 +47,20 @@ class HodConnectorConfigSpec extends UnitSpec {
 
   trait Setup extends TestData{
 
-    implicit val mockAppConfig = mock[AppConfig]
+    implicit val mockAppConfig: AppConfig = mock[AppConfig]
 
     val testHodConfig = new HodConnectorConfig {
       override implicit val appConfig: AppConfig = mockAppConfig
 
       override def serviceName: String = "test"
 
-      def publicHeadersForDES = headersForDES
+      def publicHeadersForDES: HeaderCarrier = headersForDES
     }
   }
 
   trait TestData {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val hcForDES = hc.copy(authorization = Some(Authorization(s"Bearer authToken")), extraHeaders = Seq("Environment" -> "envHeader"))
+    val hcForDES: HeaderCarrier = hc.copy(authorization = Some(Authorization(s"Bearer authToken")), extraHeaders = Seq("Environment" -> "envHeader"))
   }
 }

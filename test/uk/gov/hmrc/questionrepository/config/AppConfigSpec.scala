@@ -334,9 +334,9 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
       "microservice.services.test.identifier.required.1" -> "utr"
     )
 
-    val testStartTime = LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME)
-    val testEndTime = LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME)
-    val testOutage = Outage(testStartTime, testEndTime)
+    val testStartTime: LocalDateTime = LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME)
+    val testEndTime: LocalDateTime = LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME)
+    val testOutage: Outage = Outage(testStartTime, testEndTime)
 
     val testDisabled = List("seiss", "ddt")
     val testEnabled = List("dwp-iv")

@@ -58,13 +58,13 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait Setup extends TestDate {
-    implicit val mockAppConfig = mock[AppConfig]
+    implicit val mockAppConfig: AppConfig = mock[AppConfig]
     implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
-    val mockP60Connector = mock[P60Connector]
+    val mockP60Connector: P60Connector = mock[P60Connector]
 
-    val service = new P60Service(mockP60Connector) {
-      override def today = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
+    val service: P60Service = new P60Service(mockP60Connector) {
+      override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
 
 
@@ -78,23 +78,23 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait TestDate {
-    val paymentOne = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None)
-    val paymentTwo = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5))
-    val paymentThree = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
-    val paymentFour = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
+    val paymentOne: Payment = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None)
+    val paymentTwo: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5))
+    val paymentThree: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
+    val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
 
-    val ninoIdentifier = NinoI("AA000000D")
-    val utrIdentifier = SaUtrI("12345678")
+    val ninoIdentifier: NinoI = NinoI("AA000000D")
+    val utrIdentifier: SaUtrI = SaUtrI("12345678")
 
-    val origin = Origin("testOrigin")
+    val origin: Origin = Origin("testOrigin")
 
-    val selectionNino = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
-    val selectionNoNino = Selection(origin, Seq(utrIdentifier))
+    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
+    val selectionNoNino: Selection = Selection(origin, Seq(utrIdentifier))
 
-    val paymentToDateQuestion = Question("P60-PaymentToDate", Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-    val employeeNIContributionsQuestion = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
+    val paymentToDateQuestion: Question = Question("P60-PaymentToDate", Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
+    val employeeNIContributionsQuestion: Question = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
 
-    val paymentToDateQuestion2 = Question("P60-PaymentToDate", Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
-    val employeeNIContributionsQuestion2 = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val paymentToDateQuestion2: Question = Question("P60-PaymentToDate", Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val employeeNIContributionsQuestion2: Question = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
   }
 }

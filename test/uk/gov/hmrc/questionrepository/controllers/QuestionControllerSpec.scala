@@ -11,15 +11,18 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
 import uk.gov.hmrc.questionrepository.models.{Origin, Selection}
+import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
 class QuestionControllerSpec extends Utils.UnitSpec {
 
   "POST /questions" should {
-    "return 501 Not Implemented" in new Setup {
+    "return 200 ok" in new Setup {
+      when(fakeEvidenceRetrievalService.callAllEvidenceSources(any)(any)).thenReturn(Future.successful(Seq()))
       val result: Future[Result] = controller.question()(fakeQuestionRequest)
-      status(result) shouldBe NOT_IMPLEMENTED
+      status(result) shouldBe OK
     }
 
     "return 400 BadRequest" in new Setup {
@@ -43,7 +46,9 @@ class QuestionControllerSpec extends Utils.UnitSpec {
     val fakeQuestionRequest: FakeRequest[JsValue] = FakeRequest().withBody(jsonBody)
     val fakeBadRequest: FakeRequest[JsValue] = FakeRequest().withBody(badJson)
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    val controller = new QuestionController()(Stubs.stubMessagesControllerComponents())
+    val fakeEvidenceRetrievalService: EvidenceRetrievalService = mock[EvidenceRetrievalService]
+    implicit val mccStub: MessagesControllerComponents = Stubs.stubMessagesControllerComponents()
+    val controller = new QuestionController(fakeEvidenceRetrievalService)
   }
 }
 

@@ -7,19 +7,17 @@ package uk.gov.hmrc.questionrepository.repository
 import javax.inject.{Inject, Singleton}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.questionrepository.models.Question
+import uk.gov.hmrc.questionrepository.models.QuestionDataCache
 
 import scala.concurrent.{ExecutionContext, Future}
-
 @Singleton
 class QuestionMongoRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent)(implicit ec: ExecutionContext)
   extends ReactiveRepository(
-  "questions",
+    "questions",
     reactiveMongoComponent.mongoConnector.db,
-    Question.format){
-
-
-   def store(question: Question): Future[Unit] = {
-    insert(question).map(_ => ())
+    QuestionDataCache.format){
+  def store(questionDataCache: QuestionDataCache): Future[Unit] = {
+    insert(questionDataCache).map(_ => ())
   }
 }
+

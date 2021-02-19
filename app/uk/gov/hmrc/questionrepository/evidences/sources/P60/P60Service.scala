@@ -14,8 +14,9 @@ import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, Cir
 
 import javax.inject.Inject
 import scala.collection.SortedSet
+import scala.concurrent.ExecutionContext
 
-class P60Service @Inject()(connector: P60Connector)(implicit override val appConfig: AppConfig) extends QuestionService
+class P60Service @Inject()(p60Connector: P60Connector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
   with CheckAvailability
   with CircuitBreakerConfiguration
   with TaxYearBuilder
@@ -25,7 +26,7 @@ class P60Service @Inject()(connector: P60Connector)(implicit override val appCon
 
   override def serviceName: String = "p60Service"
 
-  override def connector: QuestionConnector[Payment] = connector
+  override def connector: QuestionConnector[Payment] = p60Connector
 
   override def evidenceTransformer(records: Seq[Payment]): Seq[Question] = {
 

@@ -20,12 +20,12 @@ import uk.gov.hmrc.questionrepository.models.Selection
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
+class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
   with HodConnectorConfig
   with TaxYearBuilder
   with Logging {
 
-  def serviceName: String
+  def serviceName: String = "p60Service"
 
   private def getTaxYears = Set(currentTaxYear.previous, currentTaxYearWithBuffer.previous).toSeq
 

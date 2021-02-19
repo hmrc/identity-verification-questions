@@ -9,7 +9,7 @@ import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.Identifier._
@@ -99,7 +99,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "test, threw exception uk.gov.hmrc.http.BadRequestException: bad bad bad request, origin: alala, identifiers: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe "test, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: alala, identifiers: AA000000D,12345678"
           }
         }
 
@@ -176,7 +176,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       "return Seq of Questions" in new Setup {
         when(mockAppConfig.serviceStatus(any)).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
         val services = Seq(service, service2)
-        val selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
+        val selection: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
 
         Future.sequence(services.map(_.questions(selection))).map(_.flatten).futureValue shouldBe Seq()
       }
@@ -188,11 +188,11 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     self =>
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    implicit val mockAppConfig = mock[AppConfig]
+    implicit val mockAppConfig: AppConfig = mock[AppConfig]
 
     def connectorResult: Future[Seq[TestRecord]] = illegalAccessResult
 
-    def connector = new QuestionConnector[TestRecord] {
+    def connector: QuestionConnector[TestRecord] = new QuestionConnector[TestRecord] {
       def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[TestRecord]] = connectorResult
     }
 
@@ -200,7 +200,9 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     abstract class TestService extends QuestionService with CheckAvailability
 
-    lazy val service = new TestService {
+    lazy val service: TestService {
+      type Record = TestRecord
+    } = new TestService {
       override val serviceName = "test"
       override type Record = TestRecord
 
@@ -212,7 +214,9 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     }
 
-    lazy val service2 = new TestService {
+    lazy val service2: TestService {
+      type Record = TestRecord
+    } = new TestService {
       override val serviceName = "test2"
       override type Record = TestRecord
 
@@ -225,18 +229,18 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait TestData {
-    val origin = Origin("alala")
-    val ninoIdentifier = NinoI("AA000000D")
-    val saUtrIdentifier = SaUtrI("12345678")
-    val futureOutage = Outage(LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2))
-    val pastOutage = Outage(LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1))
-    val currentOutage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
+    val origin: Origin = Origin("alala")
+    val ninoIdentifier: NinoI = NinoI("AA000000D")
+    val saUtrIdentifier: SaUtrI = SaUtrI("12345678")
+    val futureOutage: Outage = Outage(LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2))
+    val pastOutage: Outage = Outage(LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1))
+    val currentOutage: Outage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
 
     case class TestRecord(value: BigDecimal)
 
     def illegalAccessResult: Future[Seq[TestRecord]] = Future.failed(new IllegalAccessException("Connector should not have been called"))
     def testRecordResult: Future[Seq[TestRecord]] = Future.successful(Seq(TestRecord(1)))
-    def notFoundResult: Future[Seq[TestRecord]] = Future.failed(new NotFoundException("no no nooooo, no records found"))
-    def badRequestResult: Future[Seq[TestRecord]] = Future.failed(new BadRequestException("bad bad bad request"))
+    def notFoundResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("no no nooooo, no records found", NOT_FOUND))
+    def badRequestResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("bad bad bad request", BAD_REQUEST))
   }
 }
