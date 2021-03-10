@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.services.utilities
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.models.Identifier._
-import uk.gov.hmrc.questionrepository.models.Origin
+import uk.gov.hmrc.questionrepository.models.{Origin, ServiceName}
 
 import java.time.LocalDateTime
 
@@ -15,7 +15,7 @@ trait CheckAvailability {
 
    implicit val appConfig: AppConfig
 
-   def serviceName: String
+   def serviceName: ServiceName
 
    private lazy val serviceStatus = appConfig.serviceStatus(serviceName)
 

@@ -13,7 +13,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.Identifier._
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{Origin, PaymentToDate, Question, Selection, ServiceName, p60Service}
 
 import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,39 +24,39 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
   "check isAvailable" should {
     "return true" when {
       "no outage is defined, disabledOrigins & enabledOrigins are empty and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "outage defined but is in the past, disabledOrigins & enabledOrigins are empty and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(Some(pastOutage), List.empty, List.empty, List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(Some(pastOutage), List.empty, List.empty, List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "outage defined but is in the future, disabledOrigins & enabledOrigins are empty and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(Some(futureOutage), List.empty, List.empty, List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(Some(futureOutage), List.empty, List.empty, List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "no outage is defined, disabledOrigins is defined but does not contain origin, enabledOrigins is empty and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List("abcd", "xyz"), List.empty, List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List("abcd", "xyz"), List.empty, List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "no outage is defined, disabledOrigins is defined but does not contain origin," + "" +
         "enabledOrigins IS defined AND contains the origin and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List("abcd", "xyz"), List("alala"), List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List("abcd", "xyz"), List("alala"), List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "no outage is defined, disabledOrigins is defined DOES contain origin BUT," + "" +
         "enabledOrigins IS defined AND contains the origin and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List("alala", "xyz"), List("alala"), List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List("alala", "xyz"), List("alala"), List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
@@ -65,25 +65,25 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     "return false" when {
       "outage defined and covers the period now" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(Some(currentOutage), List.empty, List.empty, List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(Some(currentOutage), List.empty, List.empty, List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe false
       }
 
       "no outage is defined, disabledOrigins is defined DOES contain origin, enabledOrigins is empty and required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List("alala", "xyz"), List.empty, List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List("alala", "xyz"), List.empty, List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe false
       }
 
       "no outage is defined, disabledOrigins is empty, enabledOrigins is defined but does NOT contain origin, required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("abc", "xyz"), List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("abc", "xyz"), List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe false
       }
 
       "no outage is defined, disabledOrigins is empty, enabledOrigins is empty BUT NOT all required identifiers are present" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("abc", "xyz"), List("nino", "utr")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("abc", "xyz"), List("nino", "utr")))
 
         service.isAvailable(origin, Seq(ninoIdentifier)) shouldBe false
       }
@@ -92,33 +92,33 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     "getQuestions" should {
       "return empty list if service is available" when {
         "connector throws error" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
           override def connectorResult: Future[Seq[TestRecord]] = badRequestResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "test, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: alala, identifiers: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: alala, identifiers: AA000000D,12345678"
           }
         }
 
         "connector returns not found" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
           override def connectorResult: Future[Seq[TestRecord]] = notFoundResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.INFO)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "test, no records returned for selection, origin: alala, identifiers: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection, origin: alala, identifiers: AA000000D,12345678"
           }
         }
       }
 
       "return empty list if service unavailable" when {
         "outage set and covers current time" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(Some(currentOutage), List.empty, List.empty, List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(Some(currentOutage), List.empty, List.empty, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
 
@@ -129,7 +129,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         }
 
         "no outage set but origin in disabled origin list time" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List("alala"), List.empty, List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List("alala"), List.empty, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
 
@@ -140,7 +140,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         }
 
         "no outage set but origin NOT in enabled origin list time" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("another"), List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("another"), List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
 
@@ -151,7 +151,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         }
 
         "no outage set not all required Identifiers are present" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
 
@@ -164,10 +164,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       "return list of questions if service available" when {
         "connector successful" in new Setup {
-          when(mockAppConfig.serviceStatus(eqTo[String]("test"))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+          when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
-          service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe List(Question("key",List(TestRecord(1).toString)))
+          service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe List(Question(PaymentToDate,List(TestRecord(1).toString)))
         }
       }
     }
@@ -203,28 +203,28 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     lazy val service: TestService {
       type Record = TestRecord
     } = new TestService {
-      override val serviceName = "test"
+      override val serviceName = p60Service
       override type Record = TestRecord
 
       override def connector: QuestionConnector[TestRecord] = self.connector
 
-      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("test", 2, 1000, 1000)
+      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question("key", Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
 
     }
 
     lazy val service2: TestService {
       type Record = TestRecord
     } = new TestService {
-      override val serviceName = "test2"
+      override val serviceName = p60Service
       override type Record = TestRecord
 
       override def connector: QuestionConnector[TestRecord] = self.connector
 
-      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("test", 2, 1000, 1000)
+      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question("key", Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
     }
   }
 

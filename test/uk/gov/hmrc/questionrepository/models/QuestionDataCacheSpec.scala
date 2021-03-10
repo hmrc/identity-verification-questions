@@ -26,5 +26,5 @@ trait Setup {
   val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
   val selection: Selection = Selection(origin,identifiers)
   case class TestRecord(value: BigDecimal)
-  val questionList = List(Question("key",List(TestRecord(1).toString)))
+  val questionList = List(Question(PaymentToDate,List(TestRecord(1).toString)))
 }

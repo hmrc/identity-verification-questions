@@ -7,7 +7,7 @@ import iUtils.TestData.P60TestData
 import play.api.libs.json.{JsObject, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.models.Question
+import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PaymentToDate, Question}
 
 import java.time.LocalDateTime
 
@@ -217,8 +217,8 @@ trait TestData extends P60TestData {
     "min" -> 8
   )
 
-  val paymentToDateQuestion: Question = Question("P60-PaymentToDate", Seq("3000.00", "1266.00"), Map("currentTaxYear" -> "2019/20"))
-  val employeeNIContributionsQuestion: Question = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
+  val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1266.00"), Map("currentTaxYear" -> "2019/20"))
+  val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
 
 
 }

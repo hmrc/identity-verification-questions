@@ -8,11 +8,12 @@ package uk.gov.hmrc.questionrepository.connectors.utilities
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.questionrepository.config.{AppConfig, MissingAllConfig, MissingAuthorizationToken, MissingEnvironmentHeader}
+import uk.gov.hmrc.questionrepository.models.ServiceName
 
 trait HodConnectorConfig {
 
   implicit val appConfig: AppConfig
-  def serviceName: String
+  def serviceName: ServiceName
 
   protected def headersForDES(implicit hc: HeaderCarrier): HeaderCarrier =
     appConfig.hodConfiguration(serviceName) match {

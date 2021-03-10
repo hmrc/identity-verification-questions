@@ -12,7 +12,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{Origin, PaymentToDate, Question, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,10 +29,10 @@ class EvidenceRetrievalServiceSpec extends UnitSpec{
     }
 
     "return a sequence of questions if matching records are found" in new Setup {
-      when(mockP60Service.questions(any)(any)).thenReturn(Future.successful(Seq(Question("key",List(TestRecord(1).toString)))))
+      when(mockP60Service.questions(any)(any)).thenReturn(Future.successful(Seq(Question(PaymentToDate,List(TestRecord(1).toString)))))
       when(mockMongoRepo.store(any)).thenReturn(Future.successful(Unit))
       val result: Seq[Question] = service.callAllEvidenceSources(selection).futureValue
-      result shouldBe Seq(Question("key",List(TestRecord(1).toString)))
+      result shouldBe Seq(Question(PaymentToDate,List(TestRecord(1).toString)))
     }
   }
 

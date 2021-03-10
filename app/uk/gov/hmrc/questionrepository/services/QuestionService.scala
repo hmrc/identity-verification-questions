@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.services
 
 import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection, ServiceName}
 import play.api.Logging
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
@@ -21,7 +21,7 @@ abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ex: 
 
   type Record
 
-  def serviceName: String
+  def serviceName: ServiceName
 
   def connector: QuestionConnector[Record]
 

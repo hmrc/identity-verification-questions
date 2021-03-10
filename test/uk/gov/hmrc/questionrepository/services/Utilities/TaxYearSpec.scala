@@ -10,6 +10,7 @@ import Utils.testData.AppConfigTestData
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.models.{ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.utilities.{TaxYear, TaxYearBuilder}
 
 import java.time.LocalDate
@@ -72,7 +73,7 @@ class TaxYearSpec extends UnitSpec {
 
       class TaxYearToday extends TaxYearBuilder {
         override implicit val appConfig: AppConfig = mockAppConfig
-        override def serviceName: String = "testService"
+        override def serviceName: ServiceName = p60Service
       }
 
       new TaxYearToday().today shouldBe LocalDate.now
@@ -89,7 +90,7 @@ class TaxYearSpec extends UnitSpec {
       override def today = LocalDate.of(y, m, d)
       override implicit val appConfig: AppConfig = mockAppConfig
 
-      override def serviceName: String = "testService"
+      override def serviceName: ServiceName = p60Service
     }
   }
 
@@ -98,6 +99,6 @@ class TaxYearSpec extends UnitSpec {
     val _14_15 = TaxYear(2014)
     val _15_16 = TaxYear(2015)
 
-    val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.testService.bufferInMonths" -> 2)
+    val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.p60Service.bufferInMonths" -> 2)
   }
 }
