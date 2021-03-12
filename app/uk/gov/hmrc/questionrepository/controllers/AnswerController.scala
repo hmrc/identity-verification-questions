@@ -10,11 +10,12 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.questionrepository.models.AnswerCheck
-import uk.gov.hmrc.questionrepository.services.AnswersService
+import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
+
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class AnswerController @Inject()(answersService: AnswersService)(implicit cc: ControllerComponents, ec: ExecutionContext)
+class AnswerController @Inject()(answersService: AnswerVerificationService)(implicit cc: ControllerComponents, ec: ExecutionContext)
   extends BackendController(cc) {
 
   def answer(): Action[JsValue] = Action.async(parse.json) { implicit request =>

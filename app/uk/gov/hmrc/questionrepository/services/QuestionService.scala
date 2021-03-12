@@ -16,7 +16,7 @@ import uk.gov.hmrc.questionrepository.models.Identifier._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ex: ExecutionContext) extends UsingCircuitBreaker
+abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: ExecutionContext) extends UsingCircuitBreaker
   with Logging {
 
   type Record
