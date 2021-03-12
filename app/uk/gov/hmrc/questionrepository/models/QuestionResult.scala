@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.models
 
 import play.api.libs.json.{Format, Json}
 
-case class QuestionResult(questionId: QuestionId, score: Score)
+case class QuestionResult(questionKey: QuestionKey, score: Score)
 
 object QuestionResult {
   implicit val format: Format[QuestionResult] = Json.format[QuestionResult]

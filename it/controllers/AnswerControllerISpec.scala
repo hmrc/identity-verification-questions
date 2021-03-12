@@ -24,9 +24,9 @@ class AnswerControllerISpec extends BaseISpec {
     trait SetUp{
       val origin: Origin = Origin("valid_string")
       val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
-      val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(QuestionId("123456"), StringAnswer("an answer")))
+      val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("an answer")))
       val answerCheck: AnswerCheck = AnswerCheck(origin, identifiers,answerDetails)
-      val questionResult: QuestionResult = QuestionResult(QuestionId("123456"), Unknown)
+      val questionResult: QuestionResult = QuestionResult(PaymentToDate, Unknown)
     }
   }
 }
