@@ -12,7 +12,7 @@ import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.models.p60Service
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, Period}
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 class AppConfigSpec extends UnitSpec with LogCapturing {
@@ -298,6 +298,18 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         appConfig.bufferInMonthsForService(p60Service)
       }
     }
+
+    "get 'questionRecordTT'" should {
+      "return the value in application.conf if present" in new Setup {
+        override def testConfig: Map[String, Any] = baseConfig ++ questionRepoTtlPeriod
+        appConfig.questionRecordTTL shouldBe Period.parse("P2D")
+      }
+
+      "return the default value of 'P1D' if not set in application.conf" in new Setup {
+        override def testConfig: Map[String, Any] = baseConfig
+        appConfig.questionRecordTTL shouldBe Period.parse("P1D")
+      }
+    }
   }
 
   trait Setup extends TestData {
@@ -353,5 +365,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     )
 
     val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.p60Service.bufferInMonths" -> 2)
+
+    val questionRepoTtlPeriod: Map[String, Any] = Map("question.record.duration" -> "P2D")
   }
 }

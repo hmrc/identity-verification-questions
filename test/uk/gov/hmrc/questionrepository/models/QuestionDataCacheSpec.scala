@@ -8,11 +8,13 @@ package uk.gov.hmrc.questionrepository.models
 import Utils.UnitSpec
 import uk.gov.hmrc.questionrepository.models.Identifier._
 
+import java.time.LocalDateTime
+
 class QuestionDataCacheSpec extends UnitSpec{
 
   "when creating a questionDataCache it " should {
     "allow valid inputs" in new Setup{
-      val questionDataCache: QuestionDataCache = QuestionDataCache(selection,questionList)
+      val questionDataCache: QuestionDataCache = QuestionDataCache(selection, questionList, dateTime)
       questionDataCache.selection shouldBe selection
       questionDataCache.questions shouldBe questionList
     }
@@ -27,4 +29,5 @@ trait Setup {
   val selection: Selection = Selection(origin,identifiers)
   case class TestRecord(value: BigDecimal)
   val questionList = List(Question(PaymentToDate,List(TestRecord(1).toString)))
+  val dateTime = LocalDateTime.now()
 }

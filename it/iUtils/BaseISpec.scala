@@ -12,7 +12,6 @@ import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, Injecting}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
-
 import scala.concurrent.ExecutionContext
 
 trait BaseISpec extends AnyWordSpecLike
@@ -54,7 +53,6 @@ trait BaseISpec extends AnyWordSpecLike
       post(urlPathEqualTo("/platform-analytics/event"))
         .willReturn(ok())
     )
-
 
     db.drop()(ExecutionContext.global)
   }
