@@ -25,3 +25,4 @@ object QuestionKey {
 
 sealed trait ServiceName
 case object p60Service extends ServiceName
+case object passportService extends ServiceName
