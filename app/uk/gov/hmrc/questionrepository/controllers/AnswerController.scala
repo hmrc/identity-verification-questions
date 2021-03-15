@@ -15,12 +15,12 @@ import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class AnswerController @Inject()(answersService: AnswerVerificationService)(implicit cc: ControllerComponents, ec: ExecutionContext)
+class AnswerController @Inject()(answersVerificationService: AnswerVerificationService)(implicit cc: ControllerComponents, ec: ExecutionContext)
   extends BackendController(cc) {
 
   def answer(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[AnswerCheck] { answerCheck =>
-      answersService.checkAnswers(answerCheck).map { score =>
+      answersVerificationService.checkAnswers(answerCheck).map { score =>
         Ok(Json.toJson(score))
       }
     }

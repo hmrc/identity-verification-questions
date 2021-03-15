@@ -16,6 +16,8 @@ class ConfigHelper @Inject()(config: Configuration)
   extends Logging {
   protected def getIntOrDefault(key: String, default: => Int): Int = config.getOptional[Int](key).getOrElse(default)
 
+  protected def getStringOrDefault(key: String, default: => String): String = config.getOptional[String](key).getOrElse(default)
+
   protected def getDateTime(key: String) : Either[DateParsingIssue, LocalDateTime] = config.getOptional[String](key) match {
     case Some(possibleDate) => try {
       Right(LocalDateTime.parse(possibleDate, ISO_LOCAL_DATE_TIME))

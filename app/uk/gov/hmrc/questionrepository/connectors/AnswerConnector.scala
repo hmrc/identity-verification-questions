@@ -11,5 +11,5 @@ import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Origin}
 import scala.concurrent.Future
 
 trait AnswerConnector[T] {
-  def verifyAnswer(origin: Origin, identifiers: Seq[Identifier], answers: AnswerDetails): Future[T]
+  def verifyAnswer(origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails): Future[T]
 }

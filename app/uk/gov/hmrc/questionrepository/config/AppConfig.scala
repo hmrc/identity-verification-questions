@@ -5,6 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.config
 
+import java.time.Period
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -37,10 +38,12 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def serviceStatus(serviceName: ServiceName): ServiceState = ServiceState(serviceName.toString)
 
-  def hodConfiguration(serviceName: ServiceName) = getHodConfItem(serviceName.toString)
+  def hodConfiguration(serviceName: ServiceName): Either[HodConfigMissing, HodConf] = getHodConfItem(serviceName.toString)
 
-  def serviceBaseUrl(serviceName: ServiceName) = servicesConfig.baseUrl(serviceName.toString)
+  def serviceBaseUrl(serviceName: ServiceName): String = servicesConfig.baseUrl(serviceName.toString)
 
-  def bufferInMonthsForService(serviceName: ServiceName) = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
+  def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
+
+  lazy val questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
 
 }

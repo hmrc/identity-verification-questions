@@ -187,7 +187,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     def connectorResult: Future[TestRecord] = illegalAccessResult
 
     def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
-      def verifyAnswer(origin: Origin, identifiers: Seq[Identifier], answers: AnswerDetails): Future[TestRecord] = connectorResult
+      def verifyAnswer(origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails): Future[TestRecord] = connectorResult
     }
 
     import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability
