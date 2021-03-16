@@ -14,7 +14,7 @@ class QuestionDataCacheSpec extends UnitSpec{
 
   "when creating a questionDataCache it " should {
     "allow valid inputs" in new Setup{
-      val questionDataCache: QuestionDataCache = QuestionDataCache(selection, questionList, dateTime)
+      val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, selection, questionList, dateTime)
       questionDataCache.selection shouldBe selection
       questionDataCache.questions shouldBe questionList
     }
@@ -23,6 +23,7 @@ class QuestionDataCacheSpec extends UnitSpec{
 }
 
 trait Setup {
+  val correlationId = CorrelationId()
   val origin: Origin = Origin("valid_string")
   val ninoIdentifier: NinoI = NinoI("AA000000D")
   val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
