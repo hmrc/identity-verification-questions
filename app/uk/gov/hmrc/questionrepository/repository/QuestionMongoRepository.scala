@@ -12,7 +12,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.questionrepository.models.{QuestionDataCache, Selection}
+import uk.gov.hmrc.questionrepository.models.{CorrelationId, QuestionDataCache, Selection}
 
 import scala.concurrent.{ExecutionContext, Future}
 @Singleton
@@ -30,8 +30,8 @@ class QuestionMongoRepository @Inject()(reactiveMongoComponent: ReactiveMongoCom
     insert(questionDataCache).map(_ => ())
   }
 
-  def findAnswers(selection: Selection): Future[List[QuestionDataCache]] = {
-    find("selection.origin" -> JsString(selection.origin.toString)).map(_.filter(_.selection.identifiers.exists(selection.identifiers.contains)))
+  def findAnswers(correlationId: CorrelationId, selection: Selection): Future[List[QuestionDataCache]] = {
+    find("correlationId" -> JsString(correlationId.id)).map(_.filter(qmr => qmr.selection.identifiers.exists(selection.identifiers.contains) && qmr.selection.origin == selection.origin))
   }
 
 }

@@ -5,7 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{JsString, JsSuccess, Reads, Writes}
 import play.api.mvc.PathBindable
 import uk.gov.hmrc.questionrepository.models.CorrelationId.isValid
 
@@ -38,5 +38,10 @@ object CorrelationId {
 
   def apply(id: UUID) = new CorrelationId(id.toString)
 
-  implicit val format: Format[CorrelationId] = Json.format[CorrelationId]
+  implicit val writes: Writes[CorrelationId] = Writes { correlationId => JsString(correlationId.id)}
+
+  implicit val reads: Reads[CorrelationId] = Reads {
+    case JsString(c) => JsSuccess(CorrelationId(c))
+    case e => throw new IllegalArgumentException(s"unknown CorrelationId $e")
+  }
 }

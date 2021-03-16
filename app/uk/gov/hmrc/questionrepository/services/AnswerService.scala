@@ -45,16 +45,16 @@ abstract class AnswerService @Inject()(implicit val appConfig: AppConfig, ec: Ex
     if (isAvailable(answerCheck.origin, answerCheck.identifiers)) {
       withCircuitBreaker {
         for {
-          correctAnswers <- Future.sequence(filteredAnswers.map(answer => connector.verifyAnswer(answerCheck.origin, answerCheck.identifiers, answer)))
+          correctAnswers <- Future.sequence(filteredAnswers.map(answer => connector.verifyAnswer(answerCheck.correlationId, answerCheck.origin, answerCheck.identifiers, answer)))
           result = answerTransformer(correctAnswers, filteredAnswers)
         } yield result
       } recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 => {
-          logger.info(s"$serviceName, no answers returned for selection, origin: ${answerCheck.origin}, identifiers: ${answerCheck.identifiers.mkString(",")}")
+          logger.info(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}, origin: ${answerCheck.origin}, identifiers: ${answerCheck.identifiers.mkString(",")}")
           unknownResult(filteredAnswers)
         }
         case t: Throwable => {
-          logger.error(s"$serviceName, threw exception $t, origin: ${answerCheck.origin}, identifiers: ${answerCheck.identifiers.mkString(",")}")
+          logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, origin: ${answerCheck.origin}, identifiers: ${answerCheck.identifiers.mkString(",")}")
           unknownResult(filteredAnswers)
         }
       }
