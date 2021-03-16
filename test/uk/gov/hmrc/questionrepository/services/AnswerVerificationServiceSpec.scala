@@ -69,9 +69,10 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
     val mockP60AnswerService = mock[P60AnswerService]
     val service = new AnswerVerificationService(mockP60AnswerService)
+    val correlationId: CorrelationId = CorrelationId()
     val origin: Origin = Origin("valid_string")
     val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("an answer")))
-    val answerCheck: AnswerCheck = AnswerCheck(origin, identifiers,answerDetails)
+    val answerCheck: AnswerCheck = AnswerCheck(correlationId, origin, identifiers,answerDetails)
   }
 }

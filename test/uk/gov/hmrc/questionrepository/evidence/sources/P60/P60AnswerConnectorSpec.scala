@@ -21,25 +21,25 @@ class P60AnswerConnectorSpec extends UnitSpec {
   "verifyAnswer" should {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo" in new Setup {
-        when(mockQuestionRepo.findAnswers(any)).thenReturn(Future.successful(List(correctQDC)))
+        when(mockQuestionRepo.findAnswers(any, any)).thenReturn(Future.successful(List(correctQDC)))
 
-        connector.verifyAnswer(origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
+        connector.verifyAnswer(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
       }
     }
 
     "return score of 'Incorrect'" when {
       "answer does not matche an answer retrieved from repo" in new Setup {
-        when(mockQuestionRepo.findAnswers(any)).thenReturn(Future.successful(List(inCorrectQDC)))
+        when(mockQuestionRepo.findAnswers(any, any)).thenReturn(Future.successful(List(inCorrectQDC)))
 
-        connector.verifyAnswer(origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
+        connector.verifyAnswer(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
       }
     }
 
     "return score of 'Unknown'" when {
       "no answers retrieved from repo" in new Setup {
-        when(mockQuestionRepo.findAnswers(any)).thenReturn(Future.successful(List()))
+        when(mockQuestionRepo.findAnswers(any, any)).thenReturn(Future.successful(List()))
 
-        connector.verifyAnswer(origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Unknown)
+        connector.verifyAnswer(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Unknown)
       }
     }
   }

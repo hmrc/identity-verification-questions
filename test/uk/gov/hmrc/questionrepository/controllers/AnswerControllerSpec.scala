@@ -11,7 +11,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
-import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, IntegerAnswer, Origin, PaymentToDate, QuestionResult, Unknown}
+import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, CorrelationId, IntegerAnswer, Origin, PaymentToDate, QuestionResult, Unknown}
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,9 +35,10 @@ class AnswerControllerSpec() extends Utils.UnitSpec {
   }
 
   trait TestData {
+    val correlationId: CorrelationId = CorrelationId()
     val origin: Origin = Origin("seiss")
     val ninoIdentifier: NinoI = NinoI("AA000000A")
     val integerAnswer: IntegerAnswer = IntegerAnswer(5)
-    val answerCheck: AnswerCheck = AnswerCheck(origin, Seq(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, integerAnswer)))
+    val answerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, integerAnswer)))
   }
 }
