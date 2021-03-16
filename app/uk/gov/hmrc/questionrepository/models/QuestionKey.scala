@@ -10,6 +10,7 @@ import play.api.libs.json.{JsString, JsSuccess, Reads, Writes}
 sealed trait QuestionKey
 case object PaymentToDate extends QuestionKey
 case object EmployeeNIContributions extends QuestionKey
+case object PassportQuestion extends QuestionKey
 
 object QuestionKey {
   implicit val questionKeyReads: Reads[QuestionKey] = Reads {
