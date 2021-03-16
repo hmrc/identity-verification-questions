@@ -9,7 +9,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.questionrepository.models.{Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
 
 import scala.concurrent.ExecutionContext
@@ -22,7 +22,7 @@ class QuestionController @Inject()(evidenceRetrievalService: EvidenceRetrievalSe
 
   def question(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[Selection] { selection =>
-      evidenceRetrievalService.callAllEvidenceSources(selection) map toOKResponse[Seq[Question]]
+      evidenceRetrievalService.callAllEvidenceSources(selection) map toOKResponse[QuestionResponse]
     }
   }
 }

@@ -9,8 +9,9 @@ import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerConnector
 import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, DoubleAnswer, Incorrect, Origin, PaymentToDate, Question, QuestionDataCache, QuestionResult, Selection, Unknown}
+import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, CorrelationId, DoubleAnswer, Incorrect, Origin, PaymentToDate, Question, QuestionDataCache, QuestionResult, Selection, Unknown}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
+
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -49,12 +50,13 @@ class P60AnswerConnectorSpec extends UnitSpec {
   }
 
   trait TestData {
+    val correlationId = CorrelationId()
     val dateTime = LocalDateTime.now()
     val origin: Origin = Origin("alala")
     val ninoIdentifier: NinoI = NinoI("AA000000D")
     val saUtrIdentifier: SaUtrI = SaUtrI("12345678")
     val answerDetails: AnswerDetails = AnswerDetails(PaymentToDate, DoubleAnswer(100.11))
-    val correctQDC = QuestionDataCache(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
-    val inCorrectQDC = QuestionDataCache(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
+    val correctQDC = QuestionDataCache(correlationId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
+    val inCorrectQDC = QuestionDataCache(correlationId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
   }
 }
