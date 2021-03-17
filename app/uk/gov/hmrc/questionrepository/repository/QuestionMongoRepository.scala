@@ -30,6 +30,17 @@ class QuestionMongoRepository @Inject()(reactiveMongoComponent: ReactiveMongoCom
     insert(questionDataCache).map(_ => ())
   }
 
+  /**
+   *
+   * @param correlationId   correlationId identifying the questions and answers to be retrieved
+   * @param selection       contains the origin and identifier(s) used to retrieve the questions/answers
+   * @return                List of QuestionDataCache containing all available questions
+   *
+   *         find uses the correlationId to identify the questions and answers (for those evidence sources that return correct answers) generated in the original question request
+   *
+   *         the subsequent filter is for added security and uses the origin and identifiers passed by the origin service to ensure that the correlationId provided matches
+   *         the origin service and identifiers used retrieve the questions from the evidence sources
+   */
   def findAnswers(correlationId: CorrelationId, selection: Selection): Future[List[QuestionDataCache]] = {
     find("correlationId" -> JsString(correlationId.id)).map(_.filter(qmr => qmr.selection.identifiers.exists(selection.identifiers.contains) && qmr.selection.origin == selection.origin))
   }
