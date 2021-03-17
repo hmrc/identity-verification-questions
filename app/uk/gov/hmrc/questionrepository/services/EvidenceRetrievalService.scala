@@ -7,20 +7,28 @@ package uk.gov.hmrc.questionrepository.services
 
 import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.models.{QuestionDataCache, Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{CorrelationId, QuestionDataCache, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
+import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository, p60Service: P60Service)
+class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository, p60Service: P60Service, appConfig: AppConfig)
                                         (implicit ec: ExecutionContext) {
 
-  def callAllEvidenceSources(selection: Selection)(implicit hc: HeaderCarrier): Future[Seq[Question]] = {
+  def callAllEvidenceSources(selection: Selection)(implicit hc: HeaderCarrier): Future[QuestionResponse] = {
     val services = Seq(p60Service)
+
     for {
       qs <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)
-      _ <- mongoRepo.store(QuestionDataCache(selection, qs))
-    } yield qs
+      corrId = CorrelationId()
+      _ <- mongoRepo.store(QuestionDataCache(
+        correlationId = corrId,
+        selection = selection,
+        questions = qs,
+        expiryDate = LocalDateTime.now plus appConfig.questionRecordTTL))
+    } yield QuestionResponse(corrId, qs)
   }
 }

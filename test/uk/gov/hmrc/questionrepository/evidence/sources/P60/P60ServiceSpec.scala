@@ -12,7 +12,7 @@ import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.{P60Connector, P60Service}
 import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.Payment.Payment
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, Origin, PaymentToDate, Question, Selection, ServiceName, p60Service}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -22,7 +22,7 @@ import scala.concurrent.Future
 class P60ServiceSpec extends UnitSpec with LogCapturing {
 
   "Service Name should be set" in new Setup {
-    service.serviceName shouldBe "p60Service"
+    service.serviceName shouldBe p60Service
   }
 
   "calling `questions`" should {
@@ -44,7 +44,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[String](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+        when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
       }
@@ -71,7 +71,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
-    when(mockAppConfig.serviceStatus(eqTo[String](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
     when(mockAppConfig.serviceCbNumberOfCallsToTrigger(service.serviceName)).thenReturn(Some(20))
     when(mockAppConfig.serviceCbUnavailableDurationInSec(service.serviceName)).thenReturn(Some(60))
     when(mockAppConfig.serviceCbUnstableDurationInSec(service.serviceName)).thenReturn(Some(300))
@@ -91,10 +91,10 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
     val selectionNoNino: Selection = Selection(origin, Seq(utrIdentifier))
 
-    val paymentToDateQuestion: Question = Question("P60-PaymentToDate", Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-    val employeeNIContributionsQuestion: Question = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
+    val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
+    val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
 
-    val paymentToDateQuestion2: Question = Question("P60-PaymentToDate", Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
-    val employeeNIContributionsQuestion2: Question = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val paymentToDateQuestion2: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val employeeNIContributionsQuestion2: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
   }
 }

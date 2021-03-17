@@ -6,6 +6,7 @@
 package uk.gov.hmrc.questionrepository.services.utilities
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.models.ServiceName
 
 import java.time.LocalDate
 
@@ -35,7 +36,7 @@ trait TaxYearBuilder {
 
   implicit val appConfig: AppConfig
 
-  def serviceName: String
+  def serviceName: ServiceName
 
   val startingDayForTaxYear = 6
   val startingMonthForTaxYear = 4

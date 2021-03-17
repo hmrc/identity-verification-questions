@@ -18,8 +18,9 @@ import Utils.testData.P60TestData
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.questionrepository.models.Identifier._
 import uk.gov.hmrc.questionrepository.models.Payment.Payment
-import uk.gov.hmrc.questionrepository.models.{Origin, Selection}
+import uk.gov.hmrc.questionrepository.models.{Origin, Selection, ServiceName, p60Service}
 import ch.qos.logback.classic.Level
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,7 +45,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
         withCaptureOfLoggingFrom[P60ConnectorSpec] { logs =>
           connector.getRecords(selectionNoNino).futureValue shouldBe Seq()
           val warnLogs = logs.filter(_.getLevel == Level.WARN)
-          warnLogs.count(_.getMessage == "testService, No nino identifier for selection, origin: testOrigin, identifiers: 12345678") shouldBe 1
+          warnLogs.count(_.getMessage == "p60Service, No nino identifier for selection, origin: testOrigin, identifiers: 12345678") shouldBe 1
         }
       }
     }
@@ -75,7 +76,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
 
     val connector: P60Connector = new P60Connector(http) {
-      override def serviceName = "testService"
+      override def serviceName: ServiceName = p60Service
     }
   }
 

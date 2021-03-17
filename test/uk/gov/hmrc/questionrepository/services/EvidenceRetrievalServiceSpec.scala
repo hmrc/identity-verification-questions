@@ -12,27 +12,30 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{Origin, PaymentToDate, Question, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
+import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EvidenceRetrievalServiceSpec extends UnitSpec{
 
-  "when calling callAllEvidenceSources it" should {
-    "return an empty sequence of questions if not matching records" in new Setup {
+  "calling callAllEvidenceSources" should {
+    "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
       when(mockP60Service.questions(any)(any)).thenReturn(Future.successful(Seq.empty[Question]))
       when(mockMongoRepo.store(any)).thenReturn(Future.successful(Unit))
-      val result: Seq[Question] = service.callAllEvidenceSources(selection).futureValue
-      result shouldBe Seq.empty[Question]
+      when(mockAppConfig.questionRecordTTL).thenReturn(Period.parse("P1D"))
+      val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
+      result.questions shouldBe Seq.empty[Question]
     }
 
-    "return a sequence of questions if matching records are found" in new Setup {
-      when(mockP60Service.questions(any)(any)).thenReturn(Future.successful(Seq(Question("key",List(TestRecord(1).toString)))))
+    "return a QuestionResponse with sequence of questions if matching records are found" in new Setup {
+      when(mockP60Service.questions(any)(any)).thenReturn(Future.successful(Seq(Question(PaymentToDate,List(TestRecord(1).toString)))))
       when(mockMongoRepo.store(any)).thenReturn(Future.successful(Unit))
-      val result: Seq[Question] = service.callAllEvidenceSources(selection).futureValue
-      result shouldBe Seq(Question("key",List(TestRecord(1).toString)))
+      when(mockAppConfig.questionRecordTTL).thenReturn(Period.parse("P1D"))
+      val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
+      result.questions shouldBe Seq(Question(PaymentToDate,List(TestRecord(1).toString)))
     }
   }
 
@@ -43,7 +46,7 @@ trait Setup {
   implicit val mockAppConfig: AppConfig = mock[AppConfig]
   val mockP60Service: P60Service = mock[P60Service]
   val mockMongoRepo: QuestionMongoRepository = mock[QuestionMongoRepository]
-  val service = new EvidenceRetrievalService(mockMongoRepo, mockP60Service)
+  val service = new EvidenceRetrievalService(mockMongoRepo, mockP60Service, mockAppConfig)
   val origin: Origin = Origin("alala")
   val ninoIdentifier: NinoI = NinoI("AA000000D")
   val saUtrIdentifier: SaUtrI = SaUtrI("12345678")

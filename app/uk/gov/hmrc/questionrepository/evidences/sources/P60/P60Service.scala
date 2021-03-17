@@ -8,7 +8,7 @@ package uk.gov.hmrc.questionrepository.evidences.sources.P60
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.Payment.Payment
-import uk.gov.hmrc.questionrepository.models.Question
+import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PaymentToDate, Question, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 
@@ -24,7 +24,7 @@ class P60Service @Inject()(p60Connector: P60Connector)(implicit override val app
 
   override type Record = Payment
 
-  override def serviceName: String = "p60Service"
+  override def serviceName: ServiceName = p60Service
 
   override def connector: QuestionConnector[Payment] = p60Connector
 
@@ -36,11 +36,11 @@ class P60Service @Inject()(p60Connector: P60Connector)(implicit override val app
 
     val PaymentToDateAnswers: Seq[Question] = records.flatMap(_.taxablePayYTD).filter(_ > 0).map(convertAnswer) match {
       case Nil => Nil
-      case answers => Seq(Question("P60-PaymentToDate", answers.map(_.toString), additionalInfoMap))
+      case answers => Seq(Question(PaymentToDate, answers.map(_.toString), additionalInfoMap))
     }
     val EmployeeNIContributionsAnswers: Seq[Question] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(convertAnswer) match {
       case Nil => Nil
-      case answers => Seq(Question("P60-EmployeeNIContributions", answers.map(_.toString), additionalInfoMap))
+      case answers => Seq(Question(EmployeeNIContributions, answers.map(_.toString), additionalInfoMap))
     }
     PaymentToDateAnswers ++ EmployeeNIContributionsAnswers
   }

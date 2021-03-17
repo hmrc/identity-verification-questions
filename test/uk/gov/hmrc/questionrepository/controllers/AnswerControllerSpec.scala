@@ -8,10 +8,11 @@ package uk.gov.hmrc.questionrepository.controllers
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
-import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, IntegerAnswer, Origin, QuestionId, QuestionResult, Unknown}
-import uk.gov.hmrc.questionrepository.services.AnswersService
+import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, CorrelationId, IntegerAnswer, Origin, PaymentToDate, QuestionResult, Unknown}
+import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,24 +20,25 @@ class AnswerControllerSpec() extends Utils.UnitSpec {
 
   "POST /answers" should {
     "return 200 with a valid json body" in new Setup {
-      when(answersService.checkAnswers(eqTo[AnswerCheck](answerCheck))).thenReturn(Future.successful(List(QuestionResult(questionId,Unknown))))
+      when(answersService.checkAnswers(eqTo[AnswerCheck](answerCheck))(any)).thenReturn(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
       val result: Future[Result] = controller.answer()(fakeRequest)
       status(result) shouldBe OK
-      contentAsJson(result) shouldBe Json.toJson(List(QuestionResult(questionId,Unknown)))
+      contentAsJson(result) shouldBe Json.toJson(List(QuestionResult(PaymentToDate, Unknown)))
     }
   }
 
   trait Setup extends TestData {
-    val answersService: AnswersService = mock[AnswersService]
+    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
+    val answersService: AnswerVerificationService = mock[AnswerVerificationService]
     val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck))
     val controller = new AnswerController(answersService)(Stubs.stubMessagesControllerComponents(), ExecutionContext.global)
   }
 
   trait TestData {
+    val correlationId: CorrelationId = CorrelationId()
     val origin: Origin = Origin("seiss")
     val ninoIdentifier: NinoI = NinoI("AA000000A")
     val integerAnswer: IntegerAnswer = IntegerAnswer(5)
-    val questionId: QuestionId = QuestionId("12345")
-    val answerCheck: AnswerCheck = AnswerCheck(origin, Seq(ninoIdentifier), Seq(AnswerDetails(questionId,integerAnswer)))
+    val answerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, integerAnswer)))
   }
 }

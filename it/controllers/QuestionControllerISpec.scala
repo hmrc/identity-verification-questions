@@ -7,7 +7,7 @@ import iUtils.TestData.P60TestData
 import play.api.libs.json.{JsObject, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.models.Question
+import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PaymentToDate, Question, QuestionResponse}
 
 import java.time.LocalDateTime
 
@@ -17,7 +17,10 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
       p60ProxyReturnOk(p60ResponseJson)
       val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
       response.status shouldBe 200
-      Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq(paymentToDateQuestion, employeeNIContributionsQuestion))
+      val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+      questionResponse.isSuccess shouldBe true
+      questionResponse.get.questions shouldBe Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
+//      Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq(paymentToDateQuestion, employeeNIContributionsQuestion))
     }
 
     "return 200 and an empty sequence of question if provided with valid json but P60 returns not found" in new Setup {
@@ -25,7 +28,9 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
       withCaptureOfLoggingFrom[P60Service] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq())
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq.empty[Question]
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"p60Service, no records returned for selection, origin: lost-credentials, identifiers: AA000000A") shouldBe 1
       }
     }
@@ -35,7 +40,9 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
       withCaptureOfLoggingFrom[P60Service] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq())
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq.empty[Question]
         logs.filter(_.getLevel == Level.ERROR).count(_.getMessage.contains("p60Service, threw exception uk.gov.hmrc.http.Upstream5xxResponse")) shouldBe 1
       }
     }
@@ -43,7 +50,9 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
     "return 200 and an empty sequence of question if provided with valid json but does not contain required identifier" in new Setup {
       val response = await(resourceRequest(questionRoute).post(validQuestionRequestUtr))
       response.status shouldBe 200
-      Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq())
+      val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+      questionResponse.isSuccess shouldBe true
+      questionResponse.get.questions shouldBe Seq.empty[Question]
     }
 
     "return 400 if provided with invalid json" in new Setup {
@@ -68,7 +77,9 @@ class QuestionControllerOutageISpec extends BaseISpec with LogCapturing {
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq())
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq.empty[Question]
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }
@@ -88,7 +99,9 @@ class QuestionControllerDisabledOriginISpec extends BaseISpec with LogCapturing 
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq())
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq.empty[Question]
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == "Disabled origins for p60Service are [lost-credentials]") shouldBe 1
       }
     }
@@ -108,7 +121,9 @@ class QuestionControllerEnabledOriginISpec extends BaseISpec with LogCapturing {
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq())
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq.empty[Question]
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == "Enabled origins for p60Service are [identity-verification]") shouldBe 1
       }
     }
@@ -130,7 +145,9 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq(paymentToDateQuestion, employeeNIContributionsQuestion))
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }
@@ -152,7 +169,9 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
-        Json.parse(response.body).validate[Seq[Question]] shouldBe JsSuccess(Seq(paymentToDateQuestion, employeeNIContributionsQuestion))
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }
@@ -217,8 +236,7 @@ trait TestData extends P60TestData {
     "min" -> 8
   )
 
-  val paymentToDateQuestion: Question = Question("P60-PaymentToDate", Seq("3000.00", "1266.00"), Map("currentTaxYear" -> "2019/20"))
-  val employeeNIContributionsQuestion: Question = Question("P60-EmployeeNIContributions", Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
-
+  val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1266.00"), Map("currentTaxYear" -> "2019/20"))
+  val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
 
 }

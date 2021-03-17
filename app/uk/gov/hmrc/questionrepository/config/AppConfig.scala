@@ -5,9 +5,11 @@
 
 package uk.gov.hmrc.questionrepository.config
 
+import java.time.Period
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.questionrepository.models.ServiceName
 
 @Singleton
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends ConfigHelper(config) {
@@ -27,19 +29,21 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   lazy val circuitBreakerUnavailableDurationInSec: Int = getIntOrDefault("circuit.breaker.unavailablePeriodDurationInSec", 60)
   lazy val circuitBreakerUnstableDurationInSec: Int = getIntOrDefault("circuit.breaker.unstablePeriodDurationInSec", 300)
 
-  def serviceCbNumberOfCallsToTrigger(serviceName: String): Option[Int] =
-    config.getOptional[Int](s"microservice.services.$serviceName.circuitBreaker.numberOfCallsToTrigger")
-  def serviceCbUnavailableDurationInSec(serviceName: String): Option[Int] =
-    config.getOptional[Int](s"microservice.services.$serviceName.circuitBreaker.unavailableDurationInSec")
-  def serviceCbUnstableDurationInSec(serviceName: String): Option[Int] =
-    config.getOptional[Int](s"microservice.services.$serviceName.circuitBreaker.unstableDurationInSec")
+  def serviceCbNumberOfCallsToTrigger(serviceName: ServiceName): Option[Int] =
+    config.getOptional[Int](s"microservice.services.${serviceName.toString}.circuitBreaker.numberOfCallsToTrigger")
+  def serviceCbUnavailableDurationInSec(serviceName: ServiceName): Option[Int] =
+    config.getOptional[Int](s"microservice.services.${serviceName.toString}.circuitBreaker.unavailableDurationInSec")
+  def serviceCbUnstableDurationInSec(serviceName: ServiceName): Option[Int] =
+    config.getOptional[Int](s"microservice.services.${serviceName.toString}.circuitBreaker.unstableDurationInSec")
 
-  def serviceStatus(serviceName: String): ServiceState = ServiceState(serviceName)
+  def serviceStatus(serviceName: ServiceName): ServiceState = ServiceState(serviceName.toString)
 
-  def hodConfiguration(serviceName: String) = getHodConfItem(serviceName)
+  def hodConfiguration(serviceName: ServiceName): Either[HodConfigMissing, HodConf] = getHodConfItem(serviceName.toString)
 
-  def serviceBaseUrl(serviceName: String) = servicesConfig.baseUrl(serviceName)
+  def serviceBaseUrl(serviceName: ServiceName): String = servicesConfig.baseUrl(serviceName.toString)
 
-  def bufferInMonthsForService(serviceName: String) = config.get[Int](s"microservice.services.$serviceName.bufferInMonths")
+  def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
+
+  lazy val questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
 
 }

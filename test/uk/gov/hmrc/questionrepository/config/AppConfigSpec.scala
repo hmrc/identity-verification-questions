@@ -10,8 +10,9 @@ import ch.qos.logback.classic.Level
 import Utils.{LogCapturing, UnitSpec}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.questionrepository.models.p60Service
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, Period}
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 class AppConfigSpec extends UnitSpec with LogCapturing {
@@ -73,14 +74,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage between 2020-08-08T21:00 and 2020-08-08T23:00").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -90,14 +91,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage not specified").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage not specified") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -107,14 +108,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage startDate: 2020-08-08T23:00 must be earlier than endDate: 2020-08-08T21:00").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage startDate: 2020-08-08T23:00 must be earlier than endDate: 2020-08-08T21:00") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -124,14 +125,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage Invalid date in `microservice.services.test.disabled.start` : `Not A Date`").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage Invalid date in `microservice.services.p60Service.disabled.start` : `Not A Date`") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -141,14 +142,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage Invalid date in `microservice.services.test.disabled.end` : `Not A Date`").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage Invalid date in `microservice.services.p60Service.disabled.end` : `Not A Date`") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -158,14 +159,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage test.disabled.start missing").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage p60Service.disabled.start missing") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -175,14 +176,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage test.disabled.end missing").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage p60Service.disabled.end missing") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -192,14 +193,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(Some(testOutage), List.empty, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), List.empty, testEnabled, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage between 2020-08-08T21:00 and 2020-08-08T23:00").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test not specified").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service not specified") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -209,14 +210,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, List.empty, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, List.empty, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage between 2020-08-08T21:00 and 2020-08-08T23:00").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test not specified").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test are [nino, utr]").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service not specified") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
@@ -226,14 +227,14 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus("test") shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, testEnabled, List.empty)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, testEnabled, List.empty)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 4
-          infoLogs.filter(_.getMessage == "Scheduled test outage between 2020-08-08T21:00 and 2020-08-08T23:00").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Disabled origins for test are [seiss, ddt]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Enabled origins for test are [dwp-iv]").size shouldBe 1
-          infoLogs.filter(_.getMessage == "Required identifiers for test not specified").size shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
+          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
+          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
+          infoLogs.count(_.getMessage == "Required identifiers for p60Service not specified") shouldBe 1
         }
       }
     }
@@ -243,7 +244,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         "all hod config values are present for service" in new Setup {
           override def testConfig: Map[String, Any] = baseConfig ++ hodAuthorizationToken ++ hodEnvironmentHeader
 
-          appConfig.hodConfiguration("test") shouldBe Right(HodConf("authToken", "envHeader"))
+          appConfig.hodConfiguration(p60Service) shouldBe Right(HodConf("authToken", "envHeader"))
         }
       }
 
@@ -251,7 +252,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         "hod config AuthorizationToken value is missing for service" in new Setup {
           override def testConfig: Map[String, Any] = baseConfig ++ hodEnvironmentHeader
 
-          appConfig.hodConfiguration("test") shouldBe Left(MissingAuthorizationToken)
+          appConfig.hodConfiguration(p60Service) shouldBe Left(MissingAuthorizationToken)
         }
       }
 
@@ -259,7 +260,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         "hod config EnvironmentHeader value is missing for service" in new Setup {
           override def testConfig: Map[String, Any] = baseConfig ++ hodAuthorizationToken
 
-          appConfig.hodConfiguration("test") shouldBe Left(MissingEnvironmentHeader)
+          appConfig.hodConfiguration(p60Service) shouldBe Left(MissingEnvironmentHeader)
         }
       }
 
@@ -267,7 +268,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         "all hod config is missing for service" in new Setup {
           override def testConfig: Map[String, Any] = baseConfig
 
-          appConfig.hodConfiguration("test") shouldBe Left(MissingAllConfig)
+          appConfig.hodConfiguration(p60Service) shouldBe Left(MissingAllConfig)
         }
       }
     }
@@ -275,26 +276,38 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     "return a baseUrl for specified service" in new Setup {
       override def testConfig: Map[String, Any] = baseConfig ++ serviceBaseUrl
 
-      appConfig.serviceBaseUrl("test") shouldBe "http://localhost:8080"
+      appConfig.serviceBaseUrl(p60Service) shouldBe "http://localhost:8080"
     }
 
     "throw an Exception if baseUrl not in config for service" in new Setup {
       override def testConfig: Map[String, Any] = baseConfig
       an[RuntimeException] shouldBe thrownBy {
-        appConfig.serviceBaseUrl("test")
+        appConfig.serviceBaseUrl(p60Service)
       }
     }
 
     "return the bufferInMonths for requested service" in new Setup {
       override def testConfig: Map[String, Any] = baseConfig ++ bufferInMonthsForService
 
-      appConfig.bufferInMonthsForService("testService") shouldBe 2
+      appConfig.bufferInMonthsForService(p60Service) shouldBe 2
     }
 
     "throw an Exception if bufferInMonths not in config for service" in new Setup {
       override def testConfig: Map[String, Any] = baseConfig
       an[RuntimeException] shouldBe thrownBy {
-        appConfig.bufferInMonthsForService("testService")
+        appConfig.bufferInMonthsForService(p60Service)
+      }
+    }
+
+    "get 'questionRecordTT'" should {
+      "return the value in application.conf if present" in new Setup {
+        override def testConfig: Map[String, Any] = baseConfig ++ questionRepoTtlPeriod
+        appConfig.questionRecordTTL shouldBe Period.parse("P2D")
+      }
+
+      "return the default value of 'P1D' if not set in application.conf" in new Setup {
+        override def testConfig: Map[String, Any] = baseConfig
+        appConfig.questionRecordTTL shouldBe Period.parse("P1D")
       }
     }
   }
@@ -313,25 +326,25 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val unstablePeriodDurationInSec: Map[String, Any] = Map("circuit.breaker.unstablePeriodDurationInSec" -> 310)
 
     def outageConfig(startDate: String, endDate: String): Map[String, Any] = Map(
-      "microservice.services.test.disabled.start" -> startDate,
-      "microservice.services.test.disabled.end" -> endDate
+      "microservice.services.p60Service.disabled.start" -> startDate,
+      "microservice.services.p60Service.disabled.end" -> endDate
     )
 
-    val startDate: Map[String, Any] = Map("microservice.services.test.disabled.start" -> "2020-08-08T21:00:00.000")
-    val endDate: Map[String, Any] = Map("microservice.services.test.disabled.end" -> "2020-08-08T23:00:00.000")
+    val startDate: Map[String, Any] = Map("microservice.services.p60Service.disabled.start" -> "2020-08-08T21:00:00.000")
+    val endDate: Map[String, Any] = Map("microservice.services.p60Service.disabled.end" -> "2020-08-08T23:00:00.000")
 
     val disabledOrigins: Map[String, Any] = Map(
-      "microservice.services.test.disabled.origin.0" -> "seiss",
-      "microservice.services.test.disabled.origin.1" -> "ddt"
+      "microservice.services.p60Service.disabled.origin.0" -> "seiss",
+      "microservice.services.p60Service.disabled.origin.1" -> "ddt"
     )
 
     val enabledOrigins: Map[String, Any] = Map(
-      "microservice.services.test.enabled.origin.0" -> "dwp-iv"
+      "microservice.services.p60Service.enabled.origin.0" -> "dwp-iv"
     )
 
     val requiredIdentifiers: Map[String, Any] = Map(
-      "microservice.services.test.identifier.required.0" -> "nino",
-      "microservice.services.test.identifier.required.1" -> "utr"
+      "microservice.services.p60Service.identifier.required.0" -> "nino",
+      "microservice.services.p60Service.identifier.required.1" -> "utr"
     )
 
     val testStartTime: LocalDateTime = LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME)
@@ -342,15 +355,17 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val testEnabled = List("dwp-iv")
     val testIdentifiers = List ("nino", "utr")
 
-    val hodAuthorizationToken: Map[String, Any] = Map("microservice.services.test.hod.authorizationToken" -> "authToken")
-    val hodEnvironmentHeader: Map[String, Any] = Map("microservice.services.test.hod.environmentHeader" -> "envHeader")
+    val hodAuthorizationToken: Map[String, Any] = Map("microservice.services.p60Service.hod.authorizationToken" -> "authToken")
+    val hodEnvironmentHeader: Map[String, Any] = Map("microservice.services.p60Service.hod.environmentHeader" -> "envHeader")
 
     val serviceBaseUrl: Map[String, Any] = Map(
-      "microservice.services.test.protocol" -> "http",
-      "microservice.services.test.host" -> "localhost",
-      "microservice.services.test.port" -> 8080
+      "microservice.services.p60Service.protocol" -> "http",
+      "microservice.services.p60Service.host" -> "localhost",
+      "microservice.services.p60Service.port" -> 8080
     )
 
-    val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.testService.bufferInMonths" -> 2)
+    val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.p60Service.bufferInMonths" -> 2)
+
+    val questionRepoTtlPeriod: Map[String, Any] = Map("question.record.duration" -> "P2D")
   }
 }

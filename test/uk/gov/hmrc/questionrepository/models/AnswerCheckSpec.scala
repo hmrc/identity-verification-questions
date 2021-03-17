@@ -24,7 +24,8 @@ class AnswerCheckSpec extends UnitSpec {
   }
 
   trait Setup {
-    val answerCheck: AnswerCheck = AnswerCheck(Origin("ma"), Seq(NinoI("AA000000A")), Seq(AnswerDetails(QuestionId("12345"), StringAnswer("the answer"))))
-    val validJson: JsValue = Json.parse("""{"origin":"ma","selections":[{"nino":"AA000000A"}],"answers":[{"questionId":"12345","answer":"the answer"}]}""")
+    val correlationId: CorrelationId = CorrelationId()
+    val answerCheck: AnswerCheck = AnswerCheck(correlationId, Origin("ma"), Seq(NinoI("AA000000A")), Seq(AnswerDetails(PaymentToDate, StringAnswer("the answer"))))
+    val validJson: JsValue = Json.parse(s"""{"correlationId":"${correlationId.id}", "origin":"ma","identifiers":[{"nino":"AA000000A"}],"answers":[{"questionKey":"PaymentToDate","answer":"the answer"}]}""")
   }
 }

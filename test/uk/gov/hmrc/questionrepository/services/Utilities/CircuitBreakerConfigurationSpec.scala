@@ -10,6 +10,7 @@ import play.api.Configuration
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.models.{ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.utilities.CircuitBreakerConfiguration
 
 class CircuitBreakerConfigurationSpec extends UnitSpec {
@@ -45,13 +46,13 @@ class CircuitBreakerConfigurationSpec extends UnitSpec {
 
     val circuitBreakerConfiguration = new CircuitBreakerConfiguration {
       override def appConfig: AppConfig = mockAppConfig
-      override def serviceName = testServiceName
+      override def serviceName: ServiceName = testServiceName
     }
 
   }
 
   trait TestData {
-    val testServiceName = "test"
+    val testServiceName: ServiceName = p60Service
     val metrics: Map[String, Any] = Map(
       "microservice.metrics.graphite.host" -> "graphite",
       "microservice.metrics.graphite.port" -> "2003",
@@ -77,13 +78,13 @@ class CircuitBreakerConfigurationSpec extends UnitSpec {
     val unavailablePeriodDurationInSec: Map[String, Any] = Map("circuit.breaker.unavailablePeriodDurationInSec" -> 70)
     val unstablePeriodDurationInSec: Map[String, Any] = Map("circuit.breaker.unstablePeriodDurationInSec" -> 310)
 
-    val serviceNumberOfCallsToTrigger: Map[String, Any] = Map(s"microservice.services.$testServiceName.circuitBreaker.numberOfCallsToTrigger" -> 40)
-    val serviceUnavailablePeriodDurationInSec: Map[String, Any] = Map(s"microservice.services.$testServiceName.circuitBreaker.unavailableDurationInSec" -> 80)
-    val serviceUnstablePeriodDurationInSec: Map[String, Any] = Map(s"microservice.services.$testServiceName.circuitBreaker.unstableDurationInSec" -> 320)
+    val serviceNumberOfCallsToTrigger: Map[String, Any] = Map(s"microservice.services.${testServiceName.toString}.circuitBreaker.numberOfCallsToTrigger" -> 40)
+    val serviceUnavailablePeriodDurationInSec: Map[String, Any] = Map(s"microservice.services.${testServiceName.toString}.circuitBreaker.unavailableDurationInSec" -> 80)
+    val serviceUnstablePeriodDurationInSec: Map[String, Any] = Map(s"microservice.services.${testServiceName.toString}.circuitBreaker.unstableDurationInSec" -> 320)
 
 
-    val defaultCircuitBreakerConfig = CircuitBreakerConfig("test", 20 , 60 * 1000, 300 * 1000)
-    val configuredCircuitBreakerConfig = CircuitBreakerConfig("test", 30, 70 * 1000, 310 * 1000)
-    val servceiSpecificCircuitBreakerConfig = CircuitBreakerConfig("test", 40, 80 * 1000, 320 * 1000)
+    val defaultCircuitBreakerConfig = CircuitBreakerConfig("p60Service", 20 , 60 * 1000, 300 * 1000)
+    val configuredCircuitBreakerConfig = CircuitBreakerConfig("p60Service", 30, 70 * 1000, 310 * 1000)
+    val servceiSpecificCircuitBreakerConfig = CircuitBreakerConfig("p60Service", 40, 80 * 1000, 320 * 1000)
   }
 }

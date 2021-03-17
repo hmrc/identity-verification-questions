@@ -11,15 +11,15 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
-import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.Identifier._
-import uk.gov.hmrc.questionrepository.models.{Origin, PaymentToDate, Question, Selection, ServiceName, p60Service}
+import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
+import uk.gov.hmrc.questionrepository.models.Identifier.{Identifier, NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, DoubleAnswer, EmployeeNIContributions, Origin, PaymentToDate, QuestionKey, QuestionResult, Score, ServiceName, Unknown, p60Service}
 
 import java.time.LocalDateTime
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class QuestionServiceSpec extends UnitSpec with LogCapturing {
+class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
   "check isAvailable" should {
     "return true" when {
@@ -60,7 +60,6 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
         service.isAvailable(origin, Seq(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
-
     }
 
     "return false" when {
@@ -89,41 +88,43 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       }
     }
 
-    "getQuestions" should {
-      "return empty list if service is available" when {
+    "checkAnswers" should {
+      "return list of supported questions with score of 'unknown'" when {
         "connector throws error" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
-          override def connectorResult: Future[Seq[TestRecord]] = badRequestResult
 
-          withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+          override def connectorResult: Future[TestRecord] = badRequestResult
+
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: alala, identifiers: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}, origin: alala, identifiers: AA000000D,12345678"
           }
         }
 
         "connector returns not found" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
-          override def connectorResult: Future[Seq[TestRecord]] = notFoundResult
 
-          withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+          override def connectorResult: Future[TestRecord] = notFoundResult
+
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.INFO)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection, origin: alala, identifiers: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe s"p60Service, no answers returned for selection, correlationId: ${correlationId.id}, origin: alala, identifiers: AA000000D,12345678"
           }
         }
       }
 
-      "return empty list if service unavailable" when {
+      "return list of supported questions with score of 'unknown' if service is unavailable" when {
         "outage set and covers current time" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(Some(currentOutage), List.empty, List.empty, List("nino", "utr")))
 
-          override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
+          override def connectorResult: Future[TestRecord] = testRecordResult
 
-          withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             logs.size shouldBe 0
           }
         }
@@ -131,10 +132,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         "no outage set but origin in disabled origin list time" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List("alala"), List.empty, List("nino", "utr")))
 
-          override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
+          override def connectorResult: Future[TestRecord] = testRecordResult
 
-          withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             logs.size shouldBe 0
           }
         }
@@ -142,10 +143,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         "no outage set but origin NOT in enabled origin list time" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List("another"), List("nino", "utr")))
 
-          override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
+          override def connectorResult: Future[TestRecord] = testRecordResult
 
-          withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             logs.size shouldBe 0
           }
         }
@@ -153,10 +154,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         "no outage set not all required Identifiers are present" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
 
-          override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
+          override def connectorResult: Future[TestRecord] = testRecordResult
 
-          withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(origin, Seq(saUtrIdentifier))).futureValue shouldBe Seq()
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             logs.size shouldBe 0
           }
         }
@@ -166,23 +167,16 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         "connector successful" in new Setup {
           when(mockAppConfig.serviceStatus(eqTo[ServiceName](p60Service))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
 
-          override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
-          service.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe List(Question(PaymentToDate,List(TestRecord(1).toString)))
+          override def connectorResult: Future[TestRecord] = testRecordResult
+
+          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
+            service.checkAnswers(AnswerCheck(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Correct))
+            logs.size shouldBe 0
+          }
         }
       }
     }
-
-    "calling multiple Question Services" should {
-      "return Seq of Questions" in new Setup {
-        when(mockAppConfig.serviceStatus(any)).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
-        val services = Seq(service, service2)
-        val selection: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
-
-        Future.sequence(services.map(_.questions(selection))).map(_.flatten).futureValue shouldBe Seq()
-      }
-    }
   }
-
 
   trait Setup extends TestData {
     self =>
@@ -190,45 +184,38 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
 
-    def connectorResult: Future[Seq[TestRecord]] = illegalAccessResult
+    def connectorResult: Future[TestRecord] = illegalAccessResult
 
-    def connector: QuestionConnector[TestRecord] = new QuestionConnector[TestRecord] {
-      def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[TestRecord]] = connectorResult
+    def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
+      def verifyAnswer(correlationId: CorrelationId,  origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails): Future[TestRecord] = connectorResult
     }
 
     import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability
 
-    abstract class TestService extends QuestionService with CheckAvailability
+    abstract class TestService extends AnswerService with CheckAvailability
 
     lazy val service: TestService {
       type Record = TestRecord
     } = new TestService {
-      override val serviceName = p60Service
       override type Record = TestRecord
+      override val serviceName = p60Service
 
-      override def connector: QuestionConnector[TestRecord] = self.connector
+      override def connector: AnswerConnector[TestRecord] = self.connector
+
+      override def supportedQuestions: Seq[QuestionKey] = Seq(PaymentToDate)
+
+      override def answerTransformer(records: Seq[TestRecord], filteredAnswers: Seq[AnswerDetails]): Seq[QuestionResult] =
+        records.map(r => QuestionResult(r.questionKey, r.answer))
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
+//
+//      override protected def breakOnException(t: Throwable): Boolean = ???
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
-
-    }
-
-    lazy val service2: TestService {
-      type Record = TestRecord
-    } = new TestService {
-      override val serviceName = p60Service
-      override type Record = TestRecord
-
-      override def connector: QuestionConnector[TestRecord] = self.connector
-
-      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
-
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
     }
   }
 
   trait TestData {
+    val correlationId: CorrelationId = CorrelationId()
     val origin: Origin = Origin("alala")
     val ninoIdentifier: NinoI = NinoI("AA000000D")
     val saUtrIdentifier: SaUtrI = SaUtrI("12345678")
@@ -236,11 +223,14 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     val pastOutage: Outage = Outage(LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1))
     val currentOutage: Outage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
 
-    case class TestRecord(value: BigDecimal)
+    val paymentToDateAnswer = AnswerDetails(PaymentToDate, DoubleAnswer(100.11))
+    val EmployeeNIContributionsAnswer = AnswerDetails(EmployeeNIContributions, DoubleAnswer(200.22))
 
-    def illegalAccessResult: Future[Seq[TestRecord]] = Future.failed(new IllegalAccessException("Connector should not have been called"))
-    def testRecordResult: Future[Seq[TestRecord]] = Future.successful(Seq(TestRecord(1)))
-    def notFoundResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("no no nooooo, no records found", NOT_FOUND))
-    def badRequestResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("bad bad bad request", BAD_REQUEST))
+    case class TestRecord(questionKey: QuestionKey, answer: Score)
+
+    def illegalAccessResult: Future[TestRecord] = Future.failed(new IllegalAccessException("Connector should not have been called"))
+    def testRecordResult: Future[TestRecord] = Future.successful(TestRecord(PaymentToDate, Correct))
+    def notFoundResult: Future[TestRecord] = Future.failed(UpstreamErrorResponse("no no nooooo, no records found", NOT_FOUND))
+    def badRequestResult: Future[TestRecord] = Future.failed(UpstreamErrorResponse("bad bad bad request", BAD_REQUEST))
   }
 }
