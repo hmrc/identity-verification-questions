@@ -10,11 +10,13 @@ import play.api.libs.json.{JsString, JsSuccess, Reads, Writes}
 sealed trait QuestionKey
 case object PaymentToDate extends QuestionKey
 case object EmployeeNIContributions extends QuestionKey
+case object PassportQuestion extends QuestionKey
 
 object QuestionKey {
   implicit val questionKeyReads: Reads[QuestionKey] = Reads {
     case JsString("PaymentToDate") => JsSuccess(PaymentToDate)
     case JsString("EmployeeNIContributions") => JsSuccess(EmployeeNIContributions)
+    case JsString("PassportQuestion") => JsSuccess(PassportQuestion)
     case e => throw new IllegalArgumentException(s"unknown QuestionKey $e")
   }
 
@@ -25,3 +27,4 @@ object QuestionKey {
 
 sealed trait ServiceName
 case object p60Service extends ServiceName
+case object passportService extends ServiceName

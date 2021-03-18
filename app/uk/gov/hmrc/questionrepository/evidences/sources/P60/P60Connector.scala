@@ -16,10 +16,11 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.questionrepository.models.Identifier._
 import uk.gov.hmrc.questionrepository.models.Identifier.Search._
 import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, p60Service}
+import javax.inject.{Inject, Singleton}
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
   with HodConnectorConfig
   with TaxYearBuilder

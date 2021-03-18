@@ -9,10 +9,11 @@ import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
 import uk.gov.hmrc.questionrepository.models.Identifier.Identifier
 import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, CorrelationId, Incorrect, Origin, QuestionDataCache, QuestionResult, Score, Selection, Unknown}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
+import javax.inject.{Inject, Singleton}
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class P60AnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(implicit ec: ExecutionContext) extends AnswerConnector[QuestionResult] {
 
   private def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score =
