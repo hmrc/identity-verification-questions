@@ -13,10 +13,10 @@ import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
 import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, PaymentToDate, Question, QuestionResponse, Selection}
+import uk.gov.hmrc.questionrepository.models.{Origin, PassportQuestion, PaymentToDate, Question, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
-
 import java.time.Period
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -38,7 +38,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec{
       when(mockMongoRepo.store(any)).thenReturn(Future.successful(Unit))
       when(mockAppConfig.questionRecordTTL).thenReturn(Period.parse("P1D"))
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
-      result.questions shouldBe Seq(Question(PaymentToDate,List(TestRecord(1).toString)))
+      result.questions shouldBe Seq(Question(PaymentToDate,List(TestRecord(1).toString)),Question(PassportQuestion,List(TestRecord(12345).toString)))
     }
   }
 
@@ -50,7 +50,7 @@ trait Setup {
   val mockP60Service: P60Service = mock[P60Service]
   val mockPassportService: PassportService = mock[PassportService]
   val mockMongoRepo: QuestionMongoRepository = mock[QuestionMongoRepository]
-  val service = new EvidenceRetrievalService(mockMongoRepo, mockP60Service, mockAppConfig)
+  val service = new EvidenceRetrievalService(mockMongoRepo, mockP60Service, mockPassportService, mockAppConfig)
   val origin: Origin = Origin("alala")
   val ninoIdentifier: NinoI = NinoI("AA000000D")
   val saUtrIdentifier: SaUtrI = SaUtrI("12345678")

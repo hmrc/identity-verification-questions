@@ -22,6 +22,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PassportConnectorSpec extends UnitSpec with PassportTestData{
 
+  "Service Name should be set" in new setUp {
+    connector.serviceName shouldBe passportService
+  }
+
   "calling getRecords" should {
     "return true" when {
       "valid selections are provided" in new setUp {

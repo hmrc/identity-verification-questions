@@ -16,6 +16,7 @@ object QuestionKey {
   implicit val questionKeyReads: Reads[QuestionKey] = Reads {
     case JsString("PaymentToDate") => JsSuccess(PaymentToDate)
     case JsString("EmployeeNIContributions") => JsSuccess(EmployeeNIContributions)
+    case JsString("PassportQuestion") => JsSuccess(PassportQuestion)
     case e => throw new IllegalArgumentException(s"unknown QuestionKey $e")
   }
 
