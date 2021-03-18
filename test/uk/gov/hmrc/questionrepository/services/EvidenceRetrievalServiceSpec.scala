@@ -16,7 +16,7 @@ import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{Origin, PassportQuestion, PaymentToDate, Question, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import java.time.Period
-
+import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

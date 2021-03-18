@@ -9,7 +9,6 @@ import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PassportQuestion, PaymentToDate, Question, QuestionResponse}
 import java.time.LocalDateTime
-
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.ws.WSResponse
 
@@ -247,5 +246,4 @@ trait TestData extends P60TestData {
   val passportQuestion: Question = Question(PassportQuestion, Seq())
 
   val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion, passportQuestion)
-
 }
