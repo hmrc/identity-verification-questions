@@ -5,15 +5,16 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.Passport
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.{Question, ServiceName, PassportQuestion, passportService}
+import uk.gov.hmrc.questionrepository.models.{PassportQuestion, Question, ServiceName, passportService}
 import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class PassportService @Inject()(passportConnector: PassportConnector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
   with CheckAvailability
   with CircuitBreakerConfiguration

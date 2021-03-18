@@ -5,7 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.Passport
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
@@ -14,6 +14,7 @@ import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, passportSe
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class PassportConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Boolean]
   with HodConnectorConfig {
 

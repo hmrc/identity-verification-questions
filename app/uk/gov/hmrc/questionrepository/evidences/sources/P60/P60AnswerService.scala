@@ -10,10 +10,11 @@ import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
 import uk.gov.hmrc.questionrepository.models.{AnswerDetails, EmployeeNIContributions, PaymentToDate, QuestionKey, QuestionResult, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.AnswerService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
+import javax.inject.{Inject, Singleton}
 
-import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class P60AnswerService @Inject()(p60AnswerConnector: P60AnswerConnector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends AnswerService
   with CheckAvailability
   with CircuitBreakerConfiguration {

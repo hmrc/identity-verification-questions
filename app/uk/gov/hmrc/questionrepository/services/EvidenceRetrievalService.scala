@@ -5,7 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository, p60Service: P60Service, passportService: PassportService, appConfig: AppConfig)
                                         (implicit ec: ExecutionContext) {
 
