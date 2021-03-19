@@ -16,7 +16,10 @@ import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository, p60Service: P60Service, passportService: PassportService, appConfig: AppConfig)
+class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
+                                         messageTextService: MessageTextService,
+                                         appConfig: AppConfig,
+                                         p60Service: P60Service, passportService: PassportService)
                                         (implicit ec: ExecutionContext) {
 
   def callAllEvidenceSources(selection: Selection)(implicit hc: HeaderCarrier): Future[QuestionResponse] = {
@@ -26,10 +29,17 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository, p60
       qs <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)
       corrId = CorrelationId()
       _ <- mongoRepo.store(QuestionDataCache(
-        correlationId = corrId,
-        selection = selection,
-        questions = qs,
-        expiryDate = LocalDateTime.now plus appConfig.questionRecordTTL))
-    } yield QuestionResponse(corrId, qs)
+            correlationId = corrId,
+            selection = selection,
+            questions = qs,
+            expiryDate = LocalDateTime.now plus appConfig.questionRecordTTL))
+      questionTextEn = qs.flatMap(q => messageTextService.getQuestionMessageEn(q.questionKey)).toMap
+      questionTextCy = qs.flatMap(q => messageTextService.getQuestionMessageCy(q.questionKey)).toMap
+      maybeQuestionTextCy = if(questionTextCy.isEmpty) None else Some(questionTextCy)
+    } yield removeAnswers(QuestionResponse(corrId, qs, questionTextEn, maybeQuestionTextCy))
   }
+
+  private def removeAnswers(questionResponse: QuestionResponse): QuestionResponse =
+    questionResponse.copy(questions = questionResponse.questions.map(_.copy(answers = Seq.empty[String])))
+
 }

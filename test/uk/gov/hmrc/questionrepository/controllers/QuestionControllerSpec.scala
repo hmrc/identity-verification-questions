@@ -33,7 +33,7 @@ class QuestionControllerSpec extends Utils.UnitSpec {
 
   trait Setup {
     val selection: Selection = Selection(Origin("ma"),Seq(NinoI("AA000000D")),Some(3), Some(1))
-    val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question])
+    val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question], Map.empty[String, String], None)
     val jsonBody: JsValue = Json.toJson(selection)
     val badJson: JsValue = Json.parse("""
                             |{

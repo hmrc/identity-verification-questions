@@ -177,9 +177,15 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions shouldBe testQuestions
+        questionResponse.get.questionTextEn.nonEmpty shouldBe true
+        questionResponse.get.questionTextCy.isDefined shouldBe true
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }
+  }
+
+  "Just wait for circuit breaker to reset" in {
+    Thread.sleep(2000)
   }
 }
 
@@ -241,9 +247,9 @@ trait TestData extends P60TestData {
     "min" -> 8
   )
 
-  val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1266.00"), Map("currentTaxYear" -> "2019/20"))
-  val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
-  val passportQuestion: Question = Question(PassportQuestion, Seq())
+  val paymentToDateQuestion: Question = Question(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
+  val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
+  val passportQuestion: Question = Question(PassportQuestion, Seq.empty[String])
 
   val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion, passportQuestion)
 }

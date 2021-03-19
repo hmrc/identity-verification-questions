@@ -17,13 +17,13 @@ class QuestionResponseSpec extends UnitSpec {
     }
 
     "serialize a valid QuestionResponse object without optional fields" in new Setup {
-      Json.toJson(questionResponse).toString shouldBe s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}}]}"""
+      Json.toJson(questionResponse).toString shouldBe s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}}],"questionTextEn":{"PaymentToDate":"some text"}}"""
     }
 
     "deserialize valid json into a QuestionResponse" in new Setup {
-      val validQuestionResponseStr = s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}}]}"""
+      val validQuestionResponseStr = s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}}],"questionTextEn":{"PaymentToDate":"some text"}}"""
       val json: JsValue = Json.parse(validQuestionResponseStr)
-      json.validate[QuestionResponse] shouldBe JsSuccess(QuestionResponse(correlationId, questions))
+      json.validate[QuestionResponse] shouldBe JsSuccess(QuestionResponse(correlationId, questions, questionTextEn, None))
     }
 
     "error when attempting to deserialize invalid json" in {
@@ -40,9 +40,12 @@ class QuestionResponseSpec extends UnitSpec {
     val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1266.00"), Map("currentTaxYear" -> "2019/20"))
     val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
     val questions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
+    val questionTextEn = Map("PaymentToDate" -> "some text")
     val questionResponse: QuestionResponse = QuestionResponse(
       correlationId,
-      Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
+      Seq(paymentToDateQuestion, employeeNIContributionsQuestion),
+      questionTextEn,
+      None
     )
   }
 }
