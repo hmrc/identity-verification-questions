@@ -6,8 +6,6 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.Passport
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.http.HeaderCarrier
