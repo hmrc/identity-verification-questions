@@ -183,6 +183,10 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
       }
     }
   }
+
+  "Just wait for circuit breaker to reset" in {
+    Thread.sleep(2000)
+  }
 }
 
 trait Setup extends TestData {

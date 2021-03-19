@@ -31,6 +31,7 @@ trait BaseISpec extends AnyWordSpecLike
     replaceExternalDependenciesWithMockServers
       ++ csrfIgnoreFlags
       ++ Map("mongodb.uri" -> "mongodb://localhost:27017/verification-questions-it-tests")
+      ++ Map("circuit.breaker.numberOfCallsToTrigger" -> 500)
       ++ extraConfig
   ).build()
 

@@ -1,10 +1,11 @@
 package controllers
 
 import java.time.LocalDateTime
-
 import ch.qos.logback.classic.Level
+import com.github.tomakehurst.wiremock.client.WireMock.{get, okJson, stubFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import iUtils.{BaseISpec, LogCapturing}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.models.{PassportQuestion, Question, QuestionResponse}
 
@@ -19,6 +20,7 @@ class PassportOutageISpec extends BaseISpec with LogCapturing{
 
   "POST /questions for disabled service" should {
     "return 200 and a sequence of non passport responses if passport service is within outage window" in new Setup {
+      p60ProxyReturnOk(validQuestionRequest)
       withCaptureOfLoggingFrom[AppConfig]{logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -33,6 +35,18 @@ class PassportOutageISpec extends BaseISpec with LogCapturing{
   trait Setup{
     val passportQuestion: Question = Question(PassportQuestion, Seq())
     val questionRoute = "/question-repository/questions"
+
+    def p60ProxyReturnOk(payments: JsValue): StubMapping =
+      stubFor(
+        get(
+          urlEqualTo("/rti/individual/payments/nino/AA000000/tax-year/19-20"))
+          .willReturn(
+            okJson(
+              Json.toJson(payments).toString()
+            )
+          )
+      )
+
     val validQuestionRequest: JsObject = Json.obj(
       "origin" -> "lost-credentials",
       "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A")),
