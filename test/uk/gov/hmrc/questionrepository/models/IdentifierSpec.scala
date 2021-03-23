@@ -95,6 +95,35 @@ class IdentifierSpec extends UnitSpec {
     }
   }
 
+  "when creating a date of birth" should {
+    "allow valid date of birth to be created from string" in {
+      val validDate = "2020-03-23"
+      val dateOfBirth = DobI(validDate)
+      dateOfBirth.toString shouldBe validDate
+    }
+  }
+
+  "when serializing and de-serializing a date of birth identifier" should {
+    "create valid json" in {
+      val validString = "2020-03-23"
+      val validJson = s"""{"dob":"2020-03-23"}"""
+      val dobIdentifier = DobI(validString)
+      Json.toJson(dobIdentifier).toString shouldBe validJson
+    }
+  }
+
+  "create a date of birth from valid json" in {
+    val validJson = s"""{"dob":"2020-03-23"}"""
+    val json = Json.parse(validJson)
+    json.validate[DobI] shouldBe JsSuccess(DobI("2020-03-23"))
+  }
+
+  "create Identifier from valid json" in {
+    val validJson = s"""{"dob":"2020-03-23"}"""
+    val json = Json.parse(validJson)
+    json.validate[Identifier] shouldBe JsSuccess(DobI("2020-03-23"))
+  }
+
   "when serializing and de-serializing sequences of iIdentifiers" should {
     "create json for sequence of nino" in {
       val testSeq: Seq[Identifier] = Seq(NinoI("AA000000D"), NinoI("NP123456D"))
