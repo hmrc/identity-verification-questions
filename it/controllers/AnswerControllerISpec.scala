@@ -3,7 +3,7 @@ package controllers
 import iUtils.BaseISpec
 import play.api.libs.json.{JsString, JsSuccess, Json}
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 

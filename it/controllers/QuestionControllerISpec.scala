@@ -8,6 +8,7 @@ import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PassportQuestion, PaymentToDate, Question, QuestionResponse}
+
 import java.time.LocalDateTime
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.ws.WSResponse
@@ -156,6 +157,17 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }
+
+    "return 200 and sequence of questions inc Passport" when {
+      "outage window is in future and identifiers includes DOB" in new Setup {
+        p60ProxyReturnOk(p60ResponseJson)
+        val response = await(resourceRequest(questionRoute).post(validQuestionRequestNinoDob))
+        response.status shouldBe 200
+        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+        questionResponse.isSuccess shouldBe true
+        questionResponse.get.questions shouldBe testQuestions ++ Seq(passportQuestion)
+      }
+    }
   }
 }
 
@@ -239,6 +251,13 @@ trait TestData extends P60TestData {
     "min" -> 1
   )
 
+  val validQuestionRequestNinoDob: JsObject = Json.obj(
+    "origin" -> "lost-credentials",
+    "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A"),Json.obj("dob" -> "1986-02-28")),
+    "max" -> 3,
+    "min" -> 1
+  )
+
 
   val invalidQuestionRequest: JsObject = Json.obj(
     "origin" -> "lost-credentials",
@@ -251,5 +270,5 @@ trait TestData extends P60TestData {
   val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
   val passportQuestion: Question = Question(PassportQuestion, Seq.empty[String])
 
-  val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion, passportQuestion)
+  val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
 }

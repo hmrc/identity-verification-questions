@@ -10,8 +10,8 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.{P60Connector, P60Service}
-import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.Payment.Payment
+import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, Origin, PaymentToDate, Question, Selection, ServiceName, p60Service}
 
 import java.time.LocalDate

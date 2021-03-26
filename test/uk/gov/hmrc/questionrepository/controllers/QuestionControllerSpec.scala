@@ -9,7 +9,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
-import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
+import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin, Question, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
 

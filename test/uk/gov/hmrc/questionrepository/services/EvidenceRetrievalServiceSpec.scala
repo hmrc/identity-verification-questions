@@ -12,7 +12,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
-import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{Origin, PassportQuestion, PaymentToDate, Question, QuestionKey, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 

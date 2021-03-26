@@ -7,14 +7,15 @@ package uk.gov.hmrc.questionrepository.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
+import uk.gov.hmrc.questionrepository.evidences.sources.Passport.{PassportAnswerService}
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, QuestionKey, QuestionResult}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService)(implicit ec: ExecutionContext) {
-  val answerServices: Seq[AnswerService] = Seq(p60AnswerService)
+class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService, passportAnswerService: PassportAnswerService)(implicit ec: ExecutionContext) {
+  val answerServices: Seq[AnswerService] = Seq(p60AnswerService, passportAnswerService)
 
   private def getQuestionService(questionKey: QuestionKey): AnswerService = {
     answerServices.filter(_.supportedQuestions.contains(questionKey)) match {

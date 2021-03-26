@@ -6,7 +6,10 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
-import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsString, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsString, JsSuccess, JsValue, Json}
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
 class AnswerSpec extends UnitSpec {
 
@@ -29,6 +32,11 @@ class AnswerSpec extends UnitSpec {
     "create json for BooleanAnswer" in new Setup {
       val booleanAnswer: BooleanAnswer = BooleanAnswer(true)
       Json.toJson(booleanAnswer) shouldBe jsonBooleanAnswer
+    }
+
+    "create json for PassportAnswer" in new Setup {
+      val passportAnswer: PassportAnswer = PassportAnswer("123456789", "surname", "firstname", passportExpiryDate)
+      Json.toJson(passportAnswer) shouldBe jsonPassportAnswer
     }
   }
 
@@ -77,6 +85,11 @@ class AnswerSpec extends UnitSpec {
       }
     }
 
+    "create PassportAnswer if json is valid" in new Setup {
+      jsonPassportAnswer.validate[Answer] shouldBe JsSuccess(PassportAnswer("123456789","surname", "firstname", passportExpiryDate))
+      jsonPassportAnswer.validate[PassportAnswer] shouldBe JsSuccess(PassportAnswer("123456789","surname", "firstname", passportExpiryDate))
+    }
+
     "generate exception if Answer json is invalid" in new Setup {
       an[IllegalArgumentException] shouldBe thrownBy {
         wellBadJson.validate[Answer]
@@ -98,11 +111,22 @@ class AnswerSpec extends UnitSpec {
     }
   }
 
+  "serialize a sequence of Answer" in new Setup {
+    Json.toJson[Seq[Answer]](Seq(stringA, passportA, doubleA, booleanA)) shouldBe seqAnswer
+  }
+
   trait Setup {
     val jsonStringAnswer: JsString = JsString("an answer")
     val jsonIntegerAnswer: JsNumber = JsNumber(500)
     val jsonDoubleAnswer: JsNumber = JsNumber(500.12)
     val jsonBooleanAnswer: JsBoolean = JsBoolean(true)
     val wellBadJson: JsArray = JsArray()
+    val passportExpiryDate: LocalDate = LocalDate.parse("2000-02-28", ISO_LOCAL_DATE)
+    val jsonPassportAnswer: JsValue = Json.parse(s"""{"passportNumber":"123456789","surname":"surname","forenames":"firstname","dateOfExpiry":"2000-02-28"}""")
+    val stringA: Answer = StringAnswer("an answer")
+    val passportA: Answer = PassportAnswer("123456789","surname", "firstname", LocalDate.parse("2000-02-28", ISO_LOCAL_DATE))
+    val doubleA: Answer = DoubleAnswer("500.12")
+    val booleanA: Answer = BooleanAnswer("true")
+    val seqAnswer: JsValue = Json.parse(s"[${jsonStringAnswer.toString},${jsonPassportAnswer.toString},${jsonDoubleAnswer.toString},${jsonBooleanAnswer.toString}]")
   }
 }

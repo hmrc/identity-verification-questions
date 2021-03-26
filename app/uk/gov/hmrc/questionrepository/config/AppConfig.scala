@@ -5,11 +5,14 @@
 
 package uk.gov.hmrc.questionrepository.config
 
+import com.typesafe.config.ConfigException
+
 import java.time.Period
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.models.ServiceName
+import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 
 @Singleton
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends ConfigHelper(config) {
@@ -45,5 +48,14 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
 
   lazy val questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
+
+  lazy val passportAuthData: PassportAuthData = {
+    PassportAuthData(
+      organisationId = servicesConfig.getConfString("passportService.authenticationData.organisationId", throw new ConfigException.Missing("passportService.authenticationData.organisationId")),
+      organisationApplicationId = servicesConfig.getConfString("passportService.authenticationData.organisationApplicationId", throw new ConfigException.Missing("passportService.authenticationData.organisationApplicationId")),
+      organisationUserName = servicesConfig.getConfString("passportService.authenticationData.organisationUserName", throw new ConfigException.Missing("passportService.authenticationData.organisationUserName")),
+      organisationUserPassword = servicesConfig.getConfString("passportService.authenticationData.organisationUserPassword", throw new ConfigException.Missing("passportService.authenticationData.organisationUserPassword"))
+    )
+  }
 
 }

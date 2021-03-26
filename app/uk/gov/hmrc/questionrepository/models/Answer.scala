@@ -5,9 +5,10 @@
 
 package uk.gov.hmrc.questionrepository.models
 
-import play.api.libs.json.{JsBoolean, JsNumber, JsString, JsSuccess, JsValue, Reads, Writes}
+import play.api.libs.json._
+import java.time.LocalDate
 
-sealed trait Answer
+sealed trait  Answer
 
 case class StringAnswer(value: String) extends Answer {
   override val toString: String = value
@@ -58,11 +59,20 @@ object BooleanAnswer {
   def apply(value: String): BooleanAnswer = apply(value.toBoolean)
 }
 
+case class PassportAnswer(passportNumber: String, surname: String, forenames: String, dateOfExpiry: LocalDate) extends Answer
+
+object PassportAnswer {
+  implicit val format: Format[PassportAnswer] = Json.format[PassportAnswer]
+}
+
 object Answer {
+  val passportFields = Seq("passportNumber","surname","forenames","dateOfExpiry")
+
   implicit val reads: Reads[Answer] = Reads {
     case JsNumber(n) => IntOrDouble(n)
-    case JsString(s) => JsSuccess(StringAnswer(s))
     case JsBoolean(b) => JsSuccess(BooleanAnswer(b))
+    case JsString(s) => JsSuccess(StringAnswer(s))
+    case answer@JsObject(p) if passportFields.forall(p.keys.toSeq.contains) => answer.validate[PassportAnswer]
     case e => throw new IllegalArgumentException(s"unknown Answer $e")
   }
 
@@ -72,6 +82,7 @@ object Answer {
       case ia: IntegerAnswer => JsNumber(ia.value)
       case da: DoubleAnswer => JsNumber(da.value)
       case ba: BooleanAnswer => JsBoolean(ba.value)
+      case pq: PassportAnswer => Json.toJson[PassportAnswer](pq)
    }
   }
 

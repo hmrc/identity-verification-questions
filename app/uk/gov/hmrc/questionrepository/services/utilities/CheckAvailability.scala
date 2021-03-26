@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.services.utilities
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models.{Origin, ServiceName}
 
 import java.time.LocalDateTime

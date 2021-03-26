@@ -10,7 +10,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
-import uk.gov.hmrc.questionrepository.models.Identifier.NinoI
+import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, CorrelationId, IntegerAnswer, Origin, PaymentToDate, QuestionResult, Unknown}
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 

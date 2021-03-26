@@ -10,7 +10,7 @@ import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
-import uk.gov.hmrc.questionrepository.models.Identifier.Identifier
+import uk.gov.hmrc.questionrepository.models.identifier.Identifier
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, Origin, QuestionKey, QuestionResult, ServiceName, Unknown}
 
 import javax.inject.Inject

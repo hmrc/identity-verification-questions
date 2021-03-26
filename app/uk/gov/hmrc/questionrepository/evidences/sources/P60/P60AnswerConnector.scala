@@ -5,12 +5,13 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.P60
 
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
-import uk.gov.hmrc.questionrepository.models.Identifier.Identifier
+import uk.gov.hmrc.questionrepository.models.identifier.Identifier
 import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, CorrelationId, Incorrect, Origin, QuestionDataCache, QuestionResult, Score, Selection, Unknown}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -22,7 +23,7 @@ class P60AnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(implic
       case _ => Correct
     }
 
-  override def verifyAnswer(correlationId: CorrelationId, origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails): Future[QuestionResult] = {
+  override def verifyAnswer(correlationId: CorrelationId, origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId, Selection(origin, identifiers)) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
       case questionDataCaches => QuestionResult(answer.questionKey, checkResult(questionDataCaches, answer))

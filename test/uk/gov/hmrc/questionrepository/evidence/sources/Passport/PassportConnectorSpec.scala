@@ -14,7 +14,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportConnector
-import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{Origin, Selection, ServiceName, passportService}
 
 import scala.concurrent.ExecutionContext.Implicits.global

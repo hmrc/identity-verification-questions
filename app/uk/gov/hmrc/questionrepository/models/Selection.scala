@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.identifier._
 
 case class Selection(origin: Origin, identifiers: Seq[Identifier], max: Option[Int] = None, min: Option[Int] = None) {
   require(Selection.isValid(max, min), s"Invalid value, min or max values are incorrect")

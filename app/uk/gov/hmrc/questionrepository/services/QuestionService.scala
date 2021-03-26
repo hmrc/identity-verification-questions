@@ -11,7 +11,7 @@ import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection, Servi
 import play.api.Logging
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.identifier._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.evidences.sources.P60
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.Payment.Payment
+import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PaymentToDate, Question, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}

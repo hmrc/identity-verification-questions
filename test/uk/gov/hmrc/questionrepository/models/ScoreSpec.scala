@@ -25,6 +25,11 @@ class ScoreSpec extends UnitSpec {
       val score = Unknown
       Json.toJson(score) shouldBe JsString("unknown")
     }
+
+    "create json for Error" in {
+      val score = Error("an error")
+      Json.toJson(score) shouldBe JsString("error: an error")
+    }
   }
 
   "deserializing Score" should {
@@ -41,6 +46,11 @@ class ScoreSpec extends UnitSpec {
     "create Unknown object" in {
       val json = Json.parse(s""""unknown"""")
       json.validate[Score] shouldBe JsSuccess(Unknown)
+    }
+
+    "create Error object" in {
+      val json = Json.parse(s""""error: an error"""")
+      json.validate[Score] shouldBe JsSuccess(Error("an error"))
     }
 
     "not allow invalid Score" in {

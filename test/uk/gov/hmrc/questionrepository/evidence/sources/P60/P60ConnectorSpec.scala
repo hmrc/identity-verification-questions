@@ -16,8 +16,8 @@ import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Connector
 import scala.concurrent.{ExecutionContext, Future}
 import Utils.testData.P60TestData
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.questionrepository.models.Identifier._
-import uk.gov.hmrc.questionrepository.models.Payment.Payment
+import uk.gov.hmrc.questionrepository.models.identifier._
+import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models.{Origin, Selection, ServiceName, p60Service}
 import ch.qos.logback.classic.Level
 

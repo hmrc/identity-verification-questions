@@ -11,6 +11,7 @@ import Utils.{LogCapturing, UnitSpec}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.models.p60Service
+import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 
 import java.time.{LocalDateTime, Period}
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -310,6 +311,20 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
         appConfig.questionRecordTTL shouldBe Period.parse("P1D")
       }
     }
+
+    "getting passportAuthData" should {
+      "return a populated PassportAuthData object" in new Setup {
+        override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData
+        appConfig.passportAuthData shouldBe PassportAuthData("THMRC", "THMRC001", "THMRC_WS", "passport-pwd")
+      }
+
+      "throw an Exception if any/all values are missing from conf" in new Setup {
+        override def testConfig: Map[String, Any] = baseConfig
+        an[RuntimeException] shouldBe thrownBy {
+          appConfig.passportAuthData
+        }
+      }
+    }
   }
 
   trait Setup extends TestData {
@@ -367,5 +382,12 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.p60Service.bufferInMonths" -> 2)
 
     val questionRepoTtlPeriod: Map[String, Any] = Map("question.record.duration" -> "P2D")
+
+    val passportAuthDataData: Map[String, Any] = Map(
+      "microservice.services.passportService.authenticationData.organisationId" -> "THMRC",
+      "microservice.services.passportService.authenticationData.organisationApplicationId" -> "THMRC001",
+      "microservice.services.passportService.authenticationData.organisationUserName" -> "THMRC_WS",
+      "microservice.services.passportService.authenticationData.organisationUserPassword" -> "passport-pwd"
+    )
   }
 }

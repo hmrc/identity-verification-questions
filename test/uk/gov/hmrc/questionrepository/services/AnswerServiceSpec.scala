@@ -12,7 +12,7 @@ import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
-import uk.gov.hmrc.questionrepository.models.Identifier.{Identifier, NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.identifier.{Identifier, NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, DoubleAnswer, EmployeeNIContributions, Origin, PaymentToDate, QuestionKey, QuestionResult, Score, ServiceName, Unknown, p60Service}
 
 import java.time.LocalDateTime
@@ -187,7 +187,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     def connectorResult: Future[TestRecord] = illegalAccessResult
 
     def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
-      def verifyAnswer(correlationId: CorrelationId,  origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails): Future[TestRecord] = connectorResult
+      def verifyAnswer(correlationId: CorrelationId,  origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[TestRecord] = connectorResult
     }
 
     import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability

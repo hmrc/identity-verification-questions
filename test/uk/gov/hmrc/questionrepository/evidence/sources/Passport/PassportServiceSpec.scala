@@ -11,7 +11,7 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.{PassportConnector, PassportService}
-import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{Origin, PassportQuestion, Question, Selection, ServiceName, passportService}
 
 import scala.concurrent.ExecutionContext.Implicits.global

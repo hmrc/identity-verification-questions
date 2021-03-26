@@ -6,7 +6,7 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
-import uk.gov.hmrc.questionrepository.models.Identifier._
+import uk.gov.hmrc.questionrepository.models.identifier._
 
 import java.time.LocalDateTime
 

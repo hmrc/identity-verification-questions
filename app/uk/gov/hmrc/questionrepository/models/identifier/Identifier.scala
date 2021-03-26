@@ -3,14 +3,16 @@
  *
  */
 
-package uk.gov.hmrc.questionrepository.models.Identifier
+package uk.gov.hmrc.questionrepository.models.identifier
 
 import play.api.libs.json._
 import uk.gov.hmrc.domain.{Nino, SaUtr}
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-import java.time.format.DateTimeParseException
-import uk.gov.hmrc.questionrepository.models.Identifier.DobI.isValid
+import uk.gov.hmrc.questionrepository.models.identifier.DobI.isValid
+
+import scala.util.{Failure, Success, Try}
 
 sealed trait Identifier {
   val identifierType: IdentifierType
@@ -41,9 +43,10 @@ object SaUtrI {
   def apply(utrStr: String): SaUtrI = apply(SaUtr(utrStr))
 }
 
-case class DobI(dob:String) extends Identifier{
+case class DobI(dob: String) extends Identifier{
   require(isValid(dob))
-  override val toString: String = dob
+  lazy val dateOfBirth: LocalDate = LocalDate.parse(dob, ISO_LOCAL_DATE)
+  override val toString: String = dateOfBirth.format(ISO_LOCAL_DATE)
   override val identifierType: IdentifierType = DobType
 }
 
@@ -51,7 +54,10 @@ object DobI{
   implicit val format : Format[DobI] = Json.format[DobI]
 
   def isValid(possibleDate: String): Boolean =
-    try LocalDate.parse(possibleDate,ISO_LOCAL_DATE) match {case _ => true} catch {case _: DateTimeParseException => false}
+    Try(LocalDate.parse(possibleDate,ISO_LOCAL_DATE)) match {
+      case Success(_) => true
+      case Failure(_) => false
+    }
 }
 
 object Identifier {

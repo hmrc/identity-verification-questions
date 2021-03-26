@@ -3,7 +3,7 @@
  *
  */
 
-package uk.gov.hmrc.questionrepository.models.Payment
+package uk.gov.hmrc.questionrepository.models.payment
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import java.time.LocalDate

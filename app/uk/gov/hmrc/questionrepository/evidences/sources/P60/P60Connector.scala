@@ -10,11 +10,11 @@ import uk.gov.hmrc.http.{CoreGet, HeaderCarrier}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.connectors.utilities.HodConnectorConfig
-import uk.gov.hmrc.questionrepository.models.Payment.{Employment, Payment}
+import uk.gov.hmrc.questionrepository.models.payment.{Employment, Payment}
 import uk.gov.hmrc.questionrepository.services.utilities.{TaxYear, TaxYearBuilder}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.questionrepository.models.Identifier._
-import uk.gov.hmrc.questionrepository.models.Identifier.Search._
+import uk.gov.hmrc.questionrepository.models.identifier._
+import uk.gov.hmrc.questionrepository.models.identifier.Search._
 import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, p60Service}
 import javax.inject.{Inject, Singleton}
 

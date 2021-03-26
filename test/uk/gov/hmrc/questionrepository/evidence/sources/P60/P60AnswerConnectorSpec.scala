@@ -7,8 +7,9 @@ package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerConnector
-import uk.gov.hmrc.questionrepository.models.Identifier.{NinoI, SaUtrI}
+import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, CorrelationId, DoubleAnswer, Incorrect, Origin, PaymentToDate, Question, QuestionDataCache, QuestionResult, Selection, Unknown}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
@@ -45,6 +46,7 @@ class P60AnswerConnectorSpec extends UnitSpec {
   }
 
   trait Setup extends  TestData {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
     val mockQuestionRepo = mock[QuestionMongoRepository]
     val connector = new P60AnswerConnector(mockQuestionRepo)
   }

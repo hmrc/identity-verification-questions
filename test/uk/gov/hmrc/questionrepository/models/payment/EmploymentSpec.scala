@@ -3,7 +3,7 @@
  *
  */
 
-package uk.gov.hmrc.questionrepository.models.Payment
+package uk.gov.hmrc.questionrepository.models.payment
 
 import Utils.UnitSpec
 import Utils.testData.P60TestData

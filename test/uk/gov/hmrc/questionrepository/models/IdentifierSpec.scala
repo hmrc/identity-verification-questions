@@ -8,8 +8,8 @@ package uk.gov.hmrc.questionrepository.models
 import Utils.UnitSpec
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.questionrepository.models.Identifier._
-import uk.gov.hmrc.questionrepository.models.Identifier.Search._
+import uk.gov.hmrc.questionrepository.models.identifier._
+import uk.gov.hmrc.questionrepository.models.identifier.Search._
 
 class IdentifierSpec extends UnitSpec {
 
@@ -101,6 +101,14 @@ class IdentifierSpec extends UnitSpec {
       val dateOfBirth = DobI(validDate)
       dateOfBirth.toString shouldBe validDate
     }
+
+    "not allow invalid dob value" in {
+      val invalidString = "11111111"
+
+      an[IllegalArgumentException] shouldBe thrownBy {
+        DobI(invalidString)
+      }
+    }
   }
 
   "when serializing and de-serializing a date of birth identifier" should {
@@ -137,17 +145,17 @@ class IdentifierSpec extends UnitSpec {
       Json.toJson(testSeq) shouldBe Json.parse(s"""[{"utr":"987654321"},{"utr":"123456789"}]""")
     }
 
-    "create json for mixed sequence of nino and sautr" in {
-      val testSeq: Seq[Identifier] = Seq(NinoI("AA000000D"), SaUtrI("123456789"))
+    "create json for mixed sequence of nino ,sautr and dob" in {
+      val testSeq: Seq[Identifier] = Seq(NinoI("AA000000D"), SaUtrI("123456789"), DobI("1986-02-28"))
 
-      Json.toJson(testSeq) shouldBe Json.parse(s"""[{"nino":"AA000000D"},{"utr":"123456789"}]""")
+      Json.toJson(testSeq) shouldBe Json.parse(s"""[{"nino":"AA000000D"},{"utr":"123456789"},{"dob":"1986-02-28"}]""")
     }
 
     "create sequence of identifiers from json" in {
-      val validJson = s"""[{"nino":"AA000000D"},{"utr":"123456789"}]"""
+      val validJson = s"""[{"nino":"AA000000D"},{"utr":"123456789"},{"dob":"1986-02-28"}]"""
 
       val json = Json.parse(validJson)
-      json.validate[Seq[Identifier]] shouldBe JsSuccess(Seq(NinoI("AA000000D"), SaUtrI("123456789")))
+      json.validate[Seq[Identifier]] shouldBe JsSuccess(Seq(NinoI("AA000000D"), SaUtrI("123456789"), DobI("1986-02-28")))
     }
   }
 
