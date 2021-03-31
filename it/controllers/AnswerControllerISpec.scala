@@ -14,23 +14,10 @@ class AnswerControllerISpec extends BaseISpec {
   "POST /answers" should {
     val journeyPath = "/question-repository/answers"
     "return 200 with score unknown" when {
-      "no questions found" in new SetUp {
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
-        response.status shouldBe 200
-        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultUnknown))
-      }
-
-      "no questions found for requested origin" in new SetUp {
-        questionRepository.store(questionDataCache(correlationId, Origin("wrong_origin"), Seq(ninoIdentifier)))
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
-        response.status shouldBe 200
-        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultUnknown))
-      }
-
-      "no questions found for requested identifier" in new SetUp {
-        questionRepository.store(questionDataCache(correlationId, origin, Seq(utrIdentifier)))
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
-        response.status shouldBe 200
+      "questions identifier not passed" in new SetUp {
+        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier, utrIdentifier)))
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(incorrectNoIdentifier)))
+        response.status shouldBe OK
         response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultUnknown))
       }
     }
@@ -39,7 +26,7 @@ class AnswerControllerISpec extends BaseISpec {
       "answer matches correct answer stored against origin and identifier" in new SetUp {
         questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier)))
         val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
-        response.status shouldBe 200
+        response.status shouldBe OK
         response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultCorrect))
       }
     }
@@ -48,8 +35,34 @@ class AnswerControllerISpec extends BaseISpec {
       "answer does not match correct answer stored against origin and identifier" in new SetUp {
         questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier)))
         val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(incorrectAnswerCheck)))
-        response.status shouldBe 200
+        response.status shouldBe OK
         response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultIncorrect))
+      }
+
+      "correct identifier not passed" in new SetUp {
+        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier, utrIdentifier)))
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(incorrectIdentifierCheck)))
+        response.status shouldBe OK
+        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultIncorrect))
+      }
+    }
+
+    "return 404" when {
+      "no questions found" in new SetUp {
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
+        response.status shouldBe NOT_FOUND
+      }
+
+      "no questions found for requested origin" in new SetUp {
+        questionRepository.store(questionDataCache(correlationId, Origin("wrong_origin"), Seq(ninoIdentifier)))
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
+        response.status shouldBe NOT_FOUND
+      }
+
+      "no questions found for requested identifier" in new SetUp {
+        questionRepository.store(questionDataCache(correlationId, origin, Seq(utrIdentifier)))
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
+        response.status shouldBe NOT_FOUND
       }
     }
 
@@ -62,11 +75,14 @@ class AnswerControllerISpec extends BaseISpec {
       val correlationId = CorrelationId()
       val origin: Origin = Origin("valid_string")
       val ninoIdentifier: Identifier = NinoI("AA000000D")
+      val ninoIdentifier2: Identifier = NinoI("AA000002D")
       val utrIdentifier: Identifier = SaUtrI("123456789")
       val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("3000.00")))
       val answerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), answerDetails)
       val incorrectAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("666.00")))
       val incorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), incorrectAnswerDetails)
+      val incorrectNoIdentifier: AnswerCheck = AnswerCheck(correlationId, origin, Seq(utrIdentifier), incorrectAnswerDetails)
+      val incorrectIdentifierCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier2, utrIdentifier), incorrectAnswerDetails)
       val questionResultUnknown: QuestionResult = QuestionResult(PaymentToDate, Unknown)
       val questionResultCorrect: QuestionResult = QuestionResult(PaymentToDate, Correct)
       val questionResultIncorrect: QuestionResult = QuestionResult(PaymentToDate, Incorrect)

@@ -5,13 +5,14 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.P60
 
+import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
 import uk.gov.hmrc.questionrepository.models.{AnswerDetails, EmployeeNIContributions, PaymentToDate, QuestionKey, QuestionResult, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.AnswerService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
