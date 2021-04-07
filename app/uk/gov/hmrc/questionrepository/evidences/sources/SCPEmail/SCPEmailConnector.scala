@@ -10,7 +10,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.{AccountInformation, NinoClStoreEntry, Selection, ServiceName, scpEmailService}
+import uk.gov.hmrc.questionrepository.models.{AccountInformation, NinoClStoreEntry, Selection, ServiceName, scpEmailService,DetailsNotFound}
 import uk.gov.hmrc.questionrepository.models.identifier.Search._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
@@ -37,14 +37,14 @@ class SCPEmailConnector @Inject()(http: HttpGet)
     http.GET[List[NinoClStoreEntry]](url).map{findNinoClStoreCredentials}.flatMap{credIds =>
       credIds.size match{
         case 1 => getAccountInformation(credIds.head).map(Seq(_))
-        case _ => throw new NullPointerException//TODO create throw
-          //TODO when auditing made, create audit for when size is >1
+        case _ => throw DetailsNotFound
+          //TODO when auditing is made, create audit for when size is > 1
       }
     }
   }
 
   override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Option[String]]] = {
-    getEmail(selection.identifiers.nino.map(nino => nino.value).getOrElse(throw new NullPointerException))//TODO create throw
+    getEmail(selection.identifiers.nino.map(nino => nino.value).getOrElse(throw DetailsNotFound))
   }
 
 }
