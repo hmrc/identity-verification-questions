@@ -20,6 +20,7 @@ import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models.{Origin, Selection, ServiceName, p60Service}
 import ch.qos.logback.classic.Level
+import uk.gov.hmrc.questionrepository.services.utilities.TaxYear
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -32,7 +33,6 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
       "valid identifiers provided" in new Setup {
         when(mockAppConfig.hodConfiguration(any)).thenReturn(Right(HodConf("authToken", "envHeader")))
         when(mockAppConfig.serviceBaseUrl(any)).thenReturn("http://localhost:8080")
-        when(mockAppConfig.bufferInMonthsForService(any)).thenReturn(2)
 
         val expectedResponse = Seq(paymentOne, paymentTwo, paymentFour)
 
@@ -77,6 +77,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
 
     val connector: P60Connector = new P60Connector(http) {
       override def serviceName: ServiceName = p60Service
+      override protected def getTaxYears = Seq(TaxYear(2020))
     }
   }
 
