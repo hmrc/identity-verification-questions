@@ -2,7 +2,7 @@ package controllers
 
 import java.time.LocalDateTime
 import ch.qos.logback.classic.Level
-import com.github.tomakehurst.wiremock.client.WireMock.{get, okJson, stubFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{get, okJson, stubFor, urlMatching}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import iUtils.{BaseISpec, LogCapturing}
 import play.api.libs.json.{JsObject, JsValue, Json}
@@ -39,7 +39,7 @@ class PassportOutageISpec extends BaseISpec with LogCapturing{
     def p60ProxyReturnOk(payments: JsValue): StubMapping =
       stubFor(
         get(
-          urlEqualTo("/rti/individual/payments/nino/AA000000/tax-year/19-20"))
+          urlMatching("/rti/individual/payments/nino/AA000000/tax-year/([0-9]{2}+(-[0-9]{2}))"))
           .willReturn(
             okJson(
               Json.toJson(payments).toString()

@@ -28,7 +28,7 @@ class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
 
   def serviceName: ServiceName = p60Service
 
-  private def getTaxYears = Set(currentTaxYear.previous, currentTaxYearWithBuffer.previous).toSeq
+  protected def getTaxYears = Set(currentTaxYear.previous, currentTaxYearWithBuffer.previous).toSeq
 
   override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Payment]] = {
 
