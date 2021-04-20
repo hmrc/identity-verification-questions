@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SCPEmailConnector @Inject()(http: HttpGet)
                                  (implicit val appConfig: AppConfig, hc: HeaderCarrier, ec:ExecutionContext) extends QuestionConnector[Option[String]]{
-
+  
   lazy val basProxyBaseUrl: String = appConfig.basProxyBaseUrl + "/bas-proxy"
   lazy val identityVerificationBaseUrl: String = appConfig.identityVerificationBaseUrl
 

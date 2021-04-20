@@ -5,23 +5,20 @@
 
 package uk.gov.hmrc.questionrepository.evidence.sources.SCPEmail
 
-import java.util.UUID
 import Utils.UnitSpec
-import Utils.testData.{AppConfigTestData, SCPEmailTestData}
+import Utils.testData.SCPEmailTestData
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import play.api.Configuration
-import play.api.libs.json.{JsValue, Writes}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
+import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.http.hooks.HttpHook
-import uk.gov.hmrc.http.logging.RequestId
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.questionrepository.config.{AppConfig, HodConf}
+import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.models.{Origin, Selection, scpEmailService}
 
