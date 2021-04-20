@@ -34,23 +34,5 @@ trait SCPEmailTestData {
       |  "agentFriendlyName": "agentFriendlyName",
       |  "credentialCreatedDate": "a date"
       |  }""".stripMargin
-
-
-
-//      validAccountInfoWithMaximumDetails.sub shouldBe "sub"
-//  validAccountInfoWithMaximumDetails.roles shouldBe List("roles")
-//  validAccountInfoWithMaximumDetails.groupId shouldBe "groupId"
-//  validAccountInfoWithMaximumDetails.trustId shouldBe "trustId"
-//  validAccountInfoWithMaximumDetails.name shouldBe "name"
-//  validAccountInfoWithMaximumDetails.email shouldBe Some("email")
-//  validAccountInfoWithMaximumDetails.emailVerified shouldBe Some(true)
-//  validAccountInfoWithMaximumDetails.suspended shouldBe Some(false)
-//  validAccountInfoWithMaximumDetails.emailStatus shouldBe Some("emailStatus")
-//  validAccountInfoWithMaximumDetails.description shouldBe Some("description")
-//  validAccountInfoWithMaximumDetails.groupRegistrationCategory shouldBe Some("groupRegistrationCategory")
-//  validAccountInfoWithMaximumDetails.agentId shouldBe Some("agentId")
-//  validAccountInfoWithMaximumDetails.agentCode shouldBe Some("agentCode")
-//  validAccountInfoWithMaximumDetails.agentFriendlyName shouldBe Some("agentFriendlyName")
-//  validAccountInfoWithMaximumDetails.credentialCreatedDate shouldBe Some("credentialCreatedDate")
   )
 }
