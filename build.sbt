@@ -38,7 +38,7 @@ lazy val microservice = Project(appName, file("."))
     // ***************
   )
   .settings(Compile / console / scalacOptions --= Seq("-deprecation", "-Xfatal-warnings", "-Xlint"))
-  .settings(routesImport ++= Seq("models._"))
+  .settings(routesImport ++= Seq("uk.gov.hmrc.questionrepository.models._"))
   .settings(playDefaultPort := 10101)
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)

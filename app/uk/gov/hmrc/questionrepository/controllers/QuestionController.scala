@@ -7,12 +7,12 @@ package uk.gov.hmrc.questionrepository.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Writes}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.questionrepository.models.{QuestionResponse, Selection}
+import uk.gov.hmrc.questionrepository.models.{CorrelationId, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class QuestionController @Inject()(evidenceRetrievalService: EvidenceRetrievalService)(implicit cc: ControllerComponents, ec: ExecutionContext)
@@ -24,5 +24,10 @@ class QuestionController @Inject()(evidenceRetrievalService: EvidenceRetrievalSe
     withJsonBody[Selection] { selection =>
       evidenceRetrievalService.callAllEvidenceSources(selection) map toOKResponse[QuestionResponse]
     }
+  }
+
+  def questionGet(correlationId: CorrelationId): Action[AnyContent] = Action.async { implicit request =>
+    println(s"++++++++++++++++++++++++${correlationId.id}")
+    Future.successful(Ok)
   }
 }

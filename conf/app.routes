@@ -2,3 +2,5 @@
 
 POST       /questions               uk.gov.hmrc.questionrepository.controllers.QuestionController.question
 POST       /answers                 uk.gov.hmrc.questionrepository.controllers.AnswerController.answer
+
+GET        /question/:corrId        uk.gov.hmrc.questionrepository.controllers.QuestionController.questionGet(corrId: uk.gov.hmrc.questionrepository.models.CorrelationId)
