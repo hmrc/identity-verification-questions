@@ -18,6 +18,8 @@ import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends ConfigHelper(config) {
 
   val authBaseUrl: String = servicesConfig.baseUrl("auth")
+  lazy val basProxyBaseUrl: String               = servicesConfig.baseUrl("bas-proxy")
+  lazy val identityVerificationBaseUrl: String   = servicesConfig.baseUrl("identity-verification")
 
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
