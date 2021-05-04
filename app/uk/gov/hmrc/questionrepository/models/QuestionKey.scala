@@ -11,12 +11,14 @@ sealed trait QuestionKey
 case object PaymentToDate extends QuestionKey
 case object EmployeeNIContributions extends QuestionKey
 case object PassportQuestion extends QuestionKey
+case object SCPEmailQuestion extends QuestionKey
 
 object QuestionKey {
   implicit val questionKeyReads: Reads[QuestionKey] = Reads {
     case JsString("PaymentToDate") => JsSuccess(PaymentToDate)
     case JsString("EmployeeNIContributions") => JsSuccess(EmployeeNIContributions)
     case JsString("PassportQuestion") => JsSuccess(PassportQuestion)
+    case JsString("SCPEmailQuestion") => JsSuccess(SCPEmailQuestion)
     case e => throw new IllegalArgumentException(s"unknown QuestionKey $e")
   }
 

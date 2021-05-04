@@ -7,18 +7,18 @@ package uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
+import uk.gov.hmrc.http.{HeaderCarrier, CoreGet}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.{AccountInformation, NinoClStoreEntry, Selection, ServiceName, scpEmailService,DetailsNotFound}
+import uk.gov.hmrc.questionrepository.models.{AccountInformation, DetailsNotFound, NinoClStoreEntry, Selection, ServiceName, scpEmailService}
 import uk.gov.hmrc.questionrepository.models.identifier.Search._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SCPEmailConnector @Inject()(http: HttpGet)
-                                 (implicit val appConfig: AppConfig, hc: HeaderCarrier, ec:ExecutionContext) extends QuestionConnector[Option[String]]{
+class SCPEmailConnector @Inject()(val http: CoreGet)
+                                 (implicit val appConfig: AppConfig) extends QuestionConnector[Option[String]] {
   
   lazy val basProxyBaseUrl: String = appConfig.basProxyBaseUrl + "/bas-proxy"
   lazy val identityVerificationBaseUrl: String = appConfig.identityVerificationBaseUrl
@@ -32,7 +32,7 @@ class SCPEmailConnector @Inject()(http: HttpGet)
     http.GET[Option[AccountInformation]](url).map(accountInformation => accountInformation.flatMap(_.email))
   }
 
-  private def getEmail(nino: Nino): Future[Seq[Option[String]]] = {
+  private def getEmail(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Option[String]]] = {
     val url = s"$identityVerificationBaseUrl/identity-verification/nino?nino=${nino.value}"
     http.GET[List[NinoClStoreEntry]](url).map{findNinoClStoreCredentials}.flatMap{credIds =>
       credIds.size match{

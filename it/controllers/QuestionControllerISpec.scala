@@ -1,22 +1,26 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ */
+
 package controllers
 
 import ch.qos.logback.classic.Level
-import com.github.tomakehurst.wiremock.client.WireMock.{get, notFound, okJson, serverError, stubFor, urlEqualTo, urlMatching}
-import iUtils.{BaseISpec, LogCapturing}
-import iUtils.TestData.P60TestData
-import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
+import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
+import iUtils.TestData.{P60TestData}
+import play.api.libs.json.{JsObject, JsResult, Json}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PassportQuestion, PaymentToDate, Question, QuestionResponse}
-
 import java.time.LocalDateTime
-import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.ws.WSResponse
 
 class QuestionControllerISpec extends BaseISpec with LogCapturing {
   "POST /questions" should {
     "return 200 if provided with valid json" in new Setup {
       p60ProxyReturnOk(p60ResponseJson)
+      ivReturnOk
+      basGatewayStub
       val response: WSResponse = await(resourceRequest(questionRoute).post(validQuestionRequest))
       response.status shouldBe 200
       val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
@@ -26,6 +30,8 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
 
     "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
       p60ProxyReturnNotFound
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[P60Service] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -39,6 +45,8 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
 
     "return 200 and an empty sequence of question if provided with valid json but P60 returns error" in new Setup {
       p60ProxyReturnError
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[P60Service] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -77,6 +85,8 @@ class QuestionControllerOutageISpec extends BaseISpec with LogCapturing {
 
   "POST /questions for disabled service" should {
     "return 200 and a sequence of non P60 responses if P60 service is within outage window" in new Setup {
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -100,6 +110,8 @@ class QuestionControllerDisabledOriginISpec extends BaseISpec with LogCapturing 
 
   "POST /questions for disabled origin" should {
     "return 200 and an empty sequence if P60 service is disabled for origin service" in new Setup {
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -123,6 +135,8 @@ class QuestionControllerEnabledOriginISpec extends BaseISpec with LogCapturing {
 
   "POST /questions for enabled origin" should {
     "return 200 and an empty sequence if origin service in not in P60 service enabled origins" in new Setup {
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -148,6 +162,8 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
   "POST /questions for service with scheduled outage" should {
     "return 200 and sequence of questions if outage window is in future" in new Setup {
       p60ProxyReturnOk(p60ResponseJson)
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -161,6 +177,8 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
     "return 200 and sequence of questions inc Passport" when {
       "outage window is in future and identifiers includes DOB" in new Setup {
         p60ProxyReturnOk(p60ResponseJson)
+        ivReturnOk
+        basGatewayStub
         val response = await(resourceRequest(questionRoute).post(validQuestionRequestNinoDob))
         response.status shouldBe 200
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
@@ -183,6 +201,8 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
   "POST /questions for service with past outage" should {
     "return 200 and sequence of questions if outage window is in past" in new Setup {
       p60ProxyReturnOk(p60ResponseJson)
+      ivReturnOk
+      basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
         val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
         response.status shouldBe 200
@@ -201,38 +221,11 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
   }
 }
 
-trait Setup extends TestData {
+trait Setup extends WireMockStubs with TestData {
 
   val questionRoute = "/question-repository/questions"
 
-  def p60ProxyReturnOk(payments: JsValue): StubMapping =
-    stubFor(
-      get(
-        urlMatching("/rti/individual/payments/nino/AA000000/tax-year/([0-9]{2}+(-[0-9]{2}))"))
-        .willReturn(
-          okJson(
-            Json.toJson(payments).toString()
-          )
-        )
-    )
 
-  def p60ProxyReturnNotFound: StubMapping =
-    stubFor(
-      get(
-        urlMatching("/rti/individual/payments/nino/AA000000/tax-year/([0-9]{2}+(-[0-9]{2}))"))
-        .willReturn(
-          notFound()
-        )
-    )
-
-  def p60ProxyReturnError: StubMapping =
-    stubFor(
-      get(
-        urlMatching("/rti/individual/payments/nino/AA000000/tax-year/([0-9]{2}+(-[0-9]{2}))"))
-        .willReturn(
-          serverError()
-        )
-    )
 }
 
 trait TestData extends P60TestData {
