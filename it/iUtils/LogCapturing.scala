@@ -1,3 +1,8 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ */
+
 package iUtils
 
 import ch.qos.logback.classic.spi.ILoggingEvent
