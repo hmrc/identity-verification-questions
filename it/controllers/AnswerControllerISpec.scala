@@ -52,6 +52,24 @@ class AnswerControllerISpec extends BaseISpec {
       }
     }
 
+    "return 200 with score correct for SCPEmail questions" when {
+      "answer matches correct answer stored against origin and identifier" in new SCPEmailTestData {
+        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier), scpQuestions))
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(scpAnswerCheck)))
+        response.status shouldBe OK
+        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(scpQuestionResultCorrect))
+      }
+    }
+
+    "return 200 with score incorrect for SCPEmail questions" when {
+      "answer does not match correct answer stored against origin and identifier" in new SCPEmailTestData {
+        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier), scpQuestions))
+        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(scpIncorrectAnswerCheck)))
+        response.status shouldBe OK
+        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(scpQuestionResultIncorrect))
+      }
+    }
+
     "return 404" when {
       "no questions found" in new SetUp {
         val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
@@ -76,7 +94,7 @@ class AnswerControllerISpec extends BaseISpec {
       response.status shouldBe 400
     }
 
-    trait SetUp{
+    trait SetUp {
       val correlationId = CorrelationId()
       val origin: Origin = Origin("valid_string")
       val ninoIdentifier: Identifier = NinoI("AA000000D")
@@ -94,13 +112,24 @@ class AnswerControllerISpec extends BaseISpec {
       val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
       val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
       val questions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
-      def questionDataCache(correlationId: CorrelationId, origin: Origin, identifiers: Seq[Identifier]) = QuestionDataCache(correlationId,
+      def questionDataCache(correlationId: CorrelationId, origin: Origin, identifiers: Seq[Identifier], questionSeq: Seq[Question] = questions) = QuestionDataCache(correlationId,
                                                                                                                             Selection(origin, identifiers),
-                                                                                                                            questions,
+                                                                                                                            questionSeq,
                                                                                                                             LocalDateTime.now() plusMinutes(1))
 
 
       val questionRepository = app.injector.instanceOf[QuestionMongoRepository]
     }
+
+    trait SCPEmailTestData extends SetUp {
+      val scpAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(SCPEmailQuestion, StringAnswer("email@email.com")))
+      val scpAnswerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), scpAnswerDetails)
+      val scpQuestions = Seq(Question(SCPEmailQuestion, Seq("email@email.com"), Map.empty[String, String]))
+      val scpQuestionResultCorrect: QuestionResult = QuestionResult(SCPEmailQuestion, Correct)
+      val scpIncorrectAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(SCPEmailQuestion, StringAnswer("bad-email@bad-email.com")))
+      val scpIncorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), scpIncorrectAnswerDetails)
+      val scpQuestionResultIncorrect: QuestionResult = QuestionResult(SCPEmailQuestion, Incorrect)
+    }
+
   }
 }

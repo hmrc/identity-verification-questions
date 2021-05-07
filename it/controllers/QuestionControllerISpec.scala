@@ -7,17 +7,23 @@ package controllers
 
 import ch.qos.logback.classic.Level
 import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
-import iUtils.TestData.{P60TestData}
+import iUtils.TestData.P60TestData
+import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, PassportQuestion, PaymentToDate, Question, QuestionResponse}
+import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, Origin, PassportQuestion, PaymentToDate, Question, QuestionResponse, SCPEmailQuestion, Selection}
+
 import java.time.LocalDateTime
 import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.questionrepository.models.identifier.NinoI
+import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
-class QuestionControllerISpec extends BaseISpec with LogCapturing {
+class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneServerPerSuite {
   "POST /questions" should {
     "return 200 if provided with valid json" in new Setup {
+      val questionRepository = app.injector.instanceOf[QuestionMongoRepository]
       p60ProxyReturnOk(p60ResponseJson)
       ivReturnOk
       basGatewayStub
@@ -26,6 +32,10 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing {
       val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
       questionResponse.isSuccess shouldBe true
       questionResponse.get.questions.nonEmpty shouldBe true
+      questionResponse.get.questions should contain(scpEmailQuestion)
+
+      val mongoResult = questionRepository.findAnswers(questionResponse.get.correlationId, Selection(Origin("lost-credentials"), Seq(NinoI("AA000000A")))).futureValue
+      mongoResult.flatMap(qdc => qdc.questions.flatMap(q => q.answers)).count(_ == "email@email.com") shouldBe 1
     }
 
     "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
@@ -262,6 +272,7 @@ trait TestData extends P60TestData {
   val paymentToDateQuestion: Question = Question(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
   val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
   val passportQuestion: Question = Question(PassportQuestion, Seq.empty[String])
+  val scpEmailQuestion: Question = Question(SCPEmailQuestion, Seq.empty[String], Map.empty[String, String])
 
   val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
 }
