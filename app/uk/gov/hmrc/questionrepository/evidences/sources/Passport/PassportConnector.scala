@@ -9,14 +9,12 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, passportService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PassportConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Boolean]
-  with HodConnectorConfig {
+class PassportConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Boolean] {
 
   def serviceName: ServiceName = passportService
 
