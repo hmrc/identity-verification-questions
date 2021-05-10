@@ -35,7 +35,7 @@ trait CheckAvailability {
       serviceStatus.enabledOrigins.contains(origin.value)
 
    def isAvailable(origin: Origin, identifiers: Seq[Identifier]): Boolean =
-      if (!serviceStatus.enabledOrigins.isEmpty)
+      if (serviceStatus.enabledOrigins.nonEmpty)
          isEnabledByOrigin(origin) && hasRequiredIdentifiers(identifiers) && !isDisabledByTime()
       else
          !isDisabledByOrigin(origin) && hasRequiredIdentifiers(identifiers) && !isDisabledByTime()

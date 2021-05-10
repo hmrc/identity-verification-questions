@@ -16,7 +16,7 @@ Service to provide verification questions for all services that require them, fi
  ```
      { 
        "origin": "lost-credentials",
-       "selections": [{"nino":"AA000000A"}],
+       "identifiers": [{"nino":"AA000000A"}],
        "max": "5",
        "min": "3"
      }
