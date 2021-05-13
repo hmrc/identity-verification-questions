@@ -11,16 +11,14 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.http.hooks.HttpHook
-
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
+import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailConnector
+import uk.gov.hmrc.questionrepository.models.{Selection, scpEmailService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
-import uk.gov.hmrc.questionrepository.models.{Origin, Selection, scpEmailService}
 
 class SCPEmailConnectorSpec extends UnitSpec with SCPEmailTestData {
   "service name" should {
@@ -38,8 +36,6 @@ class SCPEmailConnectorSpec extends UnitSpec with SCPEmailTestData {
   }
 
   class SetUp {
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-
     var capturedHc: HeaderCarrier = HeaderCarrier()
     var capturedUrl = ""
 
@@ -67,6 +63,6 @@ class SCPEmailConnectorSpec extends UnitSpec with SCPEmailTestData {
 
     val connector = new SCPEmailConnector(http)
 
-    val selection: Selection = Selection(Origin("ma"),Seq(NinoI("AA000000D")),Some(3), Some(1))
+    val selection: Selection = Selection(origin, Seq(ninoIdentifier), Some(3), Some(1))
   }
 }

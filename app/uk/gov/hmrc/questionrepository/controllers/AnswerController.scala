@@ -5,15 +5,15 @@
 
 package uk.gov.hmrc.questionrepository.controllers
 
+import akka.Done
 import javax.inject.{Inject, Singleton}
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, IdentifiersMismatch, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
-import akka.Done
-import play.api.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 

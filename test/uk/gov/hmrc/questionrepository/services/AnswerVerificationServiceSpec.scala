@@ -6,12 +6,12 @@
 package uk.gov.hmrc.questionrepository.services
 
 import Utils.UnitSpec
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
-import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models._
+import uk.gov.hmrc.questionrepository.models.identifier._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -25,6 +25,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
         when(mockPassportAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockSCPEmailAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockP60AnswerService.checkAnswers(any)(any)).thenReturn(Future.successful(Seq(QuestionResult(PaymentToDate, Unknown))))
+        when(mockDvlaAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
       }
@@ -36,6 +37,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
         when(mockPassportAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockSCPEmailAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockP60AnswerService.checkAnswers(any)(any)).thenReturn(Future.successful(Seq(QuestionResult(PaymentToDate, Correct))))
+        when(mockDvlaAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Correct))
       }
@@ -47,6 +49,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
         when(mockPassportAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockSCPEmailAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockP60AnswerService.checkAnswers(any)(any)).thenReturn(Future.successful(Seq(QuestionResult(PaymentToDate, Incorrect))))
+        when(mockDvlaAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Incorrect))
       }
@@ -57,6 +60,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
         when(mockP60AnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockPassportAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         when(mockSCPEmailAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
+        when(mockDvlaAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheck)
         }
@@ -67,6 +71,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
         when(mockP60AnswerService.supportedQuestions).thenReturn(Seq(PaymentToDate))
         when(mockPassportAnswerService.supportedQuestions).thenReturn(Seq(PaymentToDate))
         when(mockSCPEmailAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
+        when(mockDvlaAnswerService.supportedQuestions).thenReturn(Seq.empty[QuestionKey])
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheck)
         }
@@ -76,15 +81,13 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
 
   trait SetUp{
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
     val mockP60AnswerService = mock[P60AnswerService]
     val mockPassportAnswerService = mock[PassportAnswerService]
     val mockSCPEmailAnswerService = mock[SCPEmailAnswerService]
-    val service = new AnswerVerificationService(mockP60AnswerService, mockPassportAnswerService, mockSCPEmailAnswerService)
-    val correlationId: CorrelationId = CorrelationId()
-    val origin: Origin = Origin("valid_string")
-    val identifiers: Seq[Identifier] = Seq(NinoI("AA000000D"))
+    val mockDvlaAnswerService = mock[DvlaAnswerService]
+    val service = new AnswerVerificationService(mockP60AnswerService, mockPassportAnswerService, mockSCPEmailAnswerService, mockDvlaAnswerService)
+    val identifiers: Seq[Identifier] = Seq(ninoIdentifier)
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("an answer")))
-    val answerCheck: AnswerCheck = AnswerCheck(correlationId, origin, identifiers,answerDetails)
+    val answerCheck: AnswerCheck = AnswerCheck(corrId, origin, identifiers,answerDetails)
   }
 }

@@ -48,8 +48,6 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
 
   trait Setup extends TestData {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-
     val mockSCPEmailConnector = mock[SCPEmailConnector]
 
     val service = new SCPEmailService(mockSCPEmailConnector)

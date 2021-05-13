@@ -5,10 +5,11 @@
 
 package uk.gov.hmrc.questionrepository.models
 
-import play.api.libs.json._
 import java.time.LocalDate
 
-sealed trait  Answer
+import play.api.libs.json._
+
+sealed trait Answer
 
 case class StringAnswer(value: String) extends Answer {
   override val toString: String = value
@@ -63,6 +64,13 @@ case class PassportAnswer(passportNumber: String, surname: String, forenames: St
 
 object PassportAnswer {
   implicit val format: Format[PassportAnswer] = Json.format[PassportAnswer]
+}
+
+case class UkDrivingLicenceAnswer(drivingLicenceNumber: String, surname: String, validFrom: LocalDate, validTo: LocalDate,
+                                  issueNumber: String) extends Answer
+
+object UkDrivingLicenceAnswer {
+  implicit val format: OFormat[UkDrivingLicenceAnswer] = Json.format[UkDrivingLicenceAnswer]
 }
 
 object Answer {

@@ -6,13 +6,12 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.Passport
 
 import java.time.LocalDateTime
+
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.{PassportConnector, PassportService}
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, PassportQuestion, Question, Selection, ServiceName, passportService}
+import uk.gov.hmrc.questionrepository.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,19 +43,14 @@ class PassportServiceSpec extends UnitSpec{
 
   trait Setup {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
     val mockPassportConnector: PassportConnector = mock[PassportConnector]
 
     val service: PassportService = new PassportService(mockPassportConnector)
     val passportQuestion = new Question(PassportQuestion,Seq())
 
-    val ninoIdentifier: NinoI = NinoI("AA000000D")
-    val utrIdentifier: SaUtrI = SaUtrI("12345678")
-    val origin: Origin = Origin("testOrigin")
-    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
-    val selectionWithoutNino: Selection = Selection(origin, Seq(utrIdentifier))
-
+    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
+    val selectionWithoutNino: Selection = Selection(origin, Seq(saUtrIdentifier))
 
   }
 

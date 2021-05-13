@@ -5,7 +5,11 @@
 
 package uk.gov.hmrc.questionrepository.evidence.sources.Passport
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+
 import Utils.UnitSpec
+import Utils.testData.AppConfigTestData
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
@@ -13,71 +17,52 @@ import play.api.Configuration
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
-import uk.gov.hmrc.http.logging.RequestId
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerConnector
-import uk.gov.hmrc.questionrepository.models.identifier.{DobI, NinoI}
-import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, CorrelationId, Error, Incorrect, Origin, PassportAnswer, PassportQuestion, QuestionResult, Unknown}
+import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.models.passport.PassportRequest
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class PassportAnswerConnectorSpec extends UnitSpec {
+class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
 
   "verifyAnswer" should {
     "return Correct if answer successfully matched and correct" in new Setup {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, identifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
+      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
     }
 
     "return Error if answer successfully matched and returns an error" in new Setup(errorPassportResp) {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, identifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(""))
+      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(""))
     }
 
     "return Error if answer successfully matched and returns no result" in new Setup(errorPassportResp2) {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, identifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"Unexpected response \n:$errorPassportResp2"))
+      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"Unexpected response \n:$errorPassportResp2"))
     }
 
     "return Incorrect if answer successfully matched and is failure" in new Setup(invalidPassportResp) {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, identifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Incorrect)
+      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Incorrect)
     }
 
     "return Correct if answer successfully matched and is failure but is on stop list" in new Setup(invalidPassportStoppedResp) {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, identifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
+      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
     }
 
     "return Unknown if no dob identifier present" in new Setup {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, Seq(NinoI("AA000003D")), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Unknown)
+      connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Unknown)
     }
 
     "return Error if status not OK" in new Setup(responseStatus=NOT_FOUND) {
-      override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData ++ passportServiceConfig
-      connector.verifyAnswer(corrId, origin, identifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"status: $NOT_FOUND body: $validPassportResp"))
+      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"status: $NOT_FOUND body: $validPassportResp"))
     }
   }
 
   class Setup(postResponse: String = validPassportResp, responseStatus: Int = OK) extends TestData {
 
-    def testConfig: Map[String, Any] = Map.empty
-
-    val config: Configuration = Configuration.from(testConfig)
+    val config: Configuration = Configuration.from(baseConfig ++ passportAuthDataData ++ passportServiceConfig)
     lazy val servicesConfig = new ServicesConfig(config)
     lazy implicit val mockAppConfig: AppConfig = new AppConfig(config, servicesConfig)
-
-    implicit val hc: HeaderCarrier = HeaderCarrier().copy(requestId=Some(RequestId(reqId)))
-
-    var capturedHc: HeaderCarrier = HeaderCarrier()
-    var capturedUrl = ""
 
     def getResponse: Future[HttpResponse] = Future.successful(HttpResponse.apply(responseStatus, postResponse, Map[String,Seq[String]]()))
 
@@ -99,44 +84,15 @@ class PassportAnswerConnectorSpec extends UnitSpec {
   }
 
   trait TestData {
-    val corrId = CorrelationId()
-    val origin = Origin("lost-credentials")
-    val identifiers = Seq(DobI("1986-01-01"))
-    val reqId = UUID.randomUUID().toString
+
     val passportAnswer: PassportAnswer = PassportAnswer("123456789", "surname","firstname", LocalDate.parse("2030-12-12", ISO_LOCAL_DATE))
     val passportRequest: PassportRequest = PassportRequest("1986-01-01", passportAnswer)
-
-    val metrics: Map[String, Any] = Map(
-      "microservice.metrics.graphite.host" -> "graphite",
-      "microservice.metrics.graphite.port" -> "2003",
-      "microservice.metrics.graphite.prefix" -> "play.${appName}.",
-      "microservice.metrics.graphite.enabled" -> "false"
-    )
-
-    val auditing: Map[String, Any] = Map(
-      "auditing.enabled" -> "true",
-      "auditing.traceRequests" -> "true",
-      "auditing.consumer.baseUri.host" -> "localhost",
-      "auditing.consumer.baseUri.port" -> "8100"
-    )
-
-    val auth: Map[String, Any] = Map(
-      "microservice.services.auth.host" -> "localhost",
-      "microservice.services.auth.port" -> "1111"
-    )
-
-    val baseConfig: Map[String, Any] = metrics ++ auditing ++ auth
 
     val passportAuthDataData: Map[String, Any] = Map(
       "microservice.services.passportService.authenticationData.organisationId" -> "THMRC",
       "microservice.services.passportService.authenticationData.organisationApplicationId" -> "THMRC001",
       "microservice.services.passportService.authenticationData.organisationUserName" -> "THMRC_WS",
       "microservice.services.passportService.authenticationData.organisationUserPassword" -> "passport-pwd"
-    )
-
-    val passportServiceConfig: Map[String, Any] = Map(
-      "microservice.services.passportService.host" -> "localhost",
-      "microservice.services.passportService.port" -> 9928
     )
 
     val xmlString: String = s"""<?xml version="1.0" encoding="utf-8"?>

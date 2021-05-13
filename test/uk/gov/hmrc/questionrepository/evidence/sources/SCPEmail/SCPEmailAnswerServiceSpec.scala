@@ -9,11 +9,9 @@ import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerConnector
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, CorrelationId, Incorrect, Origin, Question, QuestionDataCache, QuestionResult, SCPEmailQuestion, Selection, StringAnswer, Unknown}
+import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -23,24 +21,21 @@ class SCPEmailAnswerServiceSpec extends UnitSpec {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo" in new Setup {
         when(mockQuestionRepo.findAnswers(any, any)).thenReturn(Future.successful(List(correctQDC)))
-
-        connector.verifyAnswer(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Correct)
+        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Correct)
       }
     }
 
     "return score of 'Incorrect'" when {
       "answer does not match an answer retrieved from repo" in new Setup {
         when(mockQuestionRepo.findAnswers(any, any)).thenReturn(Future.successful(List(inCorrectQDC)))
-
-        connector.verifyAnswer(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Incorrect)
+        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Incorrect)
       }
     }
 
     "return score of 'Unknown'" when {
       "no answers retrieved from repo" in new Setup {
         when(mockQuestionRepo.findAnswers(any, any)).thenReturn(Future.successful(List()))
-
-        connector.verifyAnswer(correlationId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Unknown)
+        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Unknown)
       }
     }
   }
@@ -52,13 +47,8 @@ class SCPEmailAnswerServiceSpec extends UnitSpec {
   }
 
   trait TestData {
-    val correlationId = CorrelationId()
-    val dateTime = LocalDateTime.now()
-    val origin: Origin = Origin("alala")
-    val ninoIdentifier: NinoI = NinoI("AA000000D")
-    val saUtrIdentifier: SaUtrI = SaUtrI("12345678")
     val answerDetails: AnswerDetails = AnswerDetails(SCPEmailQuestion, StringAnswer("email@email.com"))
-    val correctQDC = QuestionDataCache(correlationId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("email@email.com"))), dateTime)
-    val inCorrectQDC = QuestionDataCache(correlationId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("bad-email@bad-email.com"))), dateTime)
+    val correctQDC = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("email@email.com"))), dateTime)
+    val inCorrectQDC = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("bad-email@bad-email.com"))), dateTime)
   }
 }

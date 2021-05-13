@@ -7,11 +7,9 @@ package uk.gov.hmrc.questionrepository.evidence.sources.DVLA
 
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.{DvlaConnector, DvlaService}
 import uk.gov.hmrc.questionrepository.models._
-import uk.gov.hmrc.questionrepository.models.identifier.{DobI, SaUtrI}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,10 +38,7 @@ class DVALServiceSpec extends UnitSpec {
 
   trait Setup extends TestData {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-
     val mockDvlaConnector: DvlaConnector = mock[DvlaConnector]
-
     val service = new DvlaService(mockDvlaConnector)
   }
 
@@ -55,15 +50,8 @@ class DVALServiceSpec extends UnitSpec {
   }
 
   trait TestData {
-    val dob = "1984-01-01"
-    val dobIdentifier: DobI = DobI(dob)
-    val utrIdentifier: SaUtrI = SaUtrI("12345678")
-
-    val origin: Origin = Origin("testOrigin")
-
     val selectionDob: Selection = Selection(origin, Seq(dobIdentifier))
-    val selectionNoDob: Selection = Selection(origin, Seq(utrIdentifier))
-
+    val selectionNoDob: Selection = Selection(origin, Seq(saUtrIdentifier))
     val dvlaQuestion: Question = Question(DVLAQuestion, Seq())
   }
 }

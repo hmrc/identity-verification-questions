@@ -10,8 +10,8 @@ import Utils.testData.PassportTestData
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.http.hooks.HttpHook
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportConnector
 import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
@@ -41,7 +41,6 @@ class PassportConnectorSpec extends UnitSpec with PassportTestData{
     val utrIdentifier: SaUtrI = SaUtrI("12345678")
     val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
 
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
 
     val connector: PassportConnector = new PassportConnector(http) {

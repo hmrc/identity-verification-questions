@@ -5,26 +5,25 @@
 
 package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+
+import Utils.testData.P60TestData
 import Utils.{LogCapturing, UnitSpec}
 import akka.actor.ActorSystem
+import ch.qos.logback.classic.Level
 import com.typesafe.config.Config
+import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, HodConf}
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Connector
-
-import scala.concurrent.{ExecutionContext, Future}
-import Utils.testData.P60TestData
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models.payment.Payment
-import uk.gov.hmrc.questionrepository.models.{Origin, Selection, ServiceName, p60Service}
-import ch.qos.logback.classic.Level
+import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.utilities.TaxYear
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class P60ConnectorSpec extends UnitSpec with LogCapturing {
 
@@ -45,14 +44,13 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
         withCaptureOfLoggingFrom[P60ConnectorSpec] { logs =>
           connector.getRecords(selectionNoNino).futureValue shouldBe Seq()
           val warnLogs = logs.filter(_.getLevel == Level.WARN)
-          warnLogs.count(_.getMessage == "p60Service, No nino identifier for selection, origin: testOrigin, identifiers: 12345678") shouldBe 1
+          warnLogs.count(_.getMessage == "p60Service, No nino identifier for selection, origin: lost-credentials, identifiers: 12345678") shouldBe 1
         }
       }
     }
   }
 
   trait Setup extends P60TestData with TestData {
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
     var capturedHc: HeaderCarrier = HeaderCarrier()
     var capturedUrl = ""
@@ -87,12 +85,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
      val paymentThree: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
      val paymentFour: Payment = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
 
-     val ninoIdentifier: NinoI = NinoI("AA000000D")
-     val utrIdentifier: SaUtrI = SaUtrI("12345678")
-
-     val origin: Origin = Origin("testOrigin")
-
-     val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
-     val selectionNoNino: Selection = Selection(origin, Seq(utrIdentifier))
+     val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
+     val selectionNoNino: Selection = Selection(origin, Seq(saUtrIdentifier))
    }
 }
