@@ -75,22 +75,25 @@ object UkDrivingLicenceAnswer {
 
 object Answer {
   val passportFields = Seq("passportNumber","surname","forenames","dateOfExpiry")
+  val dvlaFields = Seq("drivingLicenceNumber","surname","validFrom","validTo","issueNumber")
 
   implicit val reads: Reads[Answer] = Reads {
     case JsNumber(n) => IntOrDouble(n)
     case JsBoolean(b) => JsSuccess(BooleanAnswer(b))
     case JsString(s) => JsSuccess(StringAnswer(s))
     case answer@JsObject(p) if passportFields.forall(p.keys.toSeq.contains) => answer.validate[PassportAnswer]
+    case answer@JsObject(p) if dvlaFields.forall(p.keys.toSeq.contains) => answer.validate[UkDrivingLicenceAnswer]
     case e => throw new IllegalArgumentException(s"unknown Answer $e")
   }
 
   implicit val writes: Writes[Answer] = new Writes[Answer] {
     override def writes(o: Answer): JsValue = o match {
-      case sa: StringAnswer => JsString(sa.value)
-      case ia: IntegerAnswer => JsNumber(ia.value)
-      case da: DoubleAnswer => JsNumber(da.value)
-      case ba: BooleanAnswer => JsBoolean(ba.value)
-      case pq: PassportAnswer => Json.toJson[PassportAnswer](pq)
+      case sa: StringAnswer           => JsString(sa.value)
+      case ia: IntegerAnswer          => JsNumber(ia.value)
+      case da: DoubleAnswer           => JsNumber(da.value)
+      case ba: BooleanAnswer          => JsBoolean(ba.value)
+      case pq: PassportAnswer         => Json.toJson[PassportAnswer](pq)
+      case dv: UkDrivingLicenceAnswer => Json.toJson[UkDrivingLicenceAnswer](dv)
    }
   }
 
