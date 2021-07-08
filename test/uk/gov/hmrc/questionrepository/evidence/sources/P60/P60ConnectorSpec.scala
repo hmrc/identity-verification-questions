@@ -7,7 +7,6 @@ package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-
 import Utils.testData.P60TestData
 import Utils.{LogCapturing, UnitSpec}
 import akka.actor.ActorSystem
@@ -30,8 +29,8 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
   "calling getRecords" should {
     "return a sequence of Payment records" when {
       "valid identifiers provided" in new Setup {
-        when(mockAppConfig.hodConfiguration(any)).thenReturn(Right(HodConf("authToken", "envHeader")))
-        when(mockAppConfig.serviceBaseUrl(any)).thenReturn("http://localhost:8080")
+        (mockAppConfig.hodConfiguration(_: ServiceName)).expects(*).returning(Right(HodConf("authToken", "envHeader")))
+        (mockAppConfig.serviceBaseUrl(_: ServiceName)).expects(*).returning("http://localhost:8080")
 
         val expectedResponse = Seq(paymentOne, paymentTwo, paymentFour)
 
@@ -60,11 +59,11 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
     val http: HttpGet =  new HttpGet {
       override protected def actorSystem: ActorSystem = ActorSystem("for-get")
 
-      override protected def configuration: Option[Config] = None
+      override protected def configuration: Config = app.injector.instanceOf[Config]
 
       override val hooks: Seq[HttpHook] = Nil
 
-      override def doGet(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+      override def doGet(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit ec: ExecutionContext): Future[HttpResponse] = {
         capturedUrl = url
         capturedHc = hc
         getResponse

@@ -5,21 +5,24 @@
 
 package Utils
 
+import akka.actor.ActorSystem
+
 import java.time.LocalDateTime
 import java.util.UUID
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.scalatest.MockitoSugar
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.{HeaderNames, MimeTypes, Status}
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, ResultExtractors, Writeables}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.RequestId
+import play.modules.reactivemongo.ReactiveMongoComponent
+import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
+import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 import uk.gov.hmrc.questionrepository.models.identifier.{DobI, NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin}
 
@@ -36,7 +39,10 @@ trait UnitSpec
     with ResultExtractors
     with Writeables
     with FutureAwaits
-    with MockitoSugar {
+    with MockFactory
+    with MongoSpecSupport
+    with GuiceOneAppPerSuite
+{
 
   val dateTime: LocalDateTime = LocalDateTime.now()
   val dob = "1986-01-01"
@@ -47,6 +53,10 @@ trait UnitSpec
   val corrId: CorrelationId = CorrelationId()
   val origin: Origin = Origin("lost-credentials")
   val reqId: String = UUID.randomUUID().toString
+
+  implicit val actorSystem: ActorSystem = ActorSystem("test")
+  implicit val as: ActorSystem = ActorSystem()
+
 
   implicit val hc: HeaderCarrier = HeaderCarrier().copy(requestId=Some(RequestId(reqId)))
 
@@ -63,4 +73,9 @@ trait UnitSpec
   def redirectLocation(result: Result): Option[String] = redirectLocation(Future.successful(result))
 
   def header(headerName: String, result: Result): Option[String] = header(headerName, Future.successful(result))
+
+  val reactiveMongoComponent: ReactiveMongoComponent = new ReactiveMongoComponent {
+    override def mongoConnector: MongoConnector = mongoConnectorForTest
+  }
+
 }

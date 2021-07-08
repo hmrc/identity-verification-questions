@@ -7,7 +7,7 @@ package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
 import play.api.libs.json.{JsArray, JsBoolean, JsNumber, JsString, JsSuccess, JsValue, Json}
-
+import IntegerAnswer._
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
@@ -15,27 +15,27 @@ class AnswerSpec extends UnitSpec {
 
   "serializing Answer" should {
     "create json for StringAnswer" in new Setup {
-      val stringAnswer: StringAnswer = StringAnswer("an answer")
+      val stringAnswer: Answer = StringAnswer("an answer")
       Json.toJson(stringAnswer) shouldBe jsonStringAnswer
     }
 
     "create json for IntegerAnswer" in new Setup {
-      val integerAnswer: IntegerAnswer = IntegerAnswer(500)
+      val integerAnswer: Answer = IntegerAnswer(500)
       Json.toJson(integerAnswer) shouldBe jsonIntegerAnswer
     }
 
     "create json for DoubleAnswer" in new Setup {
-      val doubleAnswer: DoubleAnswer = DoubleAnswer(500.12)
+      val doubleAnswer: Answer = DoubleAnswer(500.12)
       Json.toJson(doubleAnswer) shouldBe jsonDoubleAnswer
     }
 
     "create json for BooleanAnswer" in new Setup {
-      val booleanAnswer: BooleanAnswer = BooleanAnswer(true)
+      val booleanAnswer: Answer = BooleanAnswer(true)
       Json.toJson(booleanAnswer) shouldBe jsonBooleanAnswer
     }
 
     "create json for PassportAnswer" in new Setup {
-      val passportAnswer: PassportAnswer = PassportAnswer("123456789", "surname", "firstname", passportExpiryDate)
+      val passportAnswer: Answer = PassportAnswer("123456789", "surname", "firstname", passportExpiryDate)
       Json.toJson(passportAnswer) shouldBe jsonPassportAnswer
     }
   }

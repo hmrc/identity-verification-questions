@@ -6,8 +6,7 @@
 package uk.gov.hmrc.questionrepository.connectors.utilities
 
 import Utils.UnitSpec
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{HeaderCarrier, Authorization}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, HodConf, MissingAllConfig, MissingAuthorizationToken, MissingEnvironmentHeader}
 import uk.gov.hmrc.questionrepository.models.{ServiceName, p60Service}
 
@@ -16,7 +15,7 @@ class HodConnectorConfigSpec extends UnitSpec {
   "headersForDES" should {
     "return headerCarrier with DES headers" when {
       "valid hodConfig returned from AppConfig for service" in new Setup {
-        when(mockAppConfig.hodConfiguration(eqTo[ServiceName](p60Service))).thenReturn(Right(HodConf("authToken", "envHeader")))
+        (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Right(HodConf("authToken", "envHeader")))
 
         testHodConfig.publicHeadersForDES shouldBe hcForDES
       }
@@ -24,21 +23,22 @@ class HodConnectorConfigSpec extends UnitSpec {
 
     "throw error" when {
       "MissingAuthorizationToken returned" in new Setup {
-        when(mockAppConfig.hodConfiguration(eqTo[ServiceName](p60Service))).thenReturn(Left(MissingAuthorizationToken))
+        (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Left(MissingAuthorizationToken))
+
         an[RuntimeException] shouldBe thrownBy {
           testHodConfig.publicHeadersForDES
         }
       }
 
       "MissingEnvironmentHeader returned" in new Setup {
-        when(mockAppConfig.hodConfiguration(eqTo[ServiceName](p60Service))).thenReturn(Left(MissingEnvironmentHeader))
+        (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Left(MissingEnvironmentHeader))
         an[RuntimeException] shouldBe thrownBy {
           testHodConfig.publicHeadersForDES
         }
       }
 
       "MissingAllConfig returned" in new Setup {
-        when(mockAppConfig.hodConfiguration(eqTo[ServiceName](p60Service))).thenReturn(Left(MissingAllConfig))
+        (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Left(MissingAllConfig))
         an[RuntimeException] shouldBe thrownBy {
           testHodConfig.publicHeadersForDES
         }

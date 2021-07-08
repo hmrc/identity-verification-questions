@@ -5,6 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.controllers
 
+import akka.stream.{ActorMaterializer, Materializer}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -16,24 +17,26 @@ import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 
 import java.time.LocalDateTime
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 class AnswerControllerSpec() extends Utils.UnitSpec {
 
   "POST /answers" should {
     "return 200 with a valid json body" when {
       "origin, correlationId and identifiers match entry in mongo repo" in new Setup {
-        when(answersService.checkAnswers(eqTo[AnswerCheck](answerCheck))(any)).thenReturn(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
-        when(mockQuestionMongReop.findAnswers(any, any)).thenReturn(Future.successful(List(questionDataCache)))
+        await(questionMongoRepository.insert(questionDataCache))
+        (answersService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(answerCheck, *).returning(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
         val result: Future[Result] = controller.answer()(fakeRequest)
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(List(QuestionResult(PaymentToDate, Unknown)))
+        await(questionMongoRepository.removeAll())
       }
     }
 
     "return 404" when {
       "origin, correlationId and identifiers do not match entry in mongo repo" in new Setup {
-        when(mockQuestionMongReop.findAnswers(any, any)).thenReturn(Future.successful(List.empty[QuestionDataCache]))
         val result: Future[Result] = controller.answer()(fakeRequest)
         status(result) shouldBe NOT_FOUND
       }
@@ -41,11 +44,10 @@ class AnswerControllerSpec() extends Utils.UnitSpec {
   }
 
   trait Setup extends TestData {
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
     val answersService: AnswerVerificationService = mock[AnswerVerificationService]
-    val mockQuestionMongReop = mock[QuestionMongoRepository]
+    val questionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
     val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck))
-    val controller = new AnswerController(answersService, mockQuestionMongReop)(Stubs.stubMessagesControllerComponents(), ExecutionContext.global)
+    val controller = new AnswerController(answersService, questionMongoRepository)(Stubs.stubMessagesControllerComponents(), global)
   }
 
   trait TestData {

@@ -7,7 +7,6 @@ package uk.gov.hmrc.questionrepository.evidence.sources.Passport
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-
 import Utils.UnitSpec
 import Utils.testData.AppConfigTestData
 import akka.actor.ActorSystem
@@ -16,7 +15,7 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.Configuration
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.hooks.HttpHook
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
+import uk.gov.hmrc.http.{HttpGet, HttpPost, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerConnector
@@ -69,14 +68,14 @@ class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
     val http = new HttpGet with HttpPost {
       override protected def actorSystem: ActorSystem = ActorSystem("for-post")
 
-      override protected def configuration: Option[Config] = None
+      override protected def configuration: Config = app.injector.instanceOf[Config]
 
-      override def doPostString(url: String, body: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = getResponse
+      override def doPostString(url: String, body: String, headers: Seq[(String, String)])(implicit ec: ExecutionContext): Future[HttpResponse] = getResponse
 
-      override def doPost[A](url: String, body: A, headers: Seq[(String, String)])(implicit wts: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = ???
-      override def doEmptyPost[A](url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = ???
-      override def doFormPost(url: String, body: Map[String, Seq[String]], headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = ???
-      override def doGet(url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = ???
+      override def doPost[A](url: String, body: A, headers: Seq[(String, String)])(implicit wts: Writes[A], ec: ExecutionContext): Future[HttpResponse] = ???
+      override def doEmptyPost[A](url: String, headers: Seq[(String, String)])(implicit ec: ExecutionContext): Future[HttpResponse] = ???
+      override def doFormPost(url: String, body: Map[String, Seq[String]], headers: Seq[(String, String)])(implicit ec: ExecutionContext): Future[HttpResponse] = ???
+      override def doGet(url: String, headers: Seq[(String, String)])(implicit ec: ExecutionContext): Future[HttpResponse] = ???
       override val hooks: Seq[HttpHook] = Nil
     }
 
@@ -120,7 +119,7 @@ class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
     </soapenv:Envelope>""".stripMargin
   }
 
-  val validPassportResp =
+  val validPassportResp: String =
     """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
       | <soap:Body><ns1:validateDataResponse xmlns:ns1="http://dva.hmpo.gov.uk/passport-data-service">
       |   <validateDataResponse>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;validateDataResult xmlns="http://dva.hmpo.gov.uk/passport-data-service"&gt;&lt;validationResult&gt;Success&lt;/validationResult&gt;&lt;bioDataMismatch&gt;true&lt;/bioDataMismatch&gt;&lt;passportNotFound&gt;false&lt;/passportNotFound&gt;&lt;passportCancelled&gt;false&lt;/passportCancelled&gt;&lt;/validateDataResult&gt;</validateDataResponse>
@@ -128,7 +127,7 @@ class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
       | </soap:Body>
       |</soap:Envelope>""".stripMargin
 
-  val errorPassportResp =
+  val errorPassportResp: String =
     """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
       | <soap:Body>
       |   <ns1:validateDataResponse xmlns:ns1="http://dva.hmpo.gov.uk/passport-data-service">
@@ -138,13 +137,13 @@ class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
       | </soap:Body>
       |</soap:Envelope>""".stripMargin
 
-  val errorPassportResp2 =
+  val errorPassportResp2: String =
     """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
       | <soap:Body>
       | </soap:Body>
       |</soap:Envelope>""".stripMargin
 
-  val invalidPassportResp =
+  val invalidPassportResp: String =
     """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
       | <soap:Body><ns1:validateDataResponse xmlns:ns1="http://dva.hmpo.gov.uk/passport-data-service">
       |   <validateDataResponse>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;validateDataResult xmlns="http://dva.hmpo.gov.uk/passport-data-service"&gt;&lt;validationResult&gt;Failure&lt;/validationResult&gt;&lt;bioDataMismatch&gt;true&lt;/bioDataMismatch&gt;&lt;passportNotFound&gt;false&lt;/passportNotFound&gt;&lt;passportCancelled&gt;false&lt;/passportCancelled&gt;&lt;/validateDataResult&gt;</validateDataResponse>
@@ -152,7 +151,7 @@ class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
       | </soap:Body>
       |</soap:Envelope>""".stripMargin
 
-  val invalidPassportStoppedResp =
+  val invalidPassportStoppedResp: String =
     """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
       | <soap:Body><ns1:validateDataResponse xmlns:ns1="http://dva.hmpo.gov.uk/passport-data-service">
       |   <validateDataResponse>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;validateDataResult xmlns="http://dva.hmpo.gov.uk/passport-data-service"&gt;&lt;validationResult&gt;Failure&lt;/validationResult&gt;&lt;bioDataMismatch&gt;false&lt;/bioDataMismatch&gt;&lt;passportNotFound&gt;false&lt;/passportNotFound&gt;&lt;passportCancelled&gt;false&lt;/passportCancelled&gt;&lt;matches&gt;&lt;stopMatch&gt;true&lt;/stopMatch&gt;&lt;/matches&gt;&lt;/validateDataResult&gt;</validateDataResponse>

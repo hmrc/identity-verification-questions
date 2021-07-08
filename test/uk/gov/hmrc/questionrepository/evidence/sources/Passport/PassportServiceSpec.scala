@@ -6,15 +6,15 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.Passport
 
 import java.time.LocalDateTime
-
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.{PassportConnector, PassportService}
 import uk.gov.hmrc.questionrepository.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PassportServiceSpec extends UnitSpec{
 
@@ -25,7 +25,7 @@ class PassportServiceSpec extends UnitSpec{
   "calling questions" should {
     "return a sequence of Questions" when {
       "supplied with a valid nino" in new WithStubbing {
-        when(mockPassportConnector.getRecords(any)(any, any)).thenReturn(Future.successful(Seq(true)))
+        (mockPassportConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(true)))
         service.questions(selectionNino).futureValue shouldBe Seq(passportQuestion)
       }
     }
@@ -35,7 +35,7 @@ class PassportServiceSpec extends UnitSpec{
     "return an empty list" when {
       "not supplied with a nino" in new Setup {
         val testOutage: Outage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
-        when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(Some(testOutage), List.empty, List.empty, List.empty))
+        (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(Some(testOutage), List.empty, List.empty, List.empty))
         service.questions(selectionWithoutNino).futureValue shouldBe Seq.empty
       }
     }
@@ -55,9 +55,9 @@ class PassportServiceSpec extends UnitSpec{
   }
 
   trait WithStubbing extends Setup {
-    when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
-    when(mockAppConfig.serviceCbNumberOfCallsToTrigger(service.serviceName)).thenReturn(Some(20))
-    when(mockAppConfig.serviceCbUnavailableDurationInSec(service.serviceName)).thenReturn(Some(60))
-    when(mockAppConfig.serviceCbUnstableDurationInSec(service.serviceName)).thenReturn(Some(300))
+    (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
+    (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
+    (mockAppConfig.serviceCbUnstableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(300))
   }
 }

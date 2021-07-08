@@ -7,12 +7,13 @@ package uk.gov.hmrc.questionrepository.evidence.sources.DVLA
 
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.{DvlaConnector, DvlaService}
 import uk.gov.hmrc.questionrepository.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DVALServiceSpec extends UnitSpec {
 
@@ -23,14 +24,14 @@ class DVALServiceSpec extends UnitSpec {
   "calling `questions`" should {
     "return a sequence of Questions" when {
       "supplied with a valid dob" in new WithStubbing {
-        when(mockDvlaConnector.getRecords(any)(any, any)).thenReturn(Future.successful(List(true)))
+        (mockDvlaConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(List(true)))
         service.questions(selectionDob).futureValue shouldBe Seq(dvlaQuestion)
       }
     }
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("dob")))
+        (mockAppConfig.serviceStatus(_:ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("dob")))
         service.questions(selectionNoDob).futureValue shouldBe Seq()
       }
     }
@@ -43,10 +44,10 @@ class DVALServiceSpec extends UnitSpec {
   }
 
   trait WithStubbing extends Setup {
-    when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("dob")))
-    when(mockAppConfig.serviceCbNumberOfCallsToTrigger(service.serviceName)).thenReturn(Some(20))
-    when(mockAppConfig.serviceCbUnavailableDurationInSec(service.serviceName)).thenReturn(Some(60))
-    when(mockAppConfig.serviceCbUnstableDurationInSec(service.serviceName)).thenReturn(Some(300))
+    (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("dob")))
+    (mockAppConfig.serviceCbNumberOfCallsToTrigger(_ :ServiceName)).expects(service.serviceName).returning(Some(20))
+    (mockAppConfig.serviceCbUnavailableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(60))
+    (mockAppConfig.serviceCbUnstableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(300))
   }
 
   trait TestData {

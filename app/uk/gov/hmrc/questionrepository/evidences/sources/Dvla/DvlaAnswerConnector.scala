@@ -5,9 +5,9 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.Dvla
 
-import controllers.Assets.NO_CONTENT
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
+import play.api.http.Status
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
@@ -33,7 +33,7 @@ class DvlaAnswerConnector @Inject()(http: CoreGet with CorePost)(implicit appCon
       val url = s"${appConfig.serviceBaseUrl(serviceName)}/driving-licence/validate"
 
       http.POST[UkDrivingLicenceRequest, HttpResponse](url, request).map {
-        case resp if resp.status == NO_CONTENT => QuestionResult(answer.questionKey, Correct)
+        case resp if resp.status == Status.NO_CONTENT => QuestionResult(answer.questionKey, Correct)
         case resp => QuestionResult(answer.questionKey, Error(s"Unexpected response ${resp.status}"))
       }
     }

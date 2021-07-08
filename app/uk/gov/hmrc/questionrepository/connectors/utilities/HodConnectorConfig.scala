@@ -5,8 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.connectors.utilities
 
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, MissingAllConfig, MissingAuthorizationToken, MissingEnvironmentHeader}
 import uk.gov.hmrc.questionrepository.models.ServiceName
 

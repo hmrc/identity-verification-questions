@@ -17,12 +17,12 @@ import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 @Singleton
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends ConfigHelper(config) {
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
+  lazy val authBaseUrl: String = servicesConfig.baseUrl("auth")
   lazy val basProxyBaseUrl: String               = servicesConfig.baseUrl("bas-proxy")
   lazy val identityVerificationBaseUrl: String   = servicesConfig.baseUrl("identity-verification")
 
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+  lazy val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
+  lazy val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 
 /**  CircuitBreaker Config
  *
@@ -49,7 +49,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
 
-  lazy val questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
+  def questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
 
   lazy val passportAuthData: PassportAuthData = {
     PassportAuthData(

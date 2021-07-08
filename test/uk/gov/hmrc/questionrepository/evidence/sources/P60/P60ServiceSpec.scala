@@ -7,9 +7,9 @@ package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-
 import Utils.{LogCapturing, UnitSpec}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.{P60Connector, P60Service}
 import uk.gov.hmrc.questionrepository.models._
@@ -17,7 +17,7 @@ import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.payment.Payment
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class P60ServiceSpec extends UnitSpec with LogCapturing {
 
@@ -28,15 +28,15 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   "calling `questions`" should {
     "return a sequence of Question's" when {
       "P60Connector returns a non empty sequence of Payment's" in new WithStubbing {
-        when(mockP60Connector.getRecords(any)(any, any)).thenReturn(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
-        when(mockAppConfig.bufferInMonthsForService(service.serviceName)).thenReturn(2)
+        (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
+        (mockAppConfig.bufferInMonthsForService(_ :ServiceName)).expects(service.serviceName).returning(2).atLeastOnce()
 
         service.questions(selectionNino).futureValue shouldBe Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
       }
 
       "P60Connector returns a non empty sequence of Payment's with previous year in additional information" in new WithStubbing {
-        when(mockP60Connector.getRecords(any)(any, any)).thenReturn(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
-        when(mockAppConfig.bufferInMonthsForService(service.serviceName)).thenReturn(3)
+        (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
+        (mockAppConfig.bufferInMonthsForService(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
         service.questions(selectionNino).futureValue shouldBe Seq(paymentToDateQuestion2, employeeNIContributionsQuestion2)
       }
@@ -44,13 +44,13 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
       }
 
       "P60Connector returns an empty sequence of Payment's" in new WithStubbing {
-        when(mockP60Connector.getRecords(any)(any, any)).thenReturn(Future.successful(Seq()))
+        (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
 
         service.questions(selectionNino).futureValue shouldBe Seq()
       }
@@ -66,10 +66,10 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
-    when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
-    when(mockAppConfig.serviceCbNumberOfCallsToTrigger(service.serviceName)).thenReturn(Some(20))
-    when(mockAppConfig.serviceCbUnavailableDurationInSec(service.serviceName)).thenReturn(Some(60))
-    when(mockAppConfig.serviceCbUnstableDurationInSec(service.serviceName)).thenReturn(Some(300))
+    (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
+    (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
+    (mockAppConfig.serviceCbUnstableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(300))
   }
 
   trait TestDate {

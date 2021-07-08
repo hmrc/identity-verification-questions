@@ -12,19 +12,19 @@ class AnswerTypeSpec extends UnitSpec {
 
   "serializing AnswerTypes" should {
     "create json for STR" in {
-      val strType = STR
+      val strType: AnswerType = STR
 
       Json.toJson(strType).toString shouldBe s""""STR""""
     }
 
     "create json for INT" in {
-      val strType = INT
+      val strType: AnswerType = INT
 
       Json.toJson(strType).toString shouldBe s""""INT""""
     }
 
     "create json for DBL" in {
-      val strType = DBL
+      val strType: AnswerType = DBL
 
       Json.toJson(strType).toString shouldBe s""""DBL""""
     }

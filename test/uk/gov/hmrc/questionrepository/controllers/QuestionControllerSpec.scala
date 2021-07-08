@@ -8,6 +8,7 @@ package uk.gov.hmrc.questionrepository.controllers
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin, Question, QuestionResponse, Selection}
@@ -20,7 +21,7 @@ class QuestionControllerSpec extends Utils.UnitSpec {
 
   "POST /questions" should {
     "return 200 ok" in new Setup {
-      when(fakeEvidenceRetrievalService.callAllEvidenceSources(any)(any)).thenReturn(Future.successful(questionResponse))
+      (fakeEvidenceRetrievalService.callAllEvidenceSources(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(questionResponse))
       val result: Future[Result] = controller.question()(fakeQuestionRequest)
       status(result) shouldBe OK
     }

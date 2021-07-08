@@ -14,7 +14,7 @@ import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{Origin, Question, SCPEmailQuestion, Selection, ServiceName, scpEmailService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
 
@@ -25,7 +25,7 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
   "calling `questions`" should {
     "return a sequence of Question's" when {
       "SCPEmailConnector returns a non empty sequence of Option[String] email's" in new WithStubbing {
-        when(mockSCPEmailConnector.getRecords(any)(any, any)).thenReturn(Future.successful(emailList))
+        (mockSCPEmailConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(emailList))
 
         service.questions(selectionNino).futureValue shouldBe Seq(scpEmailQuestion)
       }
@@ -33,13 +33,13 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
       }
 
       "SCPEmailConnector returns an empty sequence of Payment's" in new WithStubbing {
-        when(mockSCPEmailConnector.getRecords(any)(any, any)).thenReturn(Future.successful(Seq.empty[Option[String]]))
+        (mockSCPEmailConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq.empty[Option[String]]))
 
         service.questions(selectionNino).futureValue shouldBe Seq()
       }
@@ -54,10 +54,10 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
-    when(mockAppConfig.serviceStatus(eqTo[ServiceName](service.serviceName))).thenReturn(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
-    when(mockAppConfig.serviceCbNumberOfCallsToTrigger(service.serviceName)).thenReturn(Some(20))
-    when(mockAppConfig.serviceCbUnavailableDurationInSec(service.serviceName)).thenReturn(Some(60))
-    when(mockAppConfig.serviceCbUnstableDurationInSec(service.serviceName)).thenReturn(Some(300))
+    (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    (mockAppConfig.serviceCbNumberOfCallsToTrigger(_ :ServiceName)).expects(service.serviceName).returning(Some(20))
+    (mockAppConfig.serviceCbUnavailableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(60))
+    (mockAppConfig.serviceCbUnstableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(300))
   }
 
   trait TestData {

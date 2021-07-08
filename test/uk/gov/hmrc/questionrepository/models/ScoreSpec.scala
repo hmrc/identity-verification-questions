@@ -6,28 +6,28 @@
 package uk.gov.hmrc.questionrepository.models
 
 import Utils.UnitSpec
-import play.api.libs.json.{JsString, JsSuccess, Json}
+import play.api.libs.json._
 
 class ScoreSpec extends UnitSpec {
 
   "serializing Sore" should {
     "create json for Correct" in {
-      val score = Correct
+      val score: Score = Correct
       Json.toJson(score) shouldBe JsString("correct")
     }
 
     "create json for Incorrect" in {
-      val score = Incorrect
+      val score: Score = Incorrect
       Json.toJson(score) shouldBe JsString("incorrect")
     }
 
     "create json for Unknown" in {
-      val score = Unknown
+      val score: Score = Unknown
       Json.toJson(score) shouldBe JsString("unknown")
     }
 
     "create json for Error" in {
-      val score = Error("an error")
+      val score: Score = Error("an error")
       Json.toJson(score) shouldBe JsString("error: an error")
     }
   }
