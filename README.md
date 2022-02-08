@@ -21,7 +21,14 @@ Send a json body containing the question origin, a sequence of identifies for th
       "min": "3"
     }
 ```
-  
+#### Response
+
+| Status | Description                                                                                                                                             |
+|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 200    | QuestionResponse(correlationId: CorrelationId, questions: Seq[Question], questionTextEn: Map[String,String], questionTextCy: Option[Map[String,String]])|
+
+QuestionResponse(ce69ffd8-c656-41c5-acd3-e80a24e98de2,List(Question(PaymentToDate,List(),Map(currentTaxYear -> 2020/21)), Question(EmployeeNIContributions,List(),Map(currentTaxYear -> 2020/21))),Map(PaymentToDate.retry.one-year -> Enter the amount of total pay for the year {0}, as shown on your P60. Enter the exact amount, including pence. For example 22643.51, EmployeeNIContributions.match.error -> etc.))
+
 ### POST /answers
 Send a json body containing the question origin, a sequence of identifies for the questions and answers, such as: 
 ```
@@ -38,3 +45,10 @@ Send a json body containing the question origin, a sequence of identifies for th
                   }]
     }
 ```
+#### Response
+
+| Status | Description                                           |
+|--------|-------------------------------------------------------|
+| 200    | QuestionResult(questionKey: QuestionKey, score: Score)|
+
+Vector(QuestionResult(PaymentToDate,correct))

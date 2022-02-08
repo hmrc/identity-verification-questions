@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -20,7 +20,10 @@ class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
                                           passportAnswerService: PassportAnswerService,
                                           scpEmailAnswerService: SCPEmailAnswerService,
                                           dvlaAnswerService: DvlaAnswerService)(implicit ec: ExecutionContext) {
-  val answerServices: Seq[AnswerService] = Seq(p60AnswerService, passportAnswerService, scpEmailAnswerService, dvlaAnswerService)
+
+  // ver-1281: disable passportAnswerService, scpEmailAnswerService, dvlaAnswerService for now, do services one by one
+  //val answerServices: Seq[AnswerService] = Seq(p60AnswerService, passportAnswerService, scpEmailAnswerService, dvlaAnswerService)
+  val answerServices = Seq(p60AnswerService)
 
   private def getQuestionService(questionKey: QuestionKey): AnswerService = {
     answerServices.filter(_.supportedQuestions.contains(questionKey)) match {

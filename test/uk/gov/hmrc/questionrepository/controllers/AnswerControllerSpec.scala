@@ -1,24 +1,23 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
 package uk.gov.hmrc.questionrepository.controllers
 
-import akka.stream.{ActorMaterializer, Materializer}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.models.identifier.NinoI
-import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, CorrelationId, IntegerAnswer, Origin, PaymentToDate, Question, QuestionDataCache, QuestionResult, Selection, Unknown}
+import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 
 import java.time.LocalDateTime
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 class AnswerControllerSpec() extends Utils.UnitSpec {

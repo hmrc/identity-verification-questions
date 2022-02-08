@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -85,9 +85,9 @@ class AnswerDetailsSpec extends UnitSpec {
     val answerDetailsInt: AnswerDetails = AnswerDetails(PaymentToDate, IntegerAnswer(500))
     val answerDetailsDbl: AnswerDetails = AnswerDetails(PaymentToDate, DoubleAnswer(500.12))
     val answerDetailsBln: AnswerDetails = AnswerDetails(PaymentToDate, BooleanAnswer(true))
-    val jsonStringAnswer: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","answer":"an answer"}""")
-    val jsonIntegerAnswer: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","answer":500}""")
-    val jsonDoubleAnswer: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","answer":500.12}""")
-    val jsonBooleanAnswer: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","answer":true}""")
+    val jsonStringAnswer: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","answer":"an answer"}""")
+    val jsonIntegerAnswer: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","answer":500}""")
+    val jsonDoubleAnswer: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","answer":500.12}""")
+    val jsonBooleanAnswer: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","answer":true}""")
   }
 }

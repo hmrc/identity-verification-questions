@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -20,22 +20,22 @@ class PassportOutageISpec extends BaseISpec with LogCapturing {
     super.extraConfig ++ Map("microservice.services.passportService.disabled.start" -> datePast,
       "microservice.services.passportService.disabled.end" -> dateFuture)
   }
-
-  "POST /questions for disabled service" should {
-    "return 200 and a sequence of non passport responses if passport service is within outage window" in new Setup {
-      p60ProxyReturnOk(validQuestionRequest)
-      ivReturnOk
-      basGatewayStub
-      withCaptureOfLoggingFrom[AppConfig]{logs =>
-        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
-        response.status shouldBe 200
-        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-        questionResponse.isSuccess shouldBe true
-        questionResponse.get.questions should not contain passportQuestion
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled passportService outage between $datePast and $dateFuture") shouldBe 1
-      }
-    }
-  }
+  // ver-1281: disable for now
+//  "POST /questions for disabled service" should {
+//    "return 200 and a sequence of non passport responses if passport service is within outage window" in new Setup {
+//      p60ProxyReturnOk(validQuestionRequest)
+//      ivReturnOk
+//      basGatewayStub
+//      withCaptureOfLoggingFrom[AppConfig]{logs =>
+//        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
+//        response.status shouldBe 200
+//        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+//        questionResponse.isSuccess shouldBe true
+//        questionResponse.get.questions should not contain passportQuestion
+//        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled passportService outage between $datePast and $dateFuture") shouldBe 1
+//      }
+//    }
+//  }
 
   trait Setup extends WireMockStubs {
     val passportQuestion: Question = Question(PassportQuestion, Seq())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -32,26 +32,27 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
       questionResponse.isSuccess shouldBe true
       questionResponse.get.questions.nonEmpty shouldBe true
-      questionResponse.get.questions should contain(scpEmailQuestion)
+      questionResponse.get.questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
 
+      //ver-1281: SCPEmail disabled for now
       val mongoResult = questionRepository.findAnswers(questionResponse.get.correlationId, Selection(Origin("lost-credentials"), Seq(NinoI("AA000000A")))).futureValue
-      mongoResult.flatMap(qdc => qdc.questions.flatMap(q => q.answers)).count(_ == "email@email.com") shouldBe 1
+      //mongoResult.flatMap(qdc => qdc.questions.flatMap(q => q.answers)).count(_ == "email@email.com") shouldBe 1
     }
 
-    "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
-      p60ProxyReturnNotFound
-      ivReturnOk
-      basGatewayStub
-      withCaptureOfLoggingFrom[P60Service] { logs =>
-        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
-        response.status shouldBe 200
-        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-        questionResponse.isSuccess shouldBe true
-        questionResponse.get.questions should not contain paymentToDateQuestion
-        questionResponse.get.questions should not contain employeeNIContributionsQuestion
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"p60Service, no records returned for selection, origin: lost-credentials, identifiers: AA000000A") shouldBe 1
-      }
-    }
+//    "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
+//      p60ProxyReturnNotFound
+//      ivReturnOk
+//      basGatewayStub
+//      withCaptureOfLoggingFrom[P60Service] { logs =>
+//        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
+//        response.status shouldBe 200
+//        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+//        questionResponse.isSuccess shouldBe true
+//        questionResponse.get.questions should not contain paymentToDateQuestion
+//        questionResponse.get.questions should not contain employeeNIContributionsQuestion
+//        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"p60Service, no records returned for selection, origin: lost-credentials, identifiers: AA000000A") shouldBe 1
+//      }
+//    }
 
     "return 200 and an empty sequence of question if provided with valid json but P60 returns error" in new Setup {
       p60ProxyReturnError
@@ -184,18 +185,19 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
       }
     }
 
-    "return 200 and sequence of questions inc Passport" when {
-      "outage window is in future and identifiers includes DOB" in new Setup {
-        p60ProxyReturnOk(p60ResponseJson)
-        ivReturnOk
-        basGatewayStub
-        val response = await(resourceRequest(questionRoute).post(validQuestionRequestNinoDob))
-        response.status shouldBe 200
-        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-        questionResponse.isSuccess shouldBe true
-        questionResponse.get.questions should contain(passportQuestion)
-      }
-    }
+    //ver-1281: Passport disabled for now
+//    "return 200 and sequence of questions inc Passport" when {
+//      "outage window is in future and identifiers includes DOB" in new Setup {
+//        p60ProxyReturnOk(p60ResponseJson)
+//        ivReturnOk
+//        basGatewayStub
+//        val response = await(resourceRequest(questionRoute).post(validQuestionRequestNinoDob))
+//        response.status shouldBe 200
+//        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
+//        questionResponse.isSuccess shouldBe true
+//        questionResponse.get.questions should contain(passportQuestion)
+//      }
+//    }
   }
 }
 

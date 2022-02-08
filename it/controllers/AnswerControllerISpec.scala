@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -51,24 +51,24 @@ class AnswerControllerISpec extends BaseISpec {
         response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultIncorrect))
       }
     }
+      //ver-1281: SCPEmaildisable for now
+//    "return 200 with score correct for SCPEmail questions" when {
+//      "answer matches correct answer stored against origin and identifier" in new SCPEmailTestData {
+//        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier), scpQuestions))
+//        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(scpAnswerCheck)))
+//        response.status shouldBe OK
+//        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(scpQuestionResultCorrect))
+//      }
+//    }
 
-    "return 200 with score correct for SCPEmail questions" when {
-      "answer matches correct answer stored against origin and identifier" in new SCPEmailTestData {
-        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier), scpQuestions))
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(scpAnswerCheck)))
-        response.status shouldBe OK
-        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(scpQuestionResultCorrect))
-      }
-    }
-
-    "return 200 with score incorrect for SCPEmail questions" when {
-      "answer does not match correct answer stored against origin and identifier" in new SCPEmailTestData {
-        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier), scpQuestions))
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(scpIncorrectAnswerCheck)))
-        response.status shouldBe OK
-        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(scpQuestionResultIncorrect))
-      }
-    }
+//    "return 200 with score incorrect for SCPEmail questions" when {
+//      "answer does not match correct answer stored against origin and identifier" in new SCPEmailTestData {
+//        questionRepository.store(questionDataCache(correlationId, origin, Seq(ninoIdentifier), scpQuestions))
+//        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(scpIncorrectAnswerCheck)))
+//        response.status shouldBe OK
+//        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(scpQuestionResultIncorrect))
+//      }
+//    }
 
     "return 404" when {
       "no questions found" in new SetUp {

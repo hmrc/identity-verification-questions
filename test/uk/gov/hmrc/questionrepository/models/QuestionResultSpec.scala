@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -54,8 +54,8 @@ class QuestionResultSpec extends UnitSpec {
     val questionResultCorrect: QuestionResult = QuestionResult(PaymentToDate, Correct)
     val questionResultIncorrect: QuestionResult = QuestionResult(PaymentToDate, Incorrect)
     val questionResultUnknown: QuestionResult = QuestionResult(PaymentToDate, Unknown)
-    val jsonCorrect: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","score":"correct"}""")
-    val jsonIncorrect: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","score":"incorrect"}""")
-    val jsonUnknown: JsValue = Json.parse(s"""{"questionKey":"PaymentToDate","score":"unknown"}""")
+    val jsonCorrect: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","score":"correct"}""")
+    val jsonIncorrect: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","score":"incorrect"}""")
+    val jsonUnknown: JsValue = Json.parse(s"""{"questionKey":"rti-p60-payment-for-year","score":"unknown"}""")
   }
 }

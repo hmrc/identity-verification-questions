@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -27,14 +27,15 @@ class SCPEmailAnswerServiceSpec extends UnitSpec with BeforeAndAfterEach {
   }
 
   "verifyAnswer" should {
-    "return score of 'Correct'" when {
-      "answer matches an answer retrieved from repo" in new Setup {
-        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("email@email.com"))), dateTime)
-
-        await(questionRepo.insert(correctQDC))
-        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Correct)
-      }
-    }
+    // ver-1281: not in use for now
+//    "return score of 'Correct'" when {
+//      "answer matches an answer retrieved from repo" in new Setup {
+//        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("email@email.com"))), dateTime)
+//
+//        await(questionRepo.insert(correctQDC))
+//        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Correct)
+//      }
+//    }
 
     "return score of 'Incorrect'" when {
       "answer does not match an answer retrieved from repo" in new Setup {

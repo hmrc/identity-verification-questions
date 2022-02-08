@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -17,13 +17,13 @@ class QuestionResponseSpec extends UnitSpec {
     }
 
     "serialize a valid QuestionResponse object without optional fields" in new Setup {
-      Json.toJson(questionResponse).toString shouldBe s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"PassportQuestion","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
+      Json.toJson(questionResponse).toString shouldBe s"""{"correlationId":"$correlationId","questions":[{"questionKey":"rti-p60-payment-for-year","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"rti-p60-employee-ni-contributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"passport","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
     }
 
     "deserialize valid json into a QuestionResponse" in new Setup {
-      val validQuestionResponseStr = s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},
-                                        |{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},
-                                        |{"questionKey":"PassportQuestion","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
+      val validQuestionResponseStr = s"""{"correlationId":"$correlationId","questions":[{"questionKey":"rti-p60-payment-for-year","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},
+                                        |{"questionKey":"rti-p60-employee-ni-contributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},
+                                        |{"questionKey":"passport","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
       val json: JsValue = Json.parse(validQuestionResponseStr)
       json.validate[QuestionResponse] shouldBe JsSuccess(QuestionResponse(correlationId, questions, questionTextEn, None))
     }
@@ -37,15 +37,6 @@ class QuestionResponseSpec extends UnitSpec {
       }
     }
 
-    "error when attempting to deserialize invalid questionKey" in new Setup {
-      val invalidQuestionResponseStr = s"""{"correlationId":"$correlationId","questions":[{"questionKey":"PaymentToDate","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},
-                                          |{"questionKey":"EmployeeNIContributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},
-                                          |{"questionKey":"WhatIsThis","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
-      val json = Json.parse(invalidQuestionResponseStr)
-      an[IllegalArgumentException] shouldBe thrownBy {
-        json.validate[QuestionResponse]
-      }
-    }
   }
 
   trait Setup {

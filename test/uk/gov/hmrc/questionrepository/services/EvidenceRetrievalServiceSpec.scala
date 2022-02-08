@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  */
 
@@ -26,37 +26,39 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
   "calling callAllEvidenceSources" should {
     "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
       (mockP60Service.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
-      (mockPassportService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
-      (mockSCPEmailService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
-      (mockDvlaService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
+      // ver-1281: not in use for now
+//      (mockPassportService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
+//      (mockSCPEmailService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
+//      (mockDvlaService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Period.parse("P1D"))
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
       result.questions shouldBe Seq.empty[Question]
     }
 
-    "return a QuestionResponse with sequence of questions if matching records are found" in new Setup {
-      (mockP60Service.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(PaymentToDate, List(TestRecord(1).toString)))))
-      (mockPassportService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(PassportQuestion, List(TestRecord(12345).toString)))))
-      (mockSCPEmailService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(SCPEmailQuestion, Seq("email@email.com"), Map.empty[String, String]))))
-      (mockDvlaService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(DVLAQuestion, List(TestRecord(1).toString), Map.empty[String, String]))))
-      (mockAppConfig.questionRecordTTL _).expects().returning(Period.parse("P1D"))
-      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(PaymentToDate).returning(Map("PaymentToDate" -> "payment question"))
-      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(PaymentToDate).returning(Map("PaymentToDate" -> "cy payment question"))
-      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(PassportQuestion).returning(Map("PassportQuestion" -> "passport question"))
-      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(PassportQuestion).returning(Map("PassportQuestion" -> "cy passport question"))
-      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(SCPEmailQuestion).returning(Map("SCPEmailQuestion" -> "scp Email question"))
-      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(SCPEmailQuestion).returning(Map("SCPEmailQuestion" -> "cy scp Email question"))
-      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(DVLAQuestion).returning(Map("DVLAQuestion" -> "DVLAQuestion"))
-      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(DVLAQuestion).returning(Map("DVLAQuestion" -> "cy DVLAQuestion"))
-
-      val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
-      result.questions shouldBe
-        Seq(Question(PaymentToDate, List.empty[String]), Question(PassportQuestion, List.empty[String]), Question(SCPEmailQuestion, List.empty[String]), Question(DVLAQuestion, List.empty[String]))
-      result.questionTextEn shouldBe
-        Map("PaymentToDate" -> "payment question", "PassportQuestion" -> "passport question", "SCPEmailQuestion" -> "scp Email question", "DVLAQuestion" -> "DVLAQuestion")
-      result.questionTextCy shouldBe
-        Some(Map("PaymentToDate" -> "cy payment question", "PassportQuestion" -> "cy passport question", "SCPEmailQuestion" -> "cy scp Email question", "DVLAQuestion" -> "cy DVLAQuestion"))
-    }
+    // ver-1281: not in use for now
+//    "return a QuestionResponse with sequence of questions if matching records are found" in new Setup {
+//      (mockP60Service.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(PaymentToDate, List(TestRecord(1).toString)))))
+//      (mockPassportService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(PassportQuestion, List(TestRecord(12345).toString)))))
+//      (mockSCPEmailService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(SCPEmailQuestion, Seq("email@email.com"), Map.empty[String, String]))))
+//      (mockDvlaService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(Question(DVLAQuestion, List(TestRecord(1).toString), Map.empty[String, String]))))
+//      (mockAppConfig.questionRecordTTL _).expects().returning(Period.parse("P1D"))
+//      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(PaymentToDate).returning(Map("PaymentToDate" -> "payment question"))
+//      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(PaymentToDate).returning(Map("PaymentToDate" -> "cy payment question"))
+//      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(PassportQuestion).returning(Map("PassportQuestion" -> "passport question"))
+//      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(PassportQuestion).returning(Map("PassportQuestion" -> "cy passport question"))
+//      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(SCPEmailQuestion).returning(Map("SCPEmailQuestion" -> "scp Email question"))
+//      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(SCPEmailQuestion).returning(Map("SCPEmailQuestion" -> "cy scp Email question"))
+//      (mockMessageTextService.getQuestionMessageEn(_: QuestionKey)).expects(DVLAQuestion).returning(Map("DVLAQuestion" -> "DVLAQuestion"))
+//      (mockMessageTextService.getQuestionMessageCy(_: QuestionKey)).expects(DVLAQuestion).returning(Map("DVLAQuestion" -> "cy DVLAQuestion"))
+//
+//      val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
+//      result.questions shouldBe
+//        Seq(Question(PaymentToDate, List.empty[String]), Question(PassportQuestion, List.empty[String]), Question(SCPEmailQuestion, List.empty[String]), Question(DVLAQuestion, List.empty[String]))
+//      result.questionTextEn shouldBe
+//        Map("PaymentToDate" -> "payment question", "PassportQuestion" -> "passport question", "SCPEmailQuestion" -> "scp Email question", "DVLAQuestion" -> "DVLAQuestion")
+//      result.questionTextCy shouldBe
+//        Some(Map("PaymentToDate" -> "cy payment question", "PassportQuestion" -> "cy passport question", "SCPEmailQuestion" -> "cy scp Email question", "DVLAQuestion" -> "cy DVLAQuestion"))
+//    }
   }
 
 
