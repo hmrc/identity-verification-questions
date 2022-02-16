@@ -87,9 +87,9 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val selectionNoNino: Selection = Selection(origin, Seq(utrIdentifier))
 
     val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-    val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
+    val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20"))
 
     val paymentToDateQuestion2: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
-    val employeeNIContributionsQuestion2: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val employeeNIContributionsQuestion2: Question = Question(EmployeeNIContributions, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
   }
 }

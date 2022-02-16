@@ -18,7 +18,9 @@ import scala.concurrent.ExecutionContext
 class QuestionController @Inject()(evidenceRetrievalService: EvidenceRetrievalService)(implicit cc: ControllerComponents, ec: ExecutionContext)
   extends BackendController(cc) {
 
-  private def toOKResponse[T](result: T)(implicit writes: Writes[T]) = Ok(Json.toJson(result))
+  private def toOKResponse[T](result: T)(implicit writes: Writes[T]) = {
+    Ok(Json.toJson(result))
+  }
 
   def question(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[Selection] { selection =>
