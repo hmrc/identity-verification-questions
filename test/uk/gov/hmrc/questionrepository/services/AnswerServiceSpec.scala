@@ -12,8 +12,9 @@ import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
+import uk.gov.hmrc.questionrepository.models.P60._
 import uk.gov.hmrc.questionrepository.models.identifier.{Identifier, NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, DoubleAnswer, EmployeeNIContributions, Origin, PaymentToDate, QuestionKey, QuestionResult, Score, ServiceName, Unknown, p60Service}
+import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, DoubleAnswer, Origin, QuestionKey, QuestionResult, Score, ServiceName, Unknown, p60Service}
 
 import java.time.LocalDateTime
 import scala.concurrent.Future

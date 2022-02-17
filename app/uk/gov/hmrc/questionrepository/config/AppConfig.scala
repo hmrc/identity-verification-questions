@@ -6,25 +6,27 @@
 package uk.gov.hmrc.questionrepository.config
 
 import com.typesafe.config.ConfigException
-
-import java.time.Period
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.models.ServiceName
 import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 
+import java.time.Period
+import javax.inject.{Inject, Singleton}
+
 @Singleton
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends ConfigHelper(config) {
 
-  lazy val authBaseUrl: String = servicesConfig.baseUrl("auth")
+  lazy val authBaseUrl: String                   = servicesConfig.baseUrl("auth")
   lazy val basProxyBaseUrl: String               = servicesConfig.baseUrl("bas-proxy")
   lazy val identityVerificationBaseUrl: String   = servicesConfig.baseUrl("identity-verification")
 
   lazy val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   lazy val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 
-/**  CircuitBreaker Config
+  def p60NewQuestionEnabled: Boolean = config.get[Boolean]("p60.newquestions.enabled")
+
+  /**  CircuitBreaker Config
  *
  *   circuitBreakerNumberOfCallsToTrigger:    number of failed calls within unstablePeriodDurationInMs to trigger the breaker
  *   circuitBreakerUnavailableDurationInSec:  period of time before the service gets enabled back

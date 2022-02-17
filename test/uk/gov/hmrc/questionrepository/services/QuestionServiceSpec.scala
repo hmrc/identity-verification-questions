@@ -12,12 +12,13 @@ import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
+import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models.identifier._
-import uk.gov.hmrc.questionrepository.models.{Origin, PaymentToDate, Question, Selection, ServiceName, p60Service}
+import uk.gov.hmrc.questionrepository.models._
 
 import java.time.LocalDateTime
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class QuestionServiceSpec extends UnitSpec with LogCapturing {
 

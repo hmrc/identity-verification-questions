@@ -6,19 +6,20 @@
 package controllers
 
 import ch.qos.logback.classic.Level
-import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
 import iUtils.TestData.P60TestData
+import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
+import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.models.{EmployeeNIContributions, Origin, PassportQuestion, PaymentToDate, Question, QuestionResponse, SCPEmailQuestion, Selection}
+import uk.gov.hmrc.questionrepository.models.P60._
+import uk.gov.hmrc.questionrepository.models.identifier.NinoI
+import uk.gov.hmrc.questionrepository.models._
+import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
 import java.time.LocalDateTime
-import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
-import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
 class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneServerPerSuite {
   "POST /questions" should {
