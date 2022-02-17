@@ -9,6 +9,7 @@ import Utils.UnitSpec
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerConnector
+import uk.gov.hmrc.questionrepository.models.P60._
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 

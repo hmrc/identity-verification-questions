@@ -14,7 +14,13 @@ case class Payment(paymentDate: LocalDate,
                    taxablePayYTD: Option[BigDecimal] = None,
                    employeeNIContrib: Option[BigDecimal] = None,
                    incomeTax: Option[BigDecimal] = None,
-                   nationalInsurancePaid: Option[BigDecimal] = None)
+                   nationalInsurancePaid: Option[BigDecimal] = None,
+                   earningsAbovePT: Option[BigDecimal] = None,
+                   statutoryMaternityPay: Option[BigDecimal] = None,
+                   statutorySharedParentalPay: Option[BigDecimal] = None,
+                   statutoryAdoptionPay: Option[BigDecimal] = None,
+                   studentLoanDeductions: Option[BigDecimal] = None,
+                   postgraduateLoanDeductions: Option[BigDecimal] = None)
 
 object Payment {
   implicit val paymentReads: Reads[Payment] = {
@@ -26,15 +32,24 @@ object Payment {
 
     ((__ \ "pmtDate").read[LocalDate] and
       (__ \ "mandatoryMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]] and
-      (__ \ "niLettersAndValues").tolerantReadNullable[Seq[NiLettersAndValues]]
-      ) { (paymentDate, optMandatoryPaymentItems, optNiLettersAndValues) =>
+      (__ \ "niLettersAndValues").tolerantReadNullable[Seq[NiLettersAndValues]] and
+      (__ \ "optionalMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]]
+      ) { (paymentDate, optMandatoryPaymentItems, optNiLettersAndValues, optionalMonetaryPaymentItems) =>
       val niLettersAndValues = optNiLettersAndValues.getOrElse(Seq.empty)
       val mandatoryPayments = optMandatoryPaymentItems.getOrElse(Seq.empty)
+      val optionalMonetaryPayment = optionalMonetaryPaymentItems.getOrElse(Seq.empty)
       val taxablePayYtd = findValue("TaxablePayYTD", mandatoryPayments)
       val employeeNIContrib = findValue("EmpeeContribnsYTD", niLettersAndValues.flatMap(_.niFigure))
       val incomeTaxPaid = findValue("TaxDeductedOrRefunded", mandatoryPayments)
       val nationalInsPaid = findValue("EmpeeContribnsInPd", niLettersAndValues.flatMap(_.niFigure))
-      Payment(paymentDate, taxablePayYtd, employeeNIContrib, incomeTaxPaid, nationalInsPaid)
+      val earningsAbovePT = findValue("PTtoUELYTD", niLettersAndValues.flatMap(_.niFigure))
+      val statutoryMaternityPay = findValue("SMPYTD", optionalMonetaryPayment)
+      val statutorySharedParentalPay = findValue("SHPPYTD", optionalMonetaryPayment)
+      val statutoryAdoptionPay = findValue("SAPYTD", optionalMonetaryPayment)
+      val studentLoanDeductions = findValue("StudentLoansYTD", optionalMonetaryPayment)
+      val postgraduateLoanDeductions = findValue("PostGraduateLoansYTD", optionalMonetaryPayment)
+      Payment(paymentDate, taxablePayYtd, employeeNIContrib, incomeTaxPaid, nationalInsPaid, earningsAbovePT,
+        statutoryMaternityPay, statutorySharedParentalPay, statutoryAdoptionPay, studentLoanDeductions, postgraduateLoanDeductions)
     }
   }
 }

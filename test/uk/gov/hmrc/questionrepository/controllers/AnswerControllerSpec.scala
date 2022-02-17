@@ -10,8 +10,9 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
+import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
+import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 

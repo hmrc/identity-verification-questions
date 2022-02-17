@@ -7,6 +7,7 @@ package uk.gov.hmrc.questionrepository.evidences.sources.P60
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
+import uk.gov.hmrc.questionrepository.models.P60._
 import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.services.QuestionService
@@ -35,14 +36,47 @@ class P60Service @Inject()(p60Connector: P60Connector)(implicit override val app
     def additionalInfoMap = Map("currentTaxYear" -> taxYears.last.display) ++
       (if (taxYears.size > 1) Map("previousTaxYear" -> taxYears.head.display) else Map())
 
-    val PaymentToDateAnswers: Seq[Question] = records.flatMap(_.taxablePayYTD).filter(_ > 0).map(roundDownWithPence) match {
-      case Nil => Nil
-      case answers => Seq(Question(PaymentToDate, answers.map(_.toString), additionalInfoMap))
+    val p60Questions: Seq[Question] = {
+      val PaymentToDateAnswers: Seq[Question] = records.flatMap(_.taxablePayYTD).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(PaymentToDate, answers.map(_.toString), additionalInfoMap))
+      }
+      val EmployeeNIContributionsAnswers: Seq[Question] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(EmployeeNIContributions, answers.map(_.toString), additionalInfoMap))
+      }
+      PaymentToDateAnswers ++ EmployeeNIContributionsAnswers
     }
-    val EmployeeNIContributionsAnswers: Seq[Question] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
-      case Nil => Nil
-      case answers => Seq(Question(EmployeeNIContributions, answers.map(_.toString), additionalInfoMap))
+
+    lazy val p60NewQuestions: Seq[Question] = {
+      val EarningsAbovePTAnswers: Seq[Question] = records.flatMap(_.earningsAbovePT).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(EarningsAbovePT, answers.map(_.toString), additionalInfoMap))
+      }
+      val StatutoryMaternityPayAnswers: Seq[Question] = records.flatMap(_.statutoryMaternityPay).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(StatutoryMaternityPay, answers.map(_.toString), additionalInfoMap))
+      }
+      val StatutorySharedParentalPayAnswers: Seq[Question] = records.flatMap(_.statutorySharedParentalPay).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(StatutorySharedParentalPay, answers.map(_.toString), additionalInfoMap))
+      }
+      val StatutoryAdoptionPayAnswers: Seq[Question] = records.flatMap(_.statutoryAdoptionPay).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(StatutoryAdoptionPay, answers.map(_.toString), additionalInfoMap))
+      }
+      val StudentLoanDeductionsAnswers: Seq[Question] = records.flatMap(_.studentLoanDeductions).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(StudentLoanDeductions, answers.map(_.toString), additionalInfoMap))
+      }
+      val PostgraduateLoanDeductionsAnswers: Seq[Question] = records.flatMap(_.postgraduateLoanDeductions).filter(_ > 0).map(roundDownWithPence) match {
+        case Nil => Nil
+        case answers => Seq(Question(PostgraduateLoanDeductions, answers.map(_.toString), additionalInfoMap))
+      }
+      EarningsAbovePTAnswers ++ StatutoryMaternityPayAnswers ++ StatutorySharedParentalPayAnswers ++ StatutoryAdoptionPayAnswers ++ StudentLoanDeductionsAnswers ++ PostgraduateLoanDeductionsAnswers
     }
-    PaymentToDateAnswers ++ EmployeeNIContributionsAnswers
+
+    if (appConfig.p60NewQuestionEnabled) p60Questions ++ p60NewQuestions
+    else p60Questions
   }
 }

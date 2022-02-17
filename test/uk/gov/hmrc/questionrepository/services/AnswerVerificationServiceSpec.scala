@@ -11,6 +11,7 @@ import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
+import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.models.identifier._
 
