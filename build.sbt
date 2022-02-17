@@ -1,6 +1,10 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
+import uk.gov.hmrc.DefaultBuildSettings._
+import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
+import uk.gov.hmrc.ServiceManagerPlugin.serviceManagerSettings
+import uk.gov.hmrc._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName = "question-repository"
 
@@ -49,4 +53,8 @@ lazy val microservice = Project(appName, file("."))
     Resolver.bintrayRepo("hmrc", "releases"),
     Resolver.jcenterRepo,
     "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/"
+  ))
+  .settings(serviceManagerSettings: _*)
+  .settings(itDependenciesList := List(
+    ExternalService("IV_TEST_DATA")
   ))

@@ -25,7 +25,7 @@ case class Payment(paymentDate: LocalDate,
 object Payment {
   implicit val paymentReads: Reads[Payment] = {
 
-    def findValue(fieldName: String, paymentItems: Seq[PaymentItem]) = paymentItems.filter(_.`type` == fieldName) match {
+    def findValue(fieldName: String, paymentItems: Seq[PaymentItem]): Option[BigDecimal] = paymentItems.filter(_.`type` == fieldName) match {
       case Seq(paym) => Some(paym.amount)
       case _ => None
     }
