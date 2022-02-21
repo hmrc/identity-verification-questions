@@ -6,18 +6,18 @@
 package uk.gov.hmrc.questionrepository.evidences.sources.P60
 
 import play.api.Logging
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.connectors.utilities.HodConnectorConfig
-import uk.gov.hmrc.questionrepository.models.payment.{Employment, Payment}
-import uk.gov.hmrc.questionrepository.services.utilities.{TaxYear, TaxYearBuilder}
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models.identifier.Search._
+import uk.gov.hmrc.questionrepository.models.identifier._
+import uk.gov.hmrc.questionrepository.models.payment.{Employment, Payment}
 import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, p60Service}
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.questionrepository.services.utilities.{TaxYear, TaxYearBuilder}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -40,8 +40,8 @@ class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
     }
 
     selection.identifiers.nino.map { nino =>
-        val futureSeqSeqEmployment=Future.sequence(getTaxYears.map(tYear => getRecordsForYear(nino, tYear)))
-        val futureEmployments=futureSeqSeqEmployment.map(_.flatten)
+        val futureSeqSeqEmployment = Future.sequence(getTaxYears.map(tYear => getRecordsForYear(nino, tYear)))
+        val futureEmployments = futureSeqSeqEmployment.map(_.flatten)
         for {
           employments <- futureEmployments
           newest = employments.flatMap(_.newest)

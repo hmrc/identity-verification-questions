@@ -15,7 +15,6 @@ import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models.{Origin, Selection}
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
