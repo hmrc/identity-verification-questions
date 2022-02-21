@@ -31,7 +31,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
   "verifyAnswer" should {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo" in {
-        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
+        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "100.00"))), dateTime)
 
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)

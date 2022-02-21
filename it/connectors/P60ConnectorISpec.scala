@@ -27,7 +27,7 @@ class P60ConnectorISpec extends BaseISpec {
 
   "get p60 returns" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val paymentDate = LocalDate.parse("2021-12-23", ISO_LOCAL_DATE)
+    val paymentDate: LocalDate = LocalDate.now().minusMonths(1).minusDays(25)
     val origin: Origin = Origin("test-origin")
 
     "successfully obtain data for nino AA002022B" in {
