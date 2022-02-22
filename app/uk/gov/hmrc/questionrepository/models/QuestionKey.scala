@@ -22,6 +22,7 @@ object QuestionKey {
     P60.StudentLoanDeductions,
     P60.PostgraduateLoanDeductions,
     PassportQuestion,
+    SCPEmailQuestion,
     DVLAQuestion
   )
 
@@ -44,7 +45,7 @@ case object P60 {
 }
 
 case object PassportQuestion extends QuestionKey("passport", "passport")
-case object SCPEmailQuestion extends QuestionKey("rti-p60-payment-for-year", "P60")
+case object SCPEmailQuestion extends QuestionKey("scpEmail", "scpEmail")
 case object DVLAQuestion extends QuestionKey("dvla", "dvla")
 
 
