@@ -35,8 +35,10 @@ class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
     def getRecordsForYear(nino: NinoI, tYear: TaxYear): Future[Seq[Employment]] = {
 
       val url = s"${appConfig.serviceBaseUrl(serviceName)}/rti/individual/payments/nino/${nino.first8}/tax-year/${tYear.yearForUrl}"
+      val desHeaders: HeaderCarrier = headersForDES
+      val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url)(implicitly, headersForDES, ec)
+      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec)
     }
 
     selection.identifiers.nino.map { nino =>
