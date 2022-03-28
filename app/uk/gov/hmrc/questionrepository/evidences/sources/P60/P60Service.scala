@@ -49,7 +49,7 @@ class P60Service @Inject()(p60Connector: P60Connector)(implicit override val app
     }
 
     lazy val p60NewQuestions: Seq[Question] = {
-      val EarningsAbovePTAnswers: Seq[Question] = records.flatMap(_.earningsAbovePT).filter(_ > 0).map(roundDownWithPence) match {
+      val EarningsAbovePTAnswers: Seq[Question] = records.flatMap(_.earningsAbovePT).filter(_ > 0).map(roundDownIgnorePence) match {
         case Nil => Nil
         case answers => Seq(Question(EarningsAbovePT, answers.map(_.toString), additionalInfoMap))
       }
@@ -65,11 +65,11 @@ class P60Service @Inject()(p60Connector: P60Connector)(implicit override val app
         case Nil => Nil
         case answers => Seq(Question(StatutoryAdoptionPay, answers.map(_.toString), additionalInfoMap))
       }
-      val StudentLoanDeductionsAnswers: Seq[Question] = records.flatMap(_.studentLoanDeductions).filter(_ > 0).map(roundDownWithPence) match {
+      val StudentLoanDeductionsAnswers: Seq[Question] = records.flatMap(_.studentLoanDeductions).filter(_ > 0).map(roundDownIgnorePence) match {
         case Nil => Nil
         case answers => Seq(Question(StudentLoanDeductions, answers.map(_.toString), additionalInfoMap))
       }
-      val PostgraduateLoanDeductionsAnswers: Seq[Question] = records.flatMap(_.postgraduateLoanDeductions).filter(_ > 0).map(roundDownWithPence) match {
+      val PostgraduateLoanDeductionsAnswers: Seq[Question] = records.flatMap(_.postgraduateLoanDeductions).filter(_ > 0).map(roundDownIgnorePence) match {
         case Nil => Nil
         case answers => Seq(Question(PostgraduateLoanDeductions, answers.map(_.toString), additionalInfoMap))
       }
