@@ -84,7 +84,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val paymentThree: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
     val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
     val paymentFive: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), None, None, None, None,
-      Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.20))
+      Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.00))
 
     val ninoIdentifier: NinoI = NinoI("AA000000D")
     val utrIdentifier: SaUtrI = SaUtrI("12345678")
@@ -101,7 +101,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val statutorySharedParentalPayQuestion: Question = Question(StatutorySharedParentalPay, Seq("3000.00"), Map("currentTaxYear" -> "2019/20"))
     val statutoryAdoptionPayQuestion: Question = Question(StatutoryAdoptionPay, Seq("4000.00"), Map("currentTaxYear" -> "2019/20"))
     val studentLoanDeductionsQuestion: Question = Question(StudentLoanDeductions, Seq("5000.00"), Map("currentTaxYear" -> "2019/20"))
-    val postgraduateLoanDeductionsQuestion: Question = Question(PostgraduateLoanDeductions, Seq("300.20"), Map("currentTaxYear" -> "2019/20"))
+    val postgraduateLoanDeductionsQuestion: Question = Question(PostgraduateLoanDeductions, Seq("300.00"), Map("currentTaxYear" -> "2019/20"))
 
     val paymentToDateQuestion2: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
     val employeeNIContributionsQuestion2: Question = Question(EmployeeNIContributions, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
