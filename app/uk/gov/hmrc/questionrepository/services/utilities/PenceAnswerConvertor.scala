@@ -11,7 +11,7 @@ import scala.math.BigDecimal.RoundingMode
 trait PenceAnswerConvertor {
   val pound = BigDecimal("1.00")
   protected def convertAnswer(answer: BigDecimal): BigDecimal = roundDownIgnorePence(answer)
-  protected def convertAnswer(answer: String): BigDecimal = roundDownIgnorePence(BigDecimal(answer))
+  protected def convertAnswer(answer: String): BigDecimal = roundDownWithPence(BigDecimal(answer))
 
   //the method will add .00 to int, eg 100 convert to 100.00
   //the method also ignore pence, eg, 100.38 convert to 100.00
