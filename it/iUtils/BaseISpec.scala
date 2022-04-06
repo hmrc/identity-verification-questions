@@ -15,9 +15,7 @@ import play.api.http.{HeaderNames, Status}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, Injecting}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DefaultDB
-import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
 trait BaseISpec extends AnyWordSpecLike
   with Matchers
@@ -51,21 +49,21 @@ trait BaseISpec extends AnyWordSpecLike
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck"
   )
 
-  private lazy val db: DefaultDB = inject[ReactiveMongoComponent].mongoConnector.db()
+  private lazy val questionRepository = app.injector.instanceOf[QuestionMongoRepository]
 
-  override protected def beforeEach(): Unit = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
     stubFor(
       post(urlPathEqualTo("/platform-analytics/event"))
         .willReturn(ok())
     )
 
-    db.drop()(ExecutionContext.global)
+    questionRepository.collection.drop()
   }
 
-  override protected def afterEach(): Unit = {
+  override def afterEach(): Unit = {
     super.afterEach()
 
-    db.drop()(ExecutionContext.global)
+    questionRepository.collection.drop()
   }
 }

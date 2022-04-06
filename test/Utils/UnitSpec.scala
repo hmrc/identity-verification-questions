@@ -6,9 +6,6 @@
 package Utils
 
 import akka.actor.ActorSystem
-
-import java.time.LocalDateTime
-import java.util.UUID
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
@@ -20,12 +17,13 @@ import play.api.http.{HeaderNames, MimeTypes, Status}
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, ResultExtractors, Writeables}
-import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
-import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
+import uk.gov.hmrc.mongo.{MongoComponent, MongoSpecSupport}
 import uk.gov.hmrc.questionrepository.models.identifier.{DobI, NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin}
 
+import java.time.LocalDateTime
+import java.util.UUID
 import scala.concurrent.Future
 
 trait UnitSpec
@@ -74,8 +72,6 @@ trait UnitSpec
 
   def header(headerName: String, result: Result): Option[String] = header(headerName, Future.successful(result))
 
-  val reactiveMongoComponent: ReactiveMongoComponent = new ReactiveMongoComponent {
-    override def mongoConnector: MongoConnector = mongoConnectorForTest
-  }
+  val reactiveMongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
 
 }

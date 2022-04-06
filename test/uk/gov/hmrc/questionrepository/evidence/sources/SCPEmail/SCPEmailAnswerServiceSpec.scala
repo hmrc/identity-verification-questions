@@ -23,7 +23,7 @@ class SCPEmailAnswerServiceSpec extends UnitSpec with BeforeAndAfterEach {
 
   override def afterEach(): Unit = {
     super.afterEach()
-    await(questionRepo.removeAll())
+    await(questionRepo.collection.drop().toFuture())
   }
 
   "verifyAnswer" should {
@@ -41,7 +41,7 @@ class SCPEmailAnswerServiceSpec extends UnitSpec with BeforeAndAfterEach {
       "answer does not match an answer retrieved from repo" in new Setup {
         val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("bad-email@bad-email.com"))), dateTime)
 
-        await(questionRepo.insert(inCorrectQDC))
+        await(questionRepo.collection.insertOne(inCorrectQDC).toFuture())
         connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Incorrect)
       }
     }

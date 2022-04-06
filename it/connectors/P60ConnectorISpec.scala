@@ -36,13 +36,13 @@ class P60ConnectorISpec extends BaseISpec {
       val connector: P60Connector = fakeApplication.injector.instanceOf[P60Connector]
 
       val result = await(connector.getRecords(selectionNino))
-      result shouldBe List(Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
-        earningsAbovePT = Some(0),
-        statutoryMaternityPay = Some(300.02),
-        statutorySharedParentalPay = Some(0),
-        statutoryAdoptionPay = Some(0),
-        studentLoanDeductions = Some(800.02),
-        postgraduateLoanDeductions = Some(0)))
+      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
+                                          earningsAbovePT = Some(0),
+                                          statutoryMaternityPay = Some(300.02),
+                                          statutorySharedParentalPay = Some(0),
+                                          statutoryAdoptionPay = Some(0),
+                                          studentLoanDeductions = Some(800.02),
+                                          postgraduateLoanDeductions = Some(0))
     }
 
     "successfully obtain data for nino AA002023B" in {
@@ -53,13 +53,13 @@ class P60ConnectorISpec extends BaseISpec {
 
       val result = await(connector.getRecords(selectionNino))
 
-      result shouldBe List(Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
-        earningsAbovePT = Some(0),
-        statutoryMaternityPay = Some(0),
-        statutorySharedParentalPay = Some(0),
-        statutoryAdoptionPay = Some(400.02),
-        studentLoanDeductions = Some(0),
-        postgraduateLoanDeductions = Some(300.02)))
+      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
+                                          earningsAbovePT = Some(0),
+                                          statutoryMaternityPay = Some(0),
+                                          statutorySharedParentalPay = Some(0),
+                                          statutoryAdoptionPay = Some(400.02),
+                                          studentLoanDeductions = Some(0),
+                                          postgraduateLoanDeductions = Some(300.02))
     }
     "successfully obtain data for nino AA002024B" in {
       val ninoIdentifier: NinoI = NinoI("AA002024B")
@@ -69,13 +69,13 @@ class P60ConnectorISpec extends BaseISpec {
 
       val result = await(connector.getRecords(selectionNino))
 
-      result shouldBe List(Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
-        earningsAbovePT = Some(200.02),
-        statutoryMaternityPay = Some(0),
-        statutorySharedParentalPay = Some(500.02),
-        statutoryAdoptionPay = Some(0),
-        studentLoanDeductions = Some(0),
-        postgraduateLoanDeductions = Some(0)))
+      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
+                                          earningsAbovePT = Some(200.02),
+                                          statutoryMaternityPay = Some(0),
+                                          statutorySharedParentalPay = Some(500.02),
+                                          statutoryAdoptionPay = Some(0),
+                                          studentLoanDeductions = Some(0),
+                                          postgraduateLoanDeductions = Some(0))
     }
   }
 }

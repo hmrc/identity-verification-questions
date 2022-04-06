@@ -25,7 +25,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
   override def afterEach(): Unit = {
     super.afterEach()
-    await(mongoRepo.removeAll())
+    await(mongoRepo.collection.drop().toFuture())
   }
 
   "verifyAnswer" should {

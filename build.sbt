@@ -56,5 +56,6 @@ lazy val microservice = Project(appName, file("."))
   ))
   .settings(serviceManagerSettings: _*)
   .settings(itDependenciesList := List(
-    ExternalService("IV_TEST_DATA")
+    ExternalService("IV_TEST_DATA"),
+    ExternalService("DATASTREAM")
   ))

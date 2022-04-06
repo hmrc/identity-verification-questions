@@ -26,12 +26,12 @@ class AnswerControllerSpec() extends Utils.UnitSpec {
   "POST /answers" should {
     "return 200 with a valid json body" when {
       "origin, correlationId and identifiers match entry in mongo repo" in new Setup {
-        await(questionMongoRepository.insert(questionDataCache))
+        await(questionMongoRepository.collection.insertOne(questionDataCache).toFuture())
         (answersService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(answerCheck, *).returning(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
         val result: Future[Result] = controller.answer()(fakeRequest)
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(List(QuestionResult(PaymentToDate, Unknown)))
-        await(questionMongoRepository.removeAll())
+        await(questionMongoRepository.collection.drop().toFuture())
       }
     }
 
