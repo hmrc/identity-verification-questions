@@ -8,8 +8,6 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName = "question-repository"
 
-val silencerVersion = "1.7.0"
-
 lazy val scoverageSettings = {
   import scoverage._
   Seq(
@@ -26,20 +24,14 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageHighlighting := true
   )}
 
+routesImport := Seq.empty
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
   .settings(
     majorVersion                     := 0,
-    scalaVersion                     := "2.12.12",
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.it,
-    // ***************
-    // Use the silencer plugin to suppress warnings
-    scalacOptions += "-P:silencer:pathFilters=routes",
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    )
-    // ***************
+    scalaVersion                     := "2.12.15",
+    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.it
   )
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(Compile / console / scalacOptions --= Seq("-deprecation", "-Xfatal-warnings", "-Xlint"))
@@ -51,8 +43,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers ++= Seq(
     Resolver.bintrayRepo("hmrc", "releases"),
-    Resolver.jcenterRepo,
-    "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/"
+    Resolver.jcenterRepo
   ))
   .settings(serviceManagerSettings: _*)
   .settings(itDependenciesList := List(
