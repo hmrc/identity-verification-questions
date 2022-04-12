@@ -23,6 +23,7 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true
   )}
+
 routesImport := Seq.empty
 
 lazy val microservice = Project(appName, file("."))
@@ -42,8 +43,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers ++= Seq(
     Resolver.bintrayRepo("hmrc", "releases"),
-    Resolver.jcenterRepo,
-    "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/"
+    Resolver.jcenterRepo
   ))
   .settings(serviceManagerSettings: _*)
   .settings(itDependenciesList := List(

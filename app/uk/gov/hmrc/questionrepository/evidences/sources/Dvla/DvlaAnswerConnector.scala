@@ -5,9 +5,9 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.Dvla
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.http.Status
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
@@ -16,6 +16,7 @@ import uk.gov.hmrc.questionrepository.models.dvla.UkDrivingLicenceRequest
 import uk.gov.hmrc.questionrepository.models.identifier.Identifier
 import uk.gov.hmrc.questionrepository.models.identifier.Search.FindIdentifier
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
