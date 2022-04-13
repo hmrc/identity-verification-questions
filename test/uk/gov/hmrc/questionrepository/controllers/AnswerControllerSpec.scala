@@ -5,11 +5,15 @@
 
 package uk.gov.hmrc.questionrepository.controllers
 
+import Utils.{LogCapturing, UnitSpec}
+import ch.qos.logback.classic.Level
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
+import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.evidence.sources.P60.P60ConnectorSpec
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.models.identifier.NinoI
@@ -21,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class AnswerControllerSpec() extends Utils.UnitSpec {
+class AnswerControllerSpec() extends UnitSpec with LogCapturing {
 
   "POST /answers" should {
     "return 200 with a valid json body" when {
@@ -41,13 +45,27 @@ class AnswerControllerSpec() extends Utils.UnitSpec {
         status(result) shouldBe NOT_FOUND
       }
     }
+
+    "return 403" when {
+      "Unauthorised client called question repository" in new Setup {
+        withCaptureOfLoggingFrom[AnswerController] { logs =>
+          val result: Future[Result] = controller.answer()(fakeRequestWithUnknownAgent)
+          status(result) shouldBe FORBIDDEN
+          val infoLogs = logs.filter(_.getLevel == Level.WARN)
+          infoLogs.size shouldBe 1
+          infoLogs.count(_.getMessage == "Unauthorised client called question repository, User-Agent is: Some(Unknown)") shouldBe 1
+        }
+      }
+    }
   }
 
   trait Setup extends TestData {
     val answersService: AnswerVerificationService = mock[AnswerVerificationService]
     val questionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck))
-    val controller = new AnswerController(answersService, questionMongoRepository)(Stubs.stubMessagesControllerComponents(), global)
+    val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck)).withHeaders("User-Agent" -> "identity-verification")
+    val fakeRequestWithUnknownAgent: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck)).withHeaders("User-Agent" -> "Unknown")
+    val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+    val controller = new AnswerController(answersService, questionMongoRepository, appConfig)(Stubs.stubMessagesControllerComponents(), global)
   }
 
   trait TestData {

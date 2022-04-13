@@ -6,19 +6,23 @@
 package uk.gov.hmrc.questionrepository.config
 
 import Utils.testData.AppConfigTestData
-import ch.qos.logback.classic.Level
 import Utils.{LogCapturing, UnitSpec}
+import ch.qos.logback.classic.Level
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.models.p60Service
 import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 
-import java.time.{LocalDateTime, Period}
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+import java.time.{LocalDateTime, Period}
 
 class AppConfigSpec extends UnitSpec with LogCapturing {
 
   "AppConfig" should {
+
+    "return allowedUserAgentList" in new Setup {
+      app.injector.instanceOf[AppConfig].allowedUserAgentList.toList shouldBe List("identity-verification", "lost-credentials", "lost-credentials-frontend")
+    }
 
     "return the url for authBaseUrl" in new Setup {
       override def testConfig: Map[String, Any] = baseConfig

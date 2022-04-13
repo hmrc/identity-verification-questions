@@ -40,7 +40,8 @@ trait BaseISpec extends AnyWordSpecLike
 
   protected def resource(resource: String) = s"http://localhost:$port$resource"
 
-  protected def resourceRequest(url: String): WSRequest = wsClient.url(resource(url)).withHttpHeaders("Csrf-Token" -> "nocheck")
+  protected def resourceRequest(url: String): WSRequest =
+    wsClient.url(resource(url)).withHttpHeaders("Csrf-Token" -> "nocheck", "User-Agent" -> "identity-verification")
 
   protected def wsClient: WSClient = app.injector.instanceOf[WSClient]
 

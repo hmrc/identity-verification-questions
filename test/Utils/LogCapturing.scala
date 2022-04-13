@@ -19,12 +19,6 @@ trait LogCapturing {
     withCaptureOfLoggingFrom(List(Logger(classTag.runtimeClass)))(body)
   }
 
-  def withCaptureOfLoggingFrom[T, U](
-                                      body: (=> List[ILoggingEvent]) => Unit
-                                    )(implicit classTagT: ClassTag[T], classTagU: ClassTag[U]): Unit = {
-    withCaptureOfLoggingFrom(List(Logger(classTagT.runtimeClass), Logger(classTagU.runtimeClass)))(body)
-  }
-
   private def withCaptureOfLoggingFrom(loggers: List[LoggerLike])(body: (=> List[ILoggingEvent]) => Unit): Unit = {
     val appender = new ListAppender[ILoggingEvent]()
 

@@ -24,6 +24,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   lazy val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   lazy val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 
+  def allowedUserAgentList: Seq[String] = getStringList("allowedUserAgentList").getOrElse(Seq.empty[String])
+
   def p60NewQuestionEnabled: Boolean = config.get[Boolean]("p60.newquestions.enabled")
 
   /**  CircuitBreaker Config
