@@ -5,11 +5,14 @@
 
 package uk.gov.hmrc.questionrepository.controllers
 
+import Utils.{LogCapturing, UnitSpec}
+import ch.qos.logback.classic.Level
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
+import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin, Question, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
@@ -17,7 +20,7 @@ import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class QuestionControllerSpec extends Utils.UnitSpec {
+class QuestionControllerSpec extends UnitSpec with LogCapturing {
 
   "POST /questions" should {
     "return 200 ok" in new Setup {
@@ -26,9 +29,19 @@ class QuestionControllerSpec extends Utils.UnitSpec {
       status(result) shouldBe OK
     }
 
-    "return 400 BadRequest" in new Setup {
+    "return 400 BadRequest if the request as bad request body" in new Setup {
       val result: Future[Result] = controller.question()(fakeBadRequest)
       status(result) shouldBe BAD_REQUEST
+    }
+
+    "return 403 Forbidden if Unauthorised client called question repository" in new Setup {
+      withCaptureOfLoggingFrom[QuestionController] { logs =>
+        val result: Future[Result] = controller.question()(fakeRequest)
+        status(result) shouldBe FORBIDDEN
+        val infoLogs = logs.filter(_.getLevel == Level.WARN)
+        infoLogs.size shouldBe 1
+        infoLogs.count(_.getMessage == "Unauthorised client called question repository, User-Agent is: Some(Unknown)") shouldBe 1
+      }
     }
   }
 
@@ -45,12 +58,13 @@ class QuestionControllerSpec extends Utils.UnitSpec {
                             |}
                             |""".stripMargin)
 
-    val fakeQuestionRequest: FakeRequest[JsValue] = FakeRequest().withBody(jsonBody)
-    val fakeBadRequest: FakeRequest[JsValue] = FakeRequest().withBody(badJson)
-    val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    val fakeQuestionRequest: FakeRequest[JsValue] = FakeRequest().withBody(jsonBody).withHeaders("user-agent" -> "identity-verification")
+    val fakeBadRequest: FakeRequest[JsValue] = FakeRequest().withBody(badJson).withHeaders("User-Agent" -> "identity-verification")
+    val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(jsonBody).withHeaders("User-Agent" -> "Unknown")
     val fakeEvidenceRetrievalService: EvidenceRetrievalService = mock[EvidenceRetrievalService]
     implicit val mccStub: MessagesControllerComponents = Stubs.stubMessagesControllerComponents()
-    val controller = new QuestionController(fakeEvidenceRetrievalService)
+    val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+    val controller = new QuestionController(fakeEvidenceRetrievalService, appConfig)
   }
 }
 
