@@ -14,7 +14,7 @@ import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailService
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, QuestionDataCache, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +40,7 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
             correlationId = corrId,
             selection = selection,
             questions = qs,
-            expiryDate = LocalDateTime.now plus appConfig.questionRecordTTL))
+            expiryDate = LocalDateTime.now(ZoneOffset.UTC) plus appConfig.questionRecordTTL))
       questionTextEn = qs.flatMap(q => messageTextService.getQuestionMessageEn(q.questionKey)).toMap
       questionTextCy = qs.flatMap(q => messageTextService.getQuestionMessageCy(q.questionKey)).toMap
       maybeQuestionTextCy = if(questionTextCy.isEmpty) None else Some(questionTextCy)

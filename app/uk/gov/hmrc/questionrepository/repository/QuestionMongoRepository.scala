@@ -23,6 +23,10 @@ class QuestionMongoRepository @Inject()(mongoComponent: MongoComponent)(implicit
     domainFormat = QuestionDataCache.format,
     indexes = Seq(
       IndexModel(
+        ascending("correlationId"),
+        indexOptions = IndexOptions().name("correlationId").unique(true)
+      ),
+      IndexModel(
         ascending("expiryDate"),
         indexOptions = IndexOptions().name("expireAfterSeconds").expireAfter(0, SECONDS)
       )
