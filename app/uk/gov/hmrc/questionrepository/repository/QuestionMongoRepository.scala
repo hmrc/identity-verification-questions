@@ -27,7 +27,7 @@ class QuestionMongoRepository @Inject()(mongoComponent: MongoComponent)(implicit
         indexOptions = IndexOptions().name("expireAfterSeconds").expireAfter(0, SECONDS)
       )
     ),
-    replaceIndexes = true) {
+    replaceIndexes = false) {
 
   def store(questionDataCache: QuestionDataCache): Future[Unit] = {
     collection.insertOne(questionDataCache).toFuture().map(_ => ())
