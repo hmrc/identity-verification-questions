@@ -12,11 +12,13 @@ import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection, ServiceName}
-
 import javax.inject.Inject
+import play.api.mvc.Request
+import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
+
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: ExecutionContext) extends UsingCircuitBreaker
+abstract class QuestionService @Inject()(implicit request: Request[_], appConfig: AppConfig, ec: ExecutionContext,val eventDispatcher: EventDispatcher) extends UsingCircuitBreaker
   with Logging {
 
   type Record
@@ -54,6 +56,7 @@ abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: 
         }
         case t: Throwable => {
           logger.error(s"$serviceName, threw exception $t, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
+          eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           Seq()
         }
       }
