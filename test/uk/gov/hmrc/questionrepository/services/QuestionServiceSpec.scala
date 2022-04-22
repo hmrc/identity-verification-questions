@@ -15,8 +15,13 @@ import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models._
-
 import java.time.LocalDateTime
+
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -190,6 +195,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
     def connectorResult: Future[Seq[TestRecord]] = illegalAccessResult
 
@@ -213,6 +219,9 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
 
+      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
+      override implicit val auditService: AuditService = mock[AuditService]
     }
 
     lazy val service2: TestService {
@@ -226,6 +235,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
       override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+
+      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
+      override implicit val auditService: AuditService = mock[AuditService]
     }
   }
 
