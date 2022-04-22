@@ -11,6 +11,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.{DvlaConnector, DvlaService}
 import uk.gov.hmrc.questionrepository.models._
+import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,7 +42,9 @@ class DVALServiceSpec extends UnitSpec {
   trait Setup extends TestData {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
     val mockDvlaConnector: DvlaConnector = mock[DvlaConnector]
-    val service = new DvlaService(mockDvlaConnector)
+    val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
+    val mockAuditService: AuditService = mock[AuditService]
+    val service = new DvlaService(mockDvlaConnector,mockEventDispatcher,mockAuditService)
   }
 
   trait WithStubbing extends Setup {
