@@ -65,4 +65,6 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   }
 
   lazy val platformAnalyticsUrl: String = servicesConfig.baseUrl("platform-analytics")
+
+  def appName: String = config.getOptional[String]("appName").getOrElse("APP NAME NOT SET")
 }

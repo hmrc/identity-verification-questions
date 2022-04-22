@@ -12,10 +12,12 @@ import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 import javax.inject.Inject
 import play.api.mvc.Request
+import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
 import scala.concurrent.ExecutionContext
 
-class SCPEmailService @Inject()(scpEmailConnector: SCPEmailConnector)(implicit request: Request[_], override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
+class SCPEmailService @Inject()(scpEmailConnector: SCPEmailConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
   with CheckAvailability
   with CircuitBreakerConfiguration {
 

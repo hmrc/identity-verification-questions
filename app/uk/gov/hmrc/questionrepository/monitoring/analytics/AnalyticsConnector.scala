@@ -16,7 +16,7 @@ import play.api.mvc.Request
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AnalyticsConnector @Inject() (implicit request: Request[_], appConfig: AppConfig, http:HttpClient) extends Logging {
+class AnalyticsConnector @Inject() (appConfig: AppConfig, http:HttpClient) extends Logging {
   def serviceUrl: String = appConfig.platformAnalyticsUrl
 
   private implicit val dimensionWrites = Json.writes[DimensionValue]

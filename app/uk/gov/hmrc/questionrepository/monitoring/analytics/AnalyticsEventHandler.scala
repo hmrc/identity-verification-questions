@@ -5,7 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.monitoring.analytics
 
-import javax.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
