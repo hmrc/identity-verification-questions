@@ -11,7 +11,6 @@ import uk.gov.hmrc.questionrepository.models.{Question, SCPEmailQuestion, Servic
 import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 import javax.inject.Inject
-import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 

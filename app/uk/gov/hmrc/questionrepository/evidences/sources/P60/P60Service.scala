@@ -13,7 +13,6 @@ import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 

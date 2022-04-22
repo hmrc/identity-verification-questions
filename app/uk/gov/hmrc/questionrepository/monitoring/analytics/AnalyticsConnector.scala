@@ -11,7 +11,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.Request
 
 import scala.concurrent.{ExecutionContext, Future}
 
