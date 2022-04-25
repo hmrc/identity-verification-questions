@@ -25,7 +25,7 @@ class AuditService @Inject()(auditConnector: AuditConnector){
       DataEvent(
         auditSource = AuditSource,
         auditType = "CircuitBreakerUnhealthyService",
-        detail = Map("unavailableServiceName" -> s"$unavailableServiceName", "identifiers" -> identifiers.mkString(",")),
+        detail = Map("unavailableServiceName" -> s"$unavailableServiceName", "identifiers" -> identifiers.map(a => s"${a.identifierType}:$a").mkString(",")),
         tags = tags
       )
     )
