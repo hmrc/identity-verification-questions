@@ -16,8 +16,9 @@ import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models.payment.{Employment, Payment}
 import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.utilities.{TaxYear, TaxYearBuilder}
-
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

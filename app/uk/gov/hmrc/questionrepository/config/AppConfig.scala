@@ -65,4 +65,18 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   }
 
   lazy val platformAnalyticsUrl: String = servicesConfig.baseUrl("platform-analytics")
+
+  def minimumMeoQuestionCount(serviceName: String): Int = {
+    servicesConfig.getInt(s"microservice.services.$serviceName.minimumMeoQuestions")
+  }
+
+  lazy val saYearSwitchDay: Int = getIntOrThrowError("sa.switch.day")
+  lazy val saYearSwitchMonth: Int = getIntOrThrowError("sa.switch.month")
+  lazy val saAnswerOffset: Int = getIntOrDefault("sa.answerOffset", 0)
+  lazy val saPaymentWindowYears: Int = getIntOrThrowError("sa.payment.window")
+  lazy val saPaymentToleranceFutureDays: Int = getIntOrThrowError("sa.payment.tolerance.future.days")
+  lazy val saPaymentTolerancePastDays: Int = getIntOrThrowError("sa.payment.tolerance.past.days")
+
+  private def getIntOrThrowError(key: String): Int = config.getOptional[Int](key).getOrElse(configNotFoundError(key))
+  def configNotFoundError(key: String) = throw new RuntimeException(s"Could not find configuration key '$key'")
 }
