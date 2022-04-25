@@ -23,11 +23,15 @@ class QuestionMongoRepository @Inject()(mongoComponent: MongoComponent)(implicit
     domainFormat = QuestionDataCache.format,
     indexes = Seq(
       IndexModel(
+        ascending("correlationId"),
+        indexOptions = IndexOptions().name("correlationId").unique(true)
+      ),
+      IndexModel(
         ascending("expiryDate"),
         indexOptions = IndexOptions().name("expireAfterSeconds").expireAfter(0, SECONDS)
       )
     ),
-    replaceIndexes = true) {
+    replaceIndexes = false) {
 
   def store(questionDataCache: QuestionDataCache): Future[Unit] = {
     collection.insertOne(questionDataCache).toFuture().map(_ => ())
