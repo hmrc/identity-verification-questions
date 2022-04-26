@@ -23,7 +23,9 @@ object QuestionKey {
     P60.PostgraduateLoanDeductions,
     PassportQuestion,
     SCPEmailQuestion,
-    DVLAQuestion
+    DVLAQuestion,
+    SelfAssessment.SelfAssessedIncomeFromPensionsQuestion,
+    SelfAssessment.SelfAssessedPaymentQuestion
   )
 
   val mapping: Mapping[String, QuestionKey] = Mappings.mapOption[String, QuestionKey](fromString, _.name)
@@ -48,9 +50,14 @@ case object PassportQuestion extends QuestionKey("passport", "passport")
 case object SCPEmailQuestion extends QuestionKey("scpEmail", "scpEmail")
 case object DVLAQuestion extends QuestionKey("dvla", "dvla")
 
+case object SelfAssessment {
+  case object SelfAssessedIncomeFromPensionsQuestion extends QuestionKey("sa-income-from-pensions", "SelfAssessment")
+  case object SelfAssessedPaymentQuestion extends QuestionKey("sa-payment-details", "SelfAssessment")
+}
 
 sealed trait ServiceName
 case object p60Service extends ServiceName
 case object passportService extends ServiceName
 case object scpEmailService extends ServiceName
 case object dvlaService extends ServiceName
+case object selfAssessmentService extends ServiceName

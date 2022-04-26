@@ -10,7 +10,8 @@ import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.Question
+import uk.gov.hmrc.questionrepository.evidences.sources.QuestionConnector
+import uk.gov.hmrc.questionrepository.models.{Question, Selection, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.QuestionService
@@ -24,12 +25,12 @@ class SAService @Inject() (
     val eventDispatcher: EventDispatcher,
     override implicit val auditService: AuditService
                           ) extends QuestionService {
-  val serviceName: String = "SelfAssessmentService"
-  override def questions(journey: Journey)
+  val serviceName = selfAssessmentService
+  override def questions(selection: Selection)
                         (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Seq[Question]] = {
-    val pensionQuestionsFuture = saPensionService.questions(journey)
-    val paymentQuestionsFuture = saPaymentService.questions(journey)
+    val pensionQuestionsFuture = saPensionService.questions(selection)
+    val paymentQuestionsFuture = saPaymentService.questions(selection)
 
     for {
       paymentQuestion <- paymentQuestionsFuture

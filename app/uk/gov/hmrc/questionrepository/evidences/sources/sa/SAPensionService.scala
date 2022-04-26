@@ -11,7 +11,10 @@ import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.evidences.sources.{HodCircuitBreakerConfig, QuestionServiceMeoMinimumNumberOfQuestions}
+import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimumNumberOfQuestions
+import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
+import uk.gov.hmrc.questionrepository.models.{QuestionKey, Selection, selfAssessmentService}
+import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, NinoType}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
@@ -33,7 +36,7 @@ class SAPensionService @Inject() (
   private val currentYearKey = "currentTaxYear"
   private val previousYearKey = "previousTaxYear"
 
-  override def serviceName: String = "SelfAssessmentPensionService"
+  override def serviceName = selfAssessmentService.toString
 
   private[sa] def determinePeriod = {
     val switchDate = DateTime.parse(s"${currentDate.getYear}-$switchOverMonth-$switchOverDay")
@@ -44,16 +47,17 @@ class SAPensionService @Inject() (
     }
   }
 
-  override def getRecords(journey: Journey)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
+  override def getRecords(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
+    val nino = selection.identifiers.find(p => p.identifierType == NinoType)
       val (startYear, endYear) = determinePeriod
-      connector.getReturns(journey.nino.get, startYear, endYear)
+      connector.getReturns(nino.get, startYear, endYear)
   }
 
   val questionHandlers: Seq[QuestionHandler[Record]]  = Seq(
     new PenceQuestionHandler[SelfAssessmentReturn] {
       override def key: QuestionKey = SelfAssessedIncomeFromPensionsQuestion
 
-      override def validateAnswer(validAnswers: Seq[String], answer: String, journey: Journey)(implicit ec: ExecutionContext, appConfig: AppConfig): Future[AnswerCorrectness] = {
+      override def validateAnswer(validAnswers: Seq[String], answer: String, selection: Selection)(implicit ec: ExecutionContext, appConfig: AppConfig): Future[AnswerCorrectness] = {
         val answers = validAnswers.map(convertAnswer).map(_.toBigInt)
         val intAnswer = convertAnswer(answer).toBigInt
         val offset = appConfig.saAnswerOffset

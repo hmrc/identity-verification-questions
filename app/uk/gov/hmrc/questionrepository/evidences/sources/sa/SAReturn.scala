@@ -7,6 +7,7 @@ package uk.gov.hmrc.questionrepository.evidences.sources.sa
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.questionrepository.services.utilities.TaxYear
 
 case class SAReturn(
   taxYear: TaxYear,
