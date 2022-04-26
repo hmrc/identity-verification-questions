@@ -9,7 +9,7 @@ import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.questionrepository.models.identifier.Identifier
+import uk.gov.hmrc.questionrepository.models.Selection
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -18,14 +18,15 @@ class AuditService @Inject()(auditConnector: AuditConnector){
   val AuditSource = "question-repository"
 
 
-  def sendCircuitBreakerEvent(identifiers: Seq[Identifier], unavailableServiceName: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[AuditResult] = {
+  def sendCircuitBreakerEvent(identifiers: Selection, unavailableServiceName: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[AuditResult] = {
     val tags = Map("transactionName" -> "CircuitBreakerUnhealthyEvent")
 
+    println(s"\n\n\n\n${identifiers.toString}\n\n\n\n")
     auditConnector.sendEvent(
       DataEvent(
         auditSource = AuditSource,
         auditType = "CircuitBreakerUnhealthyService",
-        detail = Map("unavailableServiceName" -> s"$unavailableServiceName", "identifiers" -> identifiers.map(identifier => s"${identifier.identifierType}:$identifier").mkString(",")),
+        detail = Map("unavailableServiceName" -> s"$unavailableServiceName", "identifiers" -> identifiers.toString),
         tags = tags
       )
     )

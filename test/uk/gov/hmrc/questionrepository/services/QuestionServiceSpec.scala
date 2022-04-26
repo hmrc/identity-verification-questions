@@ -8,7 +8,7 @@ package uk.gov.hmrc.questionrepository.services
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException}
+import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
@@ -81,20 +81,20 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.INFO)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection, origin: origin, identifiers: AA000000D,12345678"
           }
         }
 
         "connector returns an unhealthy service exception" in new Setup {
-          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
           (service3.eventDispatcher.dispatchEvent(_: MonitoringEvent)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
             .expects(ServiceUnavailableEvent("p60Service"),*,*,*)
 
-          (service3.auditService.sendCircuitBreakerEvent(_: Seq[Identifier], _: String)(_: HeaderCarrier, _: ExecutionContext))
-            .expects(Seq(ninoIdentifier,saUtrIdentifier),"p60Service",*,*)
+          (service3.auditService.sendCircuitBreakerEvent(_: Selection, _: String)(_: HeaderCarrier, _: ExecutionContext))
+            .expects(Selection(ninoIdentifier,saUtrIdentifier),"p60Service",*,*)
 
-          service3.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+          service3.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
         }
       }
 
@@ -149,7 +149,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("user-agent" -> "origin")
 
     def connectorResult: Future[Seq[TestRecord]] = illegalAccessResult
 

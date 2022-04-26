@@ -9,8 +9,7 @@ import play.api.Logging
 import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.identifier._
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection, ServiceName}
+import uk.gov.hmrc.questionrepository.models.{Question, Selection, ServiceName}
 import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
@@ -49,15 +48,16 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
   }
 
   def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
-    if (isAvailable(selection.origin, selection.identifiers)) {
+    val origin = request.headers.get("user-agent").getOrElse("unknown origin")
+    if (isAvailable(selection)) {
       withCircuitBreaker {
         connector.getRecords(selection).map(evidenceTransformer)
       } recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 =>
-          logger.info(s"$serviceName, no records returned for selection, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
+          logger.info(s"$serviceName, no records returned for selection, origin: ${origin}, identifiers: ${selection}")
           Seq()
         case _: UnhealthyServiceException =>
-          auditService.sendCircuitBreakerEvent(selection.identifiers, serviceName.toString)
+          auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           Seq()
         case t: Throwable =>

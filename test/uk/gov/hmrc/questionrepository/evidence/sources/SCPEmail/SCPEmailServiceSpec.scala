@@ -9,11 +9,6 @@ import Utils.{LogCapturing, UnitSpec}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.{SCPEmailConnector, SCPEmailService}
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, SCPEmailQuestion, Selection, ServiceName, scpEmailService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.domain.{Nino, SaUtr}
