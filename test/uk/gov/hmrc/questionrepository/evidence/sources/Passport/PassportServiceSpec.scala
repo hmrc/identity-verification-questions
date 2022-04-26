@@ -40,7 +40,7 @@ class PassportServiceSpec extends UnitSpec{
     "return an empty list" when {
       "not supplied with a nino" in new Setup {
         val testOutage: Outage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
-        (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(Some(testOutage), List.empty, List.empty, List.empty))
+        (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(Some(testOutage), List.empty))
         service.questions(selectionWithoutNino).futureValue shouldBe Seq.empty
       }
     }
@@ -56,13 +56,13 @@ class PassportServiceSpec extends UnitSpec{
     val service: PassportService = new PassportService(mockPassportConnector, mockEventDispatcher, mockAuditService)
     val passportQuestion = new Question(PassportQuestion,Seq())
 
-    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
-    val selectionWithoutNino: Selection = Selection(origin, Seq(saUtrIdentifier))
+    val selectionNino: Selection = Selection(ninoIdentifier, saUtrIdentifier)
+    val selectionWithoutNino: Selection = Selection(saUtrIdentifier)
 
   }
 
   trait WithStubbing extends Setup {
-    (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
     (mockAppConfig.serviceCbUnstableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(300))

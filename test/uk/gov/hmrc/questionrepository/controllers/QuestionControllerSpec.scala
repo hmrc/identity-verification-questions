@@ -10,11 +10,11 @@ import ch.qos.logback.classic.Level
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
-import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin, Question, QuestionResponse, Selection}
+import uk.gov.hmrc.questionrepository.models.{CorrelationId, Question, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,15 +46,12 @@ class QuestionControllerSpec extends UnitSpec with LogCapturing {
   }
 
   trait Setup {
-    val selection: Selection = Selection(Origin("ma"),Seq(NinoI("AA000000D")),Some(3), Some(1))
+    val selection: Selection = Selection(Nino("AA000000D"))
     val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question], Map.empty[String, String], None)
     val jsonBody: JsValue = Json.toJson(selection)
     val badJson: JsValue = Json.parse("""
                             |{
-                            |   "origin":{"value":"ma"},
-                            |   "selections":[{"nino":"AA000000D"}],
-                            |   "max":1,
-                            |   "min":3
+                            |   "selections":[{"nino":"AA000000D"}]
                             |}
                             |""".stripMargin)
 

@@ -43,7 +43,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
         withCaptureOfLoggingFrom[P60ConnectorSpec] { logs =>
           connector.getRecords(selectionNoNino).futureValue shouldBe Seq()
           val warnLogs = logs.filter(_.getLevel == Level.WARN)
-          warnLogs.count(_.getMessage == "p60Service, No nino identifier for selection, origin: lost-credentials, identifiers: 12345678") shouldBe 1
+          warnLogs.count(_.getMessage == "p60Service, No nino identifier for selection: 12345678") shouldBe 1
         }
       }
     }
@@ -84,7 +84,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
      val paymentThree: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
      val paymentFour: Payment = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
 
-     val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))
-     val selectionNoNino: Selection = Selection(origin, Seq(saUtrIdentifier))
+     val selectionNino: Selection = Selection(ninoIdentifier, saUtrIdentifier)
+     val selectionNoNino: Selection = Selection(saUtrIdentifier)
    }
 }

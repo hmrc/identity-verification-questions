@@ -5,12 +5,11 @@
 
 package controllers
 
-import java.time.LocalDateTime
-import ch.qos.logback.classic.Level
 import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.{PassportQuestion, Question, QuestionResponse}
+import uk.gov.hmrc.questionrepository.models.{PassportQuestion, Question}
+
+import java.time.LocalDateTime
 
 class PassportOutageISpec extends BaseISpec with LogCapturing {
 

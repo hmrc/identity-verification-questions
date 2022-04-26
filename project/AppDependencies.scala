@@ -14,7 +14,7 @@ object AppDependencies {
     "com.vladsch.flexmark"    %  "flexmark-all"               % "0.36.8" % Test,
     "org.scalatestplus.play"  %% "scalatestplus-play"         % "5.1.0"  % Test,
     "org.mockito"             %% "mockito-scala-scalatest"    % "1.7.1"  % Test,
-    "uk.gov.hmrc"             %% "reactivemongo-test"         % "5.0.0-play-28"  % Test,
+    "uk.gov.hmrc"             %% "reactivemongo-test"         % "5.0.0-play-28"  % Test, // TODO replace with hmrc-mongo!
     "org.scalamock"           %% "scalamock"                  % "5.1.0"  % Test
   )
 

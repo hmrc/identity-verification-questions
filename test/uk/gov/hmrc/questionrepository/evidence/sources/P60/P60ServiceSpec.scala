@@ -7,12 +7,12 @@ package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
 import Utils.{LogCapturing, UnitSpec}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.{P60Connector, P60Service}
 import uk.gov.hmrc.questionrepository.models.P60._
 import uk.gov.hmrc.questionrepository.models._
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models.payment.Payment
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -54,7 +54,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
       }
@@ -79,7 +79,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
-    (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
     (mockAppConfig.serviceCbUnstableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(300))
@@ -94,13 +94,11 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val paymentFive: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), None, None, None, None,
       Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.00))
 
-    val ninoIdentifier: NinoI = NinoI("AA000000D")
-    val utrIdentifier: SaUtrI = SaUtrI("12345678")
+    val ninoIdentifier: Nino = Nino("AA000000D")
+    val utrIdentifier: SaUtr = SaUtr("12345678")
 
-    val origin: Origin = Origin("testOrigin")
-
-    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
-    val selectionNoNino: Selection = Selection(origin, Seq(utrIdentifier))
+    val selectionNino: Selection = Selection(ninoIdentifier, utrIdentifier)
+    val selectionNoNino: Selection = Selection(utrIdentifier)
 
     val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
     val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20"))

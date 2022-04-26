@@ -23,11 +23,15 @@ class QuestionMongoRepository @Inject()(mongoComponent: MongoComponent)(implicit
     domainFormat = QuestionDataCache.format,
     indexes = Seq(
       IndexModel(
+        ascending("correlationId"),
+        indexOptions = IndexOptions().name("correlationId").unique(true)
+      ),
+      IndexModel(
         ascending("expiryDate"),
         indexOptions = IndexOptions().name("expireAfterSeconds").expireAfter(0, SECONDS)
       )
     ),
-    replaceIndexes = true) {
+    replaceIndexes = false) {
 
   def store(questionDataCache: QuestionDataCache): Future[Unit] = {
     collection.insertOne(questionDataCache).toFuture().map(_ => ())
@@ -36,17 +40,23 @@ class QuestionMongoRepository @Inject()(mongoComponent: MongoComponent)(implicit
   /**
    *
    * @param correlationId   correlationId identifying the questions and answers to be retrieved
-   * @param selection       contains the origin and identifier(s) used to retrieve the questions/answers
+   * @param answerSelection       contains a subset of the identifier(s) used to retrieve the questions/answers
    * @return                List of QuestionDataCache containing all available questions
    *
    *         find uses the correlationId to identify the questions and answers (for those evidence sources that return correct answers) generated in the original question request
    *
-   *         the subsequent filter is for added security and uses the origin and identifiers passed by the origin service to ensure that the correlationId provided matches
-   *         the origin service and identifiers used retrieve the questions from the evidence sources
+   *         the subsequent filter is for added security and uses the identifiers passed by the calling service to ensure that the correlationId provided matches
+   *         the identifiers used retrieve the questions from the evidence sources
    */
-  def findAnswers(correlationId: CorrelationId, selection: Selection): Future[Seq[QuestionDataCache]] = {
-    val findAll: Future[Seq[QuestionDataCache]] = collection.find(Filters.eq("correlationId", correlationId.id)).toFuture()
-    findAll.map(_.filter(qmr => qmr.selection.identifiers.exists(selection.identifiers.contains) && qmr.selection.origin == selection.origin))
+  def findAnswers(correlationId: CorrelationId, answerSelection: Selection): Future[Seq[QuestionDataCache]] = {
+    val findAllByCorrelation: Future[Seq[QuestionDataCache]] = collection.find(Filters.eq("correlationId", correlationId.id)).toFuture()
+    // Check that the chosen selected identifiers are all actually in the matching doc
+    // N.B. We are not looking for equality, just a subset is sufficient
+    findAllByCorrelation.map { matchingDocs =>
+      matchingDocs.filter { doc =>
+        doc.selection.contains(answerSelection)
+      }
+    }
   }
 
 }

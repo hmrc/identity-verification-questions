@@ -9,20 +9,17 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
-import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.monitoring.{EventHandler, MonitoringEvent, ServiceUnavailableEvent}
+import uk.gov.hmrc.questionrepository.monitoring.{MonitoringEvent, ServiceUnavailableEvent}
 
 import scala.concurrent.ExecutionContext
 
 
 @Singleton
-class AnalyticsEventHandler @Inject()(connector: AnalyticsConnector, config: AppConfig) extends EventHandler with Logging {
+class AnalyticsEventHandler @Inject()(connector: AnalyticsConnector) extends Logging {
 
-  private lazy val factory = new AnalyticsRequestFactory(config)
-
-  override def handleEvent(event: MonitoringEvent)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+  def handleEvent(event: MonitoringEvent)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     event match {
-      case e: ServiceUnavailableEvent => sendEvent(factory.serviceUnavailableEvent(e.serviceName))
+      case e: ServiceUnavailableEvent => sendEvent(serviceUnavailableEvent(e.serviceName))
       case _ => ()
     }
   }
@@ -39,12 +36,9 @@ class AnalyticsEventHandler @Inject()(connector: AnalyticsConnector, config: App
       logger.info("VER-381 - No sessionId found in request")
     }
   }
-}
-
-private class AnalyticsRequestFactory(config: AppConfig) {
 
   def serviceUnavailableEvent(serviceName: String)(clientId: Option[String]): AnalyticsRequest={
-    val gaEvent = Event("sos_iv" , "circuit_breaker","P60service_unavailable_circuit-breaker".toLowerCase, Seq())
+    val gaEvent = Event("sos_iv" , "circuit_breaker",s"${serviceName}_unavailable_circuit-breaker", Seq())
     AnalyticsRequest(clientId, Seq(gaEvent))
   }
 }
