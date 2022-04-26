@@ -13,10 +13,6 @@ import uk.gov.hmrc.questionrepository.monitoring.analytics.AnalyticsEventHandler
 
 import scala.concurrent.ExecutionContext
 
-trait EventHandler {
-  def handleEvent(event: MonitoringEvent)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Unit
-}
-
 @Singleton
 class EventDispatcher @Inject()(analyticsEventHandler: AnalyticsEventHandler) extends Logging {
 

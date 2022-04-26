@@ -8,7 +8,7 @@ package uk.gov.hmrc.questionrepository.services
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
+import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
@@ -17,9 +17,9 @@ import uk.gov.hmrc.questionrepository.models.identifier._
 import uk.gov.hmrc.questionrepository.models._
 import java.time.LocalDateTime
 
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -120,6 +120,18 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection, origin: alala, identifiers: AA000000D,12345678"
           }
         }
+
+        "connector returns an unhealthy service exception" in new Setup {
+          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino", "utr")))
+
+          (service3.eventDispatcher.dispatchEvent(_: MonitoringEvent)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+            .expects(ServiceUnavailableEvent("p60Service"),*,*,*)
+
+          (service3.auditService.sendCircuitBreakerEvent(_: Seq[Identifier], _: String)(_: HeaderCarrier, _: ExecutionContext))
+            .expects(Seq(ninoIdentifier,saUtrIdentifier),"p60Service",*,*)
+
+          service3.questions(Selection(origin, Seq(ninoIdentifier, saUtrIdentifier))).futureValue shouldBe Seq()
+        }
       }
 
       "return empty list if service unavailable" when {
@@ -203,6 +215,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[TestRecord]] = connectorResult
     }
 
+    def connector2: QuestionConnector[TestRecord] = new QuestionConnector[TestRecord] {
+      def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[TestRecord]] = unhealthyServiceExceptionResult
+    }
+
     import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability
 
     abstract class TestService extends QuestionService with CheckAvailability
@@ -240,6 +256,23 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
     }
+
+    lazy val service3: TestService {
+      type Record = TestRecord
+    } = new TestService {
+      override val serviceName = p60Service
+      override type Record = TestRecord
+
+      override def connector: QuestionConnector[TestRecord] = connector2
+
+      override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
+
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+
+      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
+      override implicit val auditService: AuditService = mock[AuditService]
+    }
   }
 
   trait TestData {
@@ -256,5 +289,6 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     def testRecordResult: Future[Seq[TestRecord]] = Future.successful(Seq(TestRecord(1)))
     def notFoundResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("no no nooooo, no records found", NOT_FOUND))
     def badRequestResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("bad bad bad request", BAD_REQUEST))
+    def unhealthyServiceExceptionResult: Future[Seq[TestRecord]] = Future.failed(new UnhealthyServiceException("issue with service"))
   }
 }
