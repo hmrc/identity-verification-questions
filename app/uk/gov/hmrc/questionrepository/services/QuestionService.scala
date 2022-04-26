@@ -15,6 +15,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait QuestionService extends UsingCircuitBreaker with Logging {
@@ -29,7 +30,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def connector: QuestionConnector[Record]
 
-  def isAvailable(origin: Origin, identifiers: Seq[Identifier]): Boolean
+  def isAvailable(selection: Selection): Boolean
 
   def evidenceTransformer(records: Seq[Record]): Seq[Question]
 
@@ -60,7 +61,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           Seq()
         case t: Throwable =>
-          logger.error(s"$serviceName, threw exception $t, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
+          logger.error(s"$serviceName, threw exception $t, selection: $selection")
           Seq()
       }
     } else {

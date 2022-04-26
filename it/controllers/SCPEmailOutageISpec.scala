@@ -5,13 +5,11 @@
 
 package controllers
 
-import ch.qos.logback.classic.Level
 import com.github.tomakehurst.wiremock.client.WireMock.{get, okJson, stubFor, urlMatching}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import iUtils.{BaseISpec, LogCapturing}
 import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.{PassportQuestion, Question, QuestionResponse}
+import uk.gov.hmrc.questionrepository.models.{PassportQuestion, Question}
 
 import java.time.LocalDateTime
 

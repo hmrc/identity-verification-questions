@@ -31,25 +31,25 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
   "verifyAnswer" should {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo" in {
-        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
+        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(Question(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
 
         await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
+        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
       }
     }
 
     "return score of 'Incorrect'" when {
       "answer does not match an answer retrieved from repo" in {
-        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
+        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(Question(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
 
         await(mongoRepo.store(inCorrectQDC))
-        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
+        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
       }
     }
 
     "return score of 'Unknown'" when {
       "no answers retrieved from repo" in {
-        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Unknown)
+        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Unknown)
       }
     }
   }

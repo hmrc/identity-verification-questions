@@ -35,7 +35,7 @@ class DVALServiceSpec extends UnitSpec {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        (mockAppConfig.serviceStatus(_:ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("dob")))
+        (mockAppConfig.serviceStatus(_:ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("dob")))
         service.questions(selectionNoDob).futureValue shouldBe Seq()
       }
     }
@@ -51,15 +51,15 @@ class DVALServiceSpec extends UnitSpec {
   }
 
   trait WithStubbing extends Setup {
-    (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("dob")))
+    (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("dob")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_ :ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(60))
     (mockAppConfig.serviceCbUnstableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(300))
   }
 
   trait TestData {
-    val selectionDob: Selection = Selection(origin, Seq(dobIdentifier))
-    val selectionNoDob: Selection = Selection(origin, Seq(saUtrIdentifier))
+    val selectionDob: Selection = Selection(None, None, Some(dobIdentifier))
+    val selectionNoDob: Selection = Selection(saUtrIdentifier)
     val dvlaQuestion: Question = Question(DVLAQuestion, Seq())
   }
 }
