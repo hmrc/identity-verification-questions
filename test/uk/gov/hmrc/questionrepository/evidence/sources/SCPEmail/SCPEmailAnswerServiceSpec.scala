@@ -39,16 +39,16 @@ class SCPEmailAnswerServiceSpec extends UnitSpec with BeforeAndAfterEach {
 
     "return score of 'Incorrect'" when {
       "answer does not match an answer retrieved from repo" in new Setup {
-        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(origin, Seq(ninoIdentifier, saUtrIdentifier)), Seq(Question(SCPEmailQuestion, Seq("bad-email@bad-email.com"))), dateTime)
+        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(Question(SCPEmailQuestion, Seq("bad-email@bad-email.com"))), dateTime)
 
         await(questionRepo.collection.insertOne(inCorrectQDC).toFuture())
-        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Incorrect)
+        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Incorrect)
       }
     }
 
     "return score of 'Unknown'" when {
       "no answers retrieved from repo" in new Setup {
-        connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Unknown)
+        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(SCPEmailQuestion, Unknown)
       }
     }
   }

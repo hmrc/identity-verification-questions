@@ -14,14 +14,14 @@ import com.typesafe.config.Config
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.Configuration
 import play.api.libs.json.Writes
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.{HttpGet, HttpPost, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerConnector
-import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, DVLAQuestion, QuestionResult, UkDrivingLicenceAnswer, Unknown}
+import uk.gov.hmrc.questionrepository.models.{AnswerDetails, Correct, DVLAQuestion, QuestionResult, Selection, UkDrivingLicenceAnswer, Unknown}
 import uk.gov.hmrc.questionrepository.models.dvla.UkDrivingLicenceRequest
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,11 +31,11 @@ class DVALAnswerConnectorSpec extends UnitSpec with AppConfigTestData  {
   "verifyAnswer" should {
 
     "return Unknown if no dob identifier present" in new Setup {
-      connector.verifyAnswer(corrId, origin, Seq(NinoI("AA000003D")), AnswerDetails(DVLAQuestion, ukDrivingLicenceAnswer)).futureValue shouldBe QuestionResult(DVLAQuestion, Unknown)
+      connector.verifyAnswer(corrId, Selection(Nino("AA000003D")), AnswerDetails(DVLAQuestion, ukDrivingLicenceAnswer)).futureValue shouldBe QuestionResult(DVLAQuestion, Unknown)
     }
 
     "return Correct if answer successfully matched and correct" in new Setup {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(DVLAQuestion, ukDrivingLicenceAnswer)).futureValue shouldBe QuestionResult(DVLAQuestion, Correct)
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(DVLAQuestion, ukDrivingLicenceAnswer)).futureValue shouldBe QuestionResult(DVLAQuestion, Correct)
     }
 
   }

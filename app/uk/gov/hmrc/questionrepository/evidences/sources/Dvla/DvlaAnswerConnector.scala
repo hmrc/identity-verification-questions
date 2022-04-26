@@ -13,8 +13,6 @@ import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.models.dvla.UkDrivingLicenceRequest
-import uk.gov.hmrc.questionrepository.models.identifier.Identifier
-import uk.gov.hmrc.questionrepository.models.identifier.Search.FindIdentifier
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,10 +22,10 @@ class DvlaAnswerConnector @Inject()(http: CoreGet with CorePost)(implicit appCon
 
   def serviceName: ServiceName = dvlaService
 
-  override def verifyAnswer(correlationId: CorrelationId, origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails)
+  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)
                            (implicit hc: HeaderCarrier): Future[QuestionResult] = {
-    identifiers.dob.fold {
-      logger.error(s"$serviceName, No date of birth identifier for ${answer.questionKey}, origin: $origin, identifiers: ${identifiers.mkString(",")}")
+    selection.dob.fold {
+      logger.error(s"$serviceName, No date of birth identifier for ${answer.questionKey}, selection: $selection")
       Future.successful(QuestionResult(answer.questionKey, Unknown))
     } { dob =>
       val request = UkDrivingLicenceRequest(dob.toString, answer.answer.asInstanceOf[UkDrivingLicenceAnswer])

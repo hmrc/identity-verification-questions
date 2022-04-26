@@ -7,11 +7,11 @@ package uk.gov.hmrc.questionrepository.evidence.sources.SCPEmail
 
 import Utils.{LogCapturing, UnitSpec}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.{SCPEmailConnector, SCPEmailService}
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, SCPEmailQuestion, Selection, ServiceName, scpEmailService}
+import uk.gov.hmrc.questionrepository.models.{Question, SCPEmailQuestion, Selection, ServiceName, scpEmailService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +33,7 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
       }
@@ -54,7 +54,7 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
-    (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List.empty, List.empty, List("nino")))
+    (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_ :ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(60))
     (mockAppConfig.serviceCbUnstableDurationInSec(_ :ServiceName)).expects(service.serviceName).returning(Some(300))
@@ -64,13 +64,11 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
     val emailList = List(Some("email@email.com"))
     val noEmailList = List(None)
 
-    val ninoIdentifier: NinoI = NinoI("AA000000D")
-    val utrIdentifier: SaUtrI = SaUtrI("12345678")
+    val ninoIdentifier: Nino = Nino("AA000000D")
+    val utrIdentifier: SaUtr = SaUtr("12345678")
 
-    val origin: Origin = Origin("testOrigin")
-
-    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
-    val selectionNoNino: Selection = Selection(origin, Seq(utrIdentifier))
+    val selectionNino: Selection = Selection(ninoIdentifier, utrIdentifier)
+    val selectionNoNino: Selection = Selection(utrIdentifier)
 
     val scpEmailQuestion = Question(SCPEmailQuestion, Seq("email@email.com"), Map.empty[String, String])
   }

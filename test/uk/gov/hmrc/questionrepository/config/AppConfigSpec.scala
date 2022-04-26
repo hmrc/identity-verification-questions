@@ -73,172 +73,153 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     }
 
     "getting ServiceStatus" should {
+
       "return ServiceStatus with outage for a service with full valid config" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with no outage for service with config that has no outage set" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage not specified") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with no outage for service with config that has endDate earlier than startDate" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T23:00:00.000", "2020-08-08T21:00:00.000") ++ disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T23:00:00.000", "2020-08-08T21:00:00.000") ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage startDate: 2020-08-08T23:00 must be earlier than endDate: 2020-08-08T21:00") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with no outage for service with config that has invalid startDate" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("Not A Date", "2020-08-08T21:00:00.000") ++ disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("Not A Date", "2020-08-08T21:00:00.000") ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage Invalid date in `microservice.services.p60Service.disabled.start` : `Not A Date`") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with no outage for service with config that has invalid endDate" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "Not A Date") ++ disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "Not A Date") ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage Invalid date in `microservice.services.p60Service.disabled.end` : `Not A Date`") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with no outage for service with config that has no startDate" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = endDate ++ disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = endDate ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage p60Service.disabled.start missing") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with no outage for service with config that has no endDate" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = startDate ++ disabledOrigins ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = startDate ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testDisabled, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage p60Service.disabled.end missing") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with empty List for disabled origins for service with config missing setting" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ enabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), List.empty, testEnabled, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service not specified") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with empty List for enabled origins for service with config missing setting" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ disabledOrigins ++ requiredIdentifiers
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ requiredIdentifiers
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, List.empty, testIdentifiers)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service not specified") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
 
       "return ServiceStatus with empty List for required identifiers for service with config missing setting" in new Setup {
-        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000") ++ enabledOrigins ++ disabledOrigins
+        lazy val testServiceStatus: Map[String, Any] = outageConfig("2020-08-08T21:00:00.000", "2020-08-08T23:00:00.000")
 
         override def testConfig: Map[String, Any] = baseConfig ++ testServiceStatus
 
         withCaptureOfLoggingFrom[AppConfig] { logs =>
-          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testDisabled, testEnabled, List.empty)
+          appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), List.empty)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 4
+          infoLogs.size shouldBe 2
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
-          infoLogs.count(_.getMessage == "Disabled origins for p60Service are [seiss, ddt]") shouldBe 1
-          infoLogs.count(_.getMessage == "Enabled origins for p60Service are [dwp-iv]") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service not specified") shouldBe 1
         }
       }
@@ -352,15 +333,6 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val startDate: Map[String, Any] = Map("microservice.services.p60Service.disabled.start" -> "2020-08-08T21:00:00.000")
     val endDate: Map[String, Any] = Map("microservice.services.p60Service.disabled.end" -> "2020-08-08T23:00:00.000")
 
-    val disabledOrigins: Map[String, Any] = Map(
-      "microservice.services.p60Service.disabled.origin.0" -> "seiss",
-      "microservice.services.p60Service.disabled.origin.1" -> "ddt"
-    )
-
-    val enabledOrigins: Map[String, Any] = Map(
-      "microservice.services.p60Service.enabled.origin.0" -> "dwp-iv"
-    )
-
     val requiredIdentifiers: Map[String, Any] = Map(
       "microservice.services.p60Service.identifier.required.0" -> "nino",
       "microservice.services.p60Service.identifier.required.1" -> "utr"
@@ -370,8 +342,6 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     val testEndTime: LocalDateTime = LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME)
     val testOutage: Outage = Outage(testStartTime, testEndTime)
 
-    val testDisabled = List("seiss", "ddt")
-    val testEnabled = List("dwp-iv")
     val testIdentifiers = List ("nino", "utr")
 
     val hodAuthorizationToken: Map[String, Any] = Map("microservice.services.p60Service.hod.authorizationToken" -> "authToken")

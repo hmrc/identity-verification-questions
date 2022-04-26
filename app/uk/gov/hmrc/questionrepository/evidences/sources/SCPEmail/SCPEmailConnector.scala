@@ -11,7 +11,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, CoreGet}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.{AccountInformation, DetailsNotFound, NinoClStoreEntry, Selection, ServiceName, scpEmailService}
-import uk.gov.hmrc.questionrepository.models.identifier.Search._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,7 +43,7 @@ class SCPEmailConnector @Inject()(val http: CoreGet)
   }
 
   override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Option[String]]] = {
-    getEmail(selection.identifiers.nino.map(nino => nino.value).getOrElse(throw DetailsNotFound))
+    getEmail(selection.nino.getOrElse(throw DetailsNotFound))
   }
 
 }

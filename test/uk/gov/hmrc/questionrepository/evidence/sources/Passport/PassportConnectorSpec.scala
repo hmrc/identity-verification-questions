@@ -11,12 +11,12 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportConnector
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{Origin, Selection, ServiceName, passportService}
+import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, passportService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,10 +37,10 @@ class PassportConnectorSpec extends UnitSpec with PassportTestData with GuiceOne
 
 
   trait setUp {
-    val origin: Origin = Origin("testOrigin")
-    val ninoIdentifier: NinoI = NinoI("AA000000D")
-    val utrIdentifier: SaUtrI = SaUtrI("12345678")
-    val selectionNino: Selection = Selection(origin, Seq(ninoIdentifier, utrIdentifier))
+
+    val ninoIdentifier: Nino = Nino("AA000000D")
+    val utrIdentifier: SaUtr = SaUtr("12345678")
+    val selectionNino: Selection = Selection(ninoIdentifier, utrIdentifier)
 
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
 

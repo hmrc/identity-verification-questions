@@ -5,16 +5,16 @@
 
 package uk.gov.hmrc.questionrepository.services
 
-import java.time.Period
+import java.time.{LocalDate, Period}
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailService
-import uk.gov.hmrc.questionrepository.models.identifier.{DobI, NinoI, SaUtrI}
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
@@ -72,11 +72,10 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
     val mockMessageTextService: MessageTextService = mock[MessageTextService]
     val service = new EvidenceRetrievalService(mongoRepo, mockMessageTextService, mockAppConfig, mockP60Service, mockPassportService, mockSCPEmailService, mockDvlaService)
-    val origin: Origin = Origin("alala")
-    val ninoIdentifier: NinoI = NinoI("AA000000D")
-    val saUtrIdentifier: SaUtrI = SaUtrI("12345678")
-    val dobIdentifier: DobI = DobI("1984-01-01")
-    val selection: Selection = Selection(origin, Seq(ninoIdentifier, saUtrIdentifier, dobIdentifier))
+    val ninoIdentifier: Nino = Nino("AA000000D")
+    val saUtrIdentifier: SaUtr = SaUtr("12345678")
+    val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")
+    val selection: Selection = Selection(Some(ninoIdentifier), Some(saUtrIdentifier), Some(dobIdentifier))
 
     case class TestRecord(value: BigDecimal)
   }

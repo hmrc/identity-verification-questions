@@ -10,8 +10,7 @@ import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.identifier._
-import uk.gov.hmrc.questionrepository.models.{Origin, Question, Selection, ServiceName}
+import uk.gov.hmrc.questionrepository.models.{Question, Selection, ServiceName}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,7 +24,7 @@ abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: 
 
   def connector: QuestionConnector[Record]
 
-  def isAvailable(origin: Origin, identifiers: Seq[Identifier]): Boolean
+  def isAvailable(selection: Selection): Boolean
 
   def evidenceTransformer(records: Seq[Record]): Seq[Question]
 
@@ -44,16 +43,16 @@ abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: 
   }
 
   def questions(selection: Selection)(implicit hc: HeaderCarrier): Future[Seq[Question]] = {
-    if (isAvailable(selection.origin, selection.identifiers)) {
+    if (isAvailable(selection)) {
       withCircuitBreaker {
         connector.getRecords(selection).map(evidenceTransformer)
       } recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 => {
-          logger.info(s"$serviceName, no records returned for selection, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
+          logger.info(s"$serviceName, no records returned for selection: $selection")
           Seq()
         }
         case t: Throwable => {
-          logger.error(s"$serviceName, threw exception $t, origin: ${selection.origin}, identifiers: ${selection.identifiers.mkString(",")}")
+          logger.error(s"$serviceName, threw exception $t, selection: $selection")
           Seq()
         }
       }

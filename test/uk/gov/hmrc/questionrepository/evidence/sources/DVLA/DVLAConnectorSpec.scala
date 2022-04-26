@@ -27,6 +27,6 @@ class DVLAConnectorSpec extends UnitSpec {
 
   class SetUp {
     val connector = new DvlaConnector()
-    val selection: Selection = Selection(origin, dobIdentifiers, Some(3), Some(1))
+    val selection: Selection = Selection(None, None, Some(dobIdentifier))
   }
 }

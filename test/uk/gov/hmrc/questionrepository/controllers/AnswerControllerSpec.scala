@@ -10,13 +10,12 @@ import ch.qos.logback.classic.Level
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.evidence.sources.P60.P60ConnectorSpec
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.AnswerVerificationService
 
@@ -70,10 +69,9 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
 
   trait TestData {
     val correlationId: CorrelationId = CorrelationId()
-    val origin: Origin = Origin("seiss")
-    val ninoIdentifier: NinoI = NinoI("AA000000A")
+    val ninoIdentifier: Nino = Nino("AA000000A")
     val integerAnswer: IntegerAnswer = IntegerAnswer(5)
-    val answerCheck: AnswerCheck = AnswerCheck(correlationId, origin, Seq(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, integerAnswer)))
-    val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId,Selection(origin, Seq(ninoIdentifier)), Seq.empty[Question], LocalDateTime.now)
+    val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, integerAnswer)))
+    val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, Selection(ninoIdentifier), Seq.empty[Question], LocalDateTime.now)
   }
 }
