@@ -21,7 +21,6 @@ class AuditService @Inject()(auditConnector: AuditConnector){
   def sendCircuitBreakerEvent(identifiers: Selection, unavailableServiceName: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[AuditResult] = {
     val tags = Map("transactionName" -> "CircuitBreakerUnhealthyEvent")
 
-    println(s"\n\n\n\n${identifiers.toString}\n\n\n\n")
     auditConnector.sendEvent(
       DataEvent(
         auditSource = AuditSource,
