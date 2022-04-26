@@ -55,29 +55,6 @@ class ConfigHelper @Inject()(config: Configuration)
     }
   }
 
-  protected def getDisabledOrigins(serviceName: String): List[String] = {
-    val key = s"microservice.services.$serviceName.disabled.origin"
-    getStringList(key) match {
-      case Some(origins) =>
-        logger.info(s"Disabled origins for $serviceName are [${origins.mkString(", ")}]")
-        origins.toList
-      case None =>
-        logger.info(s"Disabled origins for $serviceName not specified")
-        List.empty[String]
-    }
-  }
-
-  protected def getEnabledOrigins(serviceName: String): List[String] = {
-    val key = s"microservice.services.$serviceName.enabled.origin"
-    getStringList(key) match {
-      case Some(origins) =>
-        logger.info(s"Enabled origins for $serviceName are [${origins.mkString(", ")}]")
-        origins.toList
-      case None =>
-        logger.info(s"Enabled origins for $serviceName not specified")
-        List.empty[String]
-    }
-  }
 
   protected def getRequiredIdentifiers(serviceName: String): List[String] = {
     val key = s"microservice.services.$serviceName.identifier.required"
@@ -91,16 +68,11 @@ class ConfigHelper @Inject()(config: Configuration)
     }
   }
 
-  case class ServiceState(outage: Option[Outage],
-                          disabledOrigins: List[String],
-                          enabledOrigins: List[String],
-                          requiredIdentifiers: List[String])
+  case class ServiceState(outage: Option[Outage], requiredIdentifiers: List[String])
 
   object ServiceState {
 
     def apply(serviceName: String): ServiceState = apply(scheduledOutage(serviceName),
-                                                        getDisabledOrigins(serviceName),
-                                                        getEnabledOrigins(serviceName),
                                                         getRequiredIdentifiers(serviceName))
   }
 

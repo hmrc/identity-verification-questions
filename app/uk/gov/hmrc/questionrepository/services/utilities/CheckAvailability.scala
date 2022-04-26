@@ -6,8 +6,7 @@
 package uk.gov.hmrc.questionrepository.services.utilities
 
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.identifier._
-import uk.gov.hmrc.questionrepository.models.{Origin, ServiceName}
+import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName}
 
 import java.time.LocalDateTime
 
@@ -19,8 +18,14 @@ trait CheckAvailability {
 
    private lazy val serviceStatus = appConfig.serviceStatus(serviceName)
 
-   private def hasRequiredIdentifiers(identifiers: Seq[Identifier]): Boolean =
-      serviceStatus.requiredIdentifiers.forall(identifiers.map(_.identifierType.toString).contains)
+   private def hasRequiredIdentifiers(selection: Selection): Boolean = {
+      serviceStatus.requiredIdentifiers.forall {
+         case "nino" => selection.nino.isDefined // TODO move to Selection?
+         case "utr" => selection.sautr.isDefined
+         case "dob" => selection.dob.isDefined
+         case _ => false
+      }
+   }
 
    private def isDisabledByTime(dateToCheck: LocalDateTime = LocalDateTime.now()): Boolean =
       serviceStatus.outage match {
@@ -28,16 +33,7 @@ trait CheckAvailability {
          case _ => false
       }
 
-   private def isDisabledByOrigin(origin: Origin): Boolean =
-      serviceStatus.disabledOrigins.contains(origin.value)
-
-   private def isEnabledByOrigin(origin: Origin): Boolean =
-      serviceStatus.enabledOrigins.contains(origin.value)
-
-   def isAvailable(origin: Origin, identifiers: Seq[Identifier]): Boolean =
-      if (serviceStatus.enabledOrigins.nonEmpty)
-         isEnabledByOrigin(origin) && hasRequiredIdentifiers(identifiers) && !isDisabledByTime()
-      else
-         !isDisabledByOrigin(origin) && hasRequiredIdentifiers(identifiers) && !isDisabledByTime()
+   def isAvailable(selection: Selection): Boolean =
+      hasRequiredIdentifiers(selection) && !isDisabledByTime()
 
 }

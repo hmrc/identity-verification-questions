@@ -12,10 +12,10 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.P60._
-import uk.gov.hmrc.questionrepository.models.identifier.NinoI
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
@@ -36,7 +36,7 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       questionResponse.get.questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
 
       //ver-1281: SCPEmail disabled for now
-      val mongoResult = questionRepository.findAnswers(questionResponse.get.correlationId, Selection(Origin("lost-credentials"), Seq(NinoI("AA000000A")))).futureValue
+      val mongoResult = questionRepository.findAnswers(questionResponse.get.correlationId, Selection(Nino("AA000000A"))).futureValue
       //mongoResult.flatMap(qdc => qdc.questions.flatMap(q => q.answers)).count(_ == "email@email.com") shouldBe 1
     }
 
@@ -85,7 +85,6 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
   }
 }
 
-
 class QuestionControllerOutageISpec extends BaseISpec with LogCapturing {
 
   val datePast: String = LocalDateTime.now.minusDays(1).toString
@@ -107,56 +106,6 @@ class QuestionControllerOutageISpec extends BaseISpec with LogCapturing {
         questionResponse.get.questions should not contain paymentToDateQuestion
         questionResponse.get.questions should not contain employeeNIContributionsQuestion
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
-      }
-    }
-  }
-}
-
-class QuestionControllerDisabledOriginISpec extends BaseISpec with LogCapturing {
-
-  val datePast: String = LocalDateTime.now.minusDays(1).toString
-  val dateFuture: String = LocalDateTime.now.plusDays(1).toString
-  override def extraConfig: Map[String, Any] = {
-    super.extraConfig ++ Map("microservice.services.p60Service.disabled.origin.0" -> "lost-credentials")
-  }
-
-  "POST /questions for disabled origin" should {
-    "return 200 and an empty sequence if P60 service is disabled for origin service" in new Setup {
-      ivReturnOk
-      basGatewayStub
-      withCaptureOfLoggingFrom[AppConfig] { logs =>
-        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
-        response.status shouldBe 200
-        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-        questionResponse.isSuccess shouldBe true
-        questionResponse.get.questions should not contain paymentToDateQuestion
-        questionResponse.get.questions should not contain employeeNIContributionsQuestion
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == "Disabled origins for p60Service are [lost-credentials]") shouldBe 1
-      }
-    }
-  }
-}
-
-class QuestionControllerEnabledOriginISpec extends BaseISpec with LogCapturing {
-
-  val datePast: String = LocalDateTime.now.minusDays(1).toString
-  val dateFuture: String = LocalDateTime.now.plusDays(1).toString
-  override def extraConfig: Map[String, Any] = {
-    super.extraConfig ++ Map("microservice.services.p60Service.enabled.origin.0" -> "identity-verification")
-  }
-
-  "POST /questions for enabled origin" should {
-    "return 200 and an empty sequence if origin service in not in P60 service enabled origins" in new Setup {
-      ivReturnOk
-      basGatewayStub
-      withCaptureOfLoggingFrom[AppConfig] { logs =>
-        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
-        response.status shouldBe 200
-        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-        questionResponse.isSuccess shouldBe true
-        questionResponse.get.questions should not contain paymentToDateQuestion
-        questionResponse.get.questions should not contain employeeNIContributionsQuestion
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == "Enabled origins for p60Service are [identity-verification]") shouldBe 1
       }
     }
   }
@@ -238,38 +187,25 @@ trait Setup extends WireMockStubs with TestData {
 
   val questionRoute = "/question-repository/questions"
 
-
 }
 
 trait TestData extends P60TestData {
 
   val validQuestionRequest: JsObject = Json.obj(
-    "origin" -> "lost-credentials",
-    "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A")),
-    "max" -> 3,
-    "min" -> 1
+    "nino" -> "AA000000A",
   )
 
   val validQuestionRequestUtr: JsObject = Json.obj(
-    "origin" -> "lost-credentials",
-    "identifiers" -> Json.arr(Json.obj("utr" -> "123456789")),
-    "max" -> 3,
-    "min" -> 1
+    "sautr" -> "123456789",
   )
 
   val validQuestionRequestNinoDob: JsObject = Json.obj(
-    "origin" -> "lost-credentials",
-    "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A"),Json.obj("dob" -> "1986-02-28")),
-    "max" -> 3,
-    "min" -> 1
+    "nino" -> "AA000000A",
+    "dob" -> "1986-02-28"
   )
 
-
   val invalidQuestionRequest: JsObject = Json.obj(
-    "origin" -> "lost-credentials",
-    "identifiers" -> Json.arr(Json.obj("nino" -> "AA000000A")),
-    "max" -> 5,
-    "min" -> 8
+    "foo" -> "bar",
   )
 
   val paymentToDateQuestion: Question = Question(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))

@@ -6,7 +6,8 @@
 package iUtils
 
 import com.github.tomakehurst.wiremock.client.WireMock.{ok, post, stubFor, urlPathEqualTo}
-import org.scalatest.OptionValues
+import org.mongodb.scala.bson.Document
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -26,7 +27,8 @@ trait BaseISpec extends AnyWordSpecLike
   with DefaultAwaitTimeout
   with GuiceOneServerPerSuite
   with FutureAwaits
-  with Injecting {
+  with Injecting
+  with BeforeAndAfterEach {
 
   protected def extraConfig: Map[String, Any] = Map.empty
 
@@ -50,7 +52,7 @@ trait BaseISpec extends AnyWordSpecLike
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck"
   )
 
-  private lazy val questionRepository = app.injector.instanceOf[QuestionMongoRepository]
+  lazy val questionRepository: QuestionMongoRepository = app.injector.instanceOf[QuestionMongoRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -58,13 +60,10 @@ trait BaseISpec extends AnyWordSpecLike
       post(urlPathEqualTo("/platform-analytics/event"))
         .willReturn(ok())
     )
-
-    questionRepository.collection.drop()
+    await(questionRepository.collection.drop().toFuture())
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
-
-    questionRepository.collection.drop()
   }
 }

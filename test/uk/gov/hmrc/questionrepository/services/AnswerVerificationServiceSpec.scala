@@ -13,7 +13,6 @@ import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerS
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
-import uk.gov.hmrc.questionrepository.models.identifier._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -93,8 +92,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     val mockSCPEmailAnswerService = mock[SCPEmailAnswerService]
     val mockDvlaAnswerService = mock[DvlaAnswerService]
     val service = new AnswerVerificationService(mockP60AnswerService, mockPassportAnswerService, mockSCPEmailAnswerService, mockDvlaAnswerService)
-    val identifiers: Seq[Identifier] = Seq(ninoIdentifier)
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("an answer")))
-    val answerCheck: AnswerCheck = AnswerCheck(corrId, origin, identifiers,answerDetails)
+    val answerCheck: AnswerCheck = AnswerCheck(corrId, Selection(ninoIdentifier), answerDetails)
   }
 }

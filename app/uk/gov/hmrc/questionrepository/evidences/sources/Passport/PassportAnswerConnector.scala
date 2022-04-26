@@ -10,10 +10,9 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
-import uk.gov.hmrc.questionrepository.models.identifier.Identifier
+
 import uk.gov.hmrc.questionrepository.models.passport.PassportRequest
-import uk.gov.hmrc.questionrepository.models.{AnswerDetails, CorrelationId, Error, Origin, PassportAnswer, QuestionResult, ServiceName, Unknown, passportService}
-import uk.gov.hmrc.questionrepository.models.identifier.Search._
+import uk.gov.hmrc.questionrepository.models.{AnswerDetails, CorrelationId, Error, PassportAnswer, QuestionResult, Selection, ServiceName, Unknown, passportService}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,9 +25,9 @@ class PassportAnswerConnector @Inject()(val http: CoreGet with CorePost)(implici
 
   def serviceName: ServiceName = passportService
 
-  override def verifyAnswer(correlationId: CorrelationId, origin: Origin, identifiers: Seq[Identifier], answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[QuestionResult] = {
-    identifiers.dob.fold {
-      logger.error(s"$serviceName, No date of birth identifier for ${answer.questionKey}, origin: $origin, identifiers: ${identifiers.mkString(",")}")
+  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[QuestionResult] = {
+    selection.dob.fold {
+      logger.error(s"$serviceName, No date of birth identifier for ${answer.questionKey}, selection: $selection")
       Future.successful(QuestionResult(answer.questionKey, Unknown))
     } { dob =>
       val request = createPassportXml(PassportRequest(dob.toString, answer.answer.asInstanceOf[PassportAnswer]))

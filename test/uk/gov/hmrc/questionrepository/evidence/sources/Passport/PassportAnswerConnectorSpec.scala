@@ -29,31 +29,31 @@ class PassportAnswerConnectorSpec extends UnitSpec with AppConfigTestData {
 
   "verifyAnswer" should {
     "return Correct if answer successfully matched and correct" in new Setup {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
     }
 
     "return Error if answer successfully matched and returns an error" in new Setup(errorPassportResp) {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(""))
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(""))
     }
 
     "return Error if answer successfully matched and returns no result" in new Setup(errorPassportResp2) {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"Unexpected response \n:$errorPassportResp2"))
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"Unexpected response \n:$errorPassportResp2"))
     }
 
     "return Incorrect if answer successfully matched and is failure" in new Setup(invalidPassportResp) {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Incorrect)
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Incorrect)
     }
 
     "return Correct if answer successfully matched and is failure but is on stop list" in new Setup(invalidPassportStoppedResp) {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Correct)
     }
 
     "return Unknown if no dob identifier present" in new Setup {
-      connector.verifyAnswer(corrId, origin, Seq(ninoIdentifier), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Unknown)
+      connector.verifyAnswer(corrId, Selection(ninoIdentifier), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Unknown)
     }
 
     "return Error if status not OK" in new Setup(responseStatus=NOT_FOUND) {
-      connector.verifyAnswer(corrId, origin, dobIdentifiers, AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"status: $NOT_FOUND body: $validPassportResp"))
+      connector.verifyAnswer(corrId, Selection(None, None, Some(dobIdentifier)), AnswerDetails(PassportQuestion, passportAnswer)).futureValue shouldBe QuestionResult(PassportQuestion, Error(s"status: $NOT_FOUND body: $validPassportResp"))
     }
   }
 

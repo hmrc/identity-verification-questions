@@ -17,12 +17,12 @@ import play.api.http.{HeaderNames, MimeTypes, Status}
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, ResultExtractors, Writeables}
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.mongo.{MongoComponent, MongoSpecSupport}
-import uk.gov.hmrc.questionrepository.models.identifier.{DobI, NinoI, SaUtrI}
-import uk.gov.hmrc.questionrepository.models.{CorrelationId, Origin}
+import uk.gov.hmrc.questionrepository.models.CorrelationId
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -44,12 +44,10 @@ trait UnitSpec
 
   val dateTime: LocalDateTime = LocalDateTime.now()
   val dob = "1986-01-01"
-  val dobIdentifier: DobI = DobI(dob)
-  val dobIdentifiers = Seq(dobIdentifier)
-  val ninoIdentifier: NinoI = NinoI("AA000000D")
-  val saUtrIdentifier: SaUtrI = SaUtrI("12345678")
+  val dobIdentifier: LocalDate = LocalDate.parse(dob)
+  val ninoIdentifier: Nino = Nino("AA000000D")
+  val saUtrIdentifier: SaUtr = SaUtr("12345678")
   val corrId: CorrelationId = CorrelationId()
-  val origin: Origin = Origin("lost-credentials")
   val reqId: String = UUID.randomUUID().toString
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")

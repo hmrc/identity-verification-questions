@@ -62,6 +62,6 @@ class SCPEmailConnectorSpec extends UnitSpec with SCPEmailTestData with GuiceOne
 
     val connector = new SCPEmailConnector(http)
 
-    val selection: Selection = Selection(origin, Seq(ninoIdentifier), Some(3), Some(1))
+    val selection: Selection = Selection(ninoIdentifier)
   }
 }
