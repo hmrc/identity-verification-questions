@@ -10,6 +10,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.connectors
 import uk.gov.hmrc.questionrepository.evidences.sources.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.{Question, Selection, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
@@ -40,11 +41,16 @@ class SAService @Inject() (
 
   override type Record = SelfAssessmentReturn
 
-  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
-
-  override def questionHandlers: Seq[QuestionHandler[SelfAssessmentReturn]] =
-    saPensionService.questionHandlers ++ saPaymentService.questionHandlers
+//  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
+//
+//  override def questionHandlers: Seq[QuestionHandler[SelfAssessmentReturn]] =
+//    saPensionService.questionHandlers ++ saPaymentService.questionHandlers
 
   override protected def circuitBreakerConfig: CircuitBreakerConfig = ???
 
+  override def connector: connectors.QuestionConnector[SelfAssessmentReturn] = ???
+
+  override def isAvailable(selection: Selection): Boolean = ???
+
+  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
 }

@@ -11,10 +11,10 @@ import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimumNumberOfQuestions
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
-import uk.gov.hmrc.questionrepository.models.{QuestionKey, Selection, selfAssessmentService}
-import uk.gov.hmrc.questionrepository.models.identifier.{NinoI, NinoType}
+import uk.gov.hmrc.questionrepository.models.{Question, QuestionKey, Selection, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
@@ -25,7 +25,8 @@ class SAPensionService @Inject() (
     connector : SAPensionsConnector,
     val eventDispatcher: EventDispatcher,
     override implicit val auditService: AuditService) extends QuestionServiceMeoMinimumNumberOfQuestions
-  with CircuitBreakerConfig {
+//  with CircuitBreakerConfig
+{
 
   type Record = SelfAssessmentReturn
 
@@ -36,7 +37,7 @@ class SAPensionService @Inject() (
   private val currentYearKey = "currentTaxYear"
   private val previousYearKey = "previousTaxYear"
 
-  override def serviceName = selfAssessmentService.toString
+  override def serviceName = selfAssessmentService
 
   private[sa] def determinePeriod = {
     val switchDate = DateTime.parse(s"${currentDate.getYear}-$switchOverMonth-$switchOverDay")
@@ -47,55 +48,61 @@ class SAPensionService @Inject() (
     }
   }
 
-  override def getRecords(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
-    val nino = selection.identifiers.find(p => p.identifierType == NinoType)
+   def getRecords(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
       val (startYear, endYear) = determinePeriod
-      connector.getReturns(nino.get, startYear, endYear)
+      connector.getReturns(selection.nino.get, startYear, endYear)
   }
 
-  val questionHandlers: Seq[QuestionHandler[Record]]  = Seq(
-    new PenceQuestionHandler[SelfAssessmentReturn] {
-      override def key: QuestionKey = SelfAssessedIncomeFromPensionsQuestion
+//  val questionHandlers: Seq[QuestionHandler[Record]]  = Seq(
+//    new PenceQuestionHandler[SelfAssessmentReturn] {
+//      override def key: QuestionKey = SelfAssessedIncomeFromPensionsQuestion
+//
+//      override def validateAnswer(validAnswers: Seq[String], answer: String, selection: Selection)(implicit ec: ExecutionContext, appConfig: AppConfig): Future[AnswerCorrectness] = {
+//        val answers = validAnswers.map(convertAnswer).map(_.toBigInt)
+//        val intAnswer = convertAnswer(answer).toBigInt
+//        val offset = appConfig.saAnswerOffset
+//        val result = if (answers.exists(a => a - offset <= intAnswer && a + offset >= intAnswer)) Match else NoMatch(answers.map(_.toString))
+//        Future.successful(result)
+//      }
+//
+//      private def returnsToAdditionalInfo(returns: Seq[SAReturn]): Map[String, String] = {
+//        val yearToRecords: Map[Int, Seq[SARecord]] = returns.map(sar => sar.taxYear.startYear -> sar.returns).toMap
+//        val yearsWithSomeNotZero: Set[String] = yearToRecords.collect { case (year, records) if records.exists(_.incomeFromPensions > 0) => year.toString }.toSet
+//        additionalInfo.filter { case (_, year) => yearsWithSomeNotZero(year) }
+//      }
+//
+//      override def customAdditionalInfo(returns: Seq[SelfAssessmentReturn]): Map[String, String]= {
+//        if (returns.isEmpty) additionalInfo
+//        else {
+//              // it will always be an SAReturn
+//            returnsToAdditionalInfo(returns.asInstanceOf[Seq[SAReturn]])
+//        }
+//      }
+//
+//      override protected def additionalInfo: Map[String, String] = {
+//        val (previousYear, currentYear) = determinePeriod
+//        Map(
+//          currentYearKey -> currentYear.toString,
+//          previousYearKey -> previousYear.toString
+//        )
+//      }
+//
+//      override protected def correctAnswers(record: SelfAssessmentReturn): Seq[String] = {
+//        record match {
+//          case pension: SAReturn =>
+//            pension.returns.collect {
+//              case value if value.incomeFromPensions > 0 => value.incomeFromPensions.toString()
+//            }
+//          case _ => Seq()
+//        }
+//      }
+//    }
+//  )
+  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
 
-      override def validateAnswer(validAnswers: Seq[String], answer: String, selection: Selection)(implicit ec: ExecutionContext, appConfig: AppConfig): Future[AnswerCorrectness] = {
-        val answers = validAnswers.map(convertAnswer).map(_.toBigInt)
-        val intAnswer = convertAnswer(answer).toBigInt
-        val offset = appConfig.saAnswerOffset
-        val result = if (answers.exists(a => a - offset <= intAnswer && a + offset >= intAnswer)) Match else NoMatch(answers.map(_.toString))
-        Future.successful(result)
-      }
+  override def isAvailable(selection: Selection): Boolean = ???
 
-      private def returnsToAdditionalInfo(returns: Seq[SAReturn]): Map[String, String] = {
-        val yearToRecords: Map[Int, Seq[SARecord]] = returns.map(sar => sar.taxYear.startYear -> sar.returns).toMap
-        val yearsWithSomeNotZero: Set[String] = yearToRecords.collect { case (year, records) if records.exists(_.incomeFromPensions > 0) => year.toString }.toSet
-        additionalInfo.filter { case (_, year) => yearsWithSomeNotZero(year) }
-      }
+  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
 
-      override def customAdditionalInfo(returns: Seq[SelfAssessmentReturn]): Map[String, String]= {
-        if (returns.isEmpty) additionalInfo
-        else {
-              // it will always be an SAReturn
-            returnsToAdditionalInfo(returns.asInstanceOf[Seq[SAReturn]])
-        }
-      }
-
-      override protected def additionalInfo: Map[String, String] = {
-        val (previousYear, currentYear) = determinePeriod
-        Map(
-          currentYearKey -> currentYear.toString,
-          previousYearKey -> previousYear.toString
-        )
-      }
-
-      override protected def correctAnswers(record: SelfAssessmentReturn): Seq[String] = {
-        record match {
-          case pension: SAReturn =>
-            pension.returns.collect {
-              case value if value.incomeFromPensions > 0 => value.incomeFromPensions.toString()
-            }
-          case _ => Seq()
-        }
-      }
-    }
-  )
+  override protected def circuitBreakerConfig: CircuitBreakerConfig = ???
 }
