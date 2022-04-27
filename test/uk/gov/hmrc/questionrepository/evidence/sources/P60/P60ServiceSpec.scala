@@ -14,9 +14,14 @@ import uk.gov.hmrc.questionrepository.evidences.sources.P60.{P60Connector, P60Se
 import uk.gov.hmrc.questionrepository.models.P60._
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.models.payment.Payment
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -64,8 +69,11 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
 
   trait Setup extends TestDate {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockP60Connector: P60Connector = mock[P60Connector]
-    val service: P60Service = new P60Service(mockP60Connector) {
+    val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
+    val mockAuditService: AuditService = mock[AuditService]
+    val service: P60Service = new P60Service(mockP60Connector, mockEventDispatcher, mockAuditService) {
       override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
   }

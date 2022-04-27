@@ -6,19 +6,24 @@
 package uk.gov.hmrc.questionrepository.services
 
 import play.api.Logging
-import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
+import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
-import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.{Question, Selection, ServiceName}
+import play.api.mvc.Request
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
+import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 
-import javax.inject.Inject
+
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: ExecutionContext) extends UsingCircuitBreaker
-  with Logging {
+trait QuestionService extends UsingCircuitBreaker with Logging {
 
   type Record
+
+  implicit val eventDispatcher: EventDispatcher
+
+  implicit val auditService: AuditService
 
   def serviceName: ServiceName
 
@@ -42,19 +47,22 @@ abstract class QuestionService @Inject()(implicit val appConfig: AppConfig, ec: 
     case _ => true
   }
 
-  def questions(selection: Selection)(implicit hc: HeaderCarrier): Future[Seq[Question]] = {
+  def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
+    val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailable(selection)) {
       withCircuitBreaker {
         connector.getRecords(selection).map(evidenceTransformer)
       } recover {
-        case e: UpstreamErrorResponse if e.statusCode == 404 => {
-          logger.info(s"$serviceName, no records returned for selection: $selection")
+        case e: UpstreamErrorResponse if e.statusCode == 404 =>
+          logger.info(s"$serviceName, no records returned for selection, origin: ${origin}, identifiers: ${selection}")
           Seq()
-        }
-        case t: Throwable => {
+        case _: UnhealthyServiceException =>
+          auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
+          eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
+          Seq()
+        case t: Throwable =>
           logger.error(s"$serviceName, threw exception $t, selection: $selection")
           Seq()
-        }
       }
     } else {
       Future.successful(Seq())

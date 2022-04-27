@@ -7,6 +7,10 @@ package uk.gov.hmrc.questionrepository.evidence.sources.SCPEmail
 
 import Utils.{LogCapturing, UnitSpec}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
@@ -48,9 +52,12 @@ class SCPEmailServiceSpec extends UnitSpec with LogCapturing {
 
   trait Setup extends TestData {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockSCPEmailConnector = mock[SCPEmailConnector]
+    val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
+    val mockAuditService: AuditService = mock[AuditService]
 
-    val service = new SCPEmailService(mockSCPEmailConnector)
+    val service = new SCPEmailService(mockSCPEmailConnector, mockEventDispatcher, mockAuditService)
   }
 
   trait WithStubbing extends Setup {

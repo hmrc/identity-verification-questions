@@ -9,12 +9,14 @@ import javax.inject.Inject
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.{DVLAQuestion, Question, ServiceName, dvlaService}
+import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
+import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.QuestionService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
 import scala.concurrent.ExecutionContext
 
-class DvlaService @Inject()(dvlaConnector: DvlaConnector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
+class DvlaService @Inject()(dvlaConnector: DvlaConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
   with CheckAvailability with CircuitBreakerConfiguration {
 
   override type Record = Boolean
