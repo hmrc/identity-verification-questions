@@ -10,7 +10,8 @@ import javax.inject.Inject
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.questionrepository.evidences.sources.QuestionConnector
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
+import uk.gov.hmrc.questionrepository.models.Selection
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,13 +29,8 @@ class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
     }
   }
 
-  override def getRecords(
-    nino: Nino
-  )(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext,
-    userAgent: Option[UserAgent]
-  ): Future[Seq[SAPaymentReturn]] = {
+  override def getRecords(selection: Selection)(
+    implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAPaymentReturn]] = {
     throw new IllegalStateException("We should never be calling this method as we cannot retrieve payments by Nino")
   }
 }

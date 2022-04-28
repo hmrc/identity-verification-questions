@@ -8,6 +8,7 @@ package uk.gov.hmrc.questionrepository.evidences.sources.sa
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.questionrepository.models.JsonLocalDateFormats.dFormat
 
 case class SAPayment(amount: BigDecimal, paymentDate: Option[LocalDate], transactionCode: Option[String] = None)
 

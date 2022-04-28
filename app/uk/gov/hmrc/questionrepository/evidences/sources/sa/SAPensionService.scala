@@ -17,6 +17,7 @@ import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedIncomeFr
 import uk.gov.hmrc.questionrepository.models.{Question, QuestionKey, Selection, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
+import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -25,8 +26,12 @@ class SAPensionService @Inject() (
     connector : SAPensionsConnector,
     val eventDispatcher: EventDispatcher,
     override implicit val auditService: AuditService) extends QuestionServiceMeoMinimumNumberOfQuestions
+  with CheckAvailability
+  with CircuitBreakerConfiguration
 //  with CircuitBreakerConfig
 {
+
+  override def connector: QuestionConnector[SelfAssessmentReturn] = connector
 
   type Record = SelfAssessmentReturn
 
@@ -98,11 +103,8 @@ class SAPensionService @Inject() (
 //      }
 //    }
 //  )
-  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
 
-  override def isAvailable(selection: Selection): Boolean = ???
 
   override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
 
-  override protected def circuitBreakerConfig: CircuitBreakerConfig = ???
 }

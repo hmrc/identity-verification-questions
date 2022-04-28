@@ -11,7 +11,8 @@ import org.joda.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.questionrepository.evidences.sources.QuestionConnector
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
+import uk.gov.hmrc.questionrepository.models.Selection
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,7 +32,7 @@ class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
     }
   }
 
-  override def getRecords(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext, userAgent: Option[UserAgent]): Future[Seq[SAReturn]] = {
-    getReturns(nino, LocalDate.now().getYear - 1, LocalDate.now().getYear)
+  override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
+    getReturns(selection.nino.get, LocalDate.now().getYear - 1, LocalDate.now().getYear)
   }
 }

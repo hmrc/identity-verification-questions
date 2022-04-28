@@ -11,12 +11,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
-
-import scala.concurrent.{ExecutionContext, Future}
-
-trait QuestionConnector[T] {
-  def getRecords(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext, userAgent: Option[UserAgent]): Future[Seq[T]]
-}
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 
 trait HodConnector[T] extends QuestionConnector[T] {
 

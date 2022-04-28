@@ -13,10 +13,13 @@ import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceExcepti
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.questionrepository.config.AppConfig
+import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimumNumberOfQuestions
 import uk.gov.hmrc.questionrepository.models.{Question, Selection, SelfAssessment, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
+import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability
+import uk.gov.hmrc.questionrepository.models.JsonLocalDateFormats.dFormat
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +27,8 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
   implicit val appConfig: AppConfig,
   ec: ExecutionContext
 ) extends QuestionServiceMeoMinimumNumberOfQuestions
-  with AnswerUrl
+  with CheckAvailability
+//  with AnswerUrl
  // with CircuitBreakerConfig
 {
 
@@ -39,7 +43,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
   val allowedPaymentTypes = List("PYT", "TFO")
 
   override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
-    if (isDisabled(journey.serviceContract.origin)) {
+    if (isAvailable(selection)) {
       Future.successful(Seq())
     } else {
       withCircuitBreaker {
@@ -69,9 +73,9 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     }
   }
 
-  private def convertPaymentsToQuestions(paymentReturns: Seq[SAPaymentReturn])(
-    implicit request: Request[_]
-  ): Seq[Question] = paymentReturns.map { paymentReturn =>
+  private def convertPaymentsToQuestions(paymentReturns: Seq[SAPaymentReturn])
+                                        (implicit request: Request[_]): Seq[Question] =
+    paymentReturns.map { paymentReturn =>
     val paymentWindowStartDate = currentDate.minusYears(appConfig.saPaymentWindowYears)
     val recentPositivePayments = paymentReturn.payments.filter { individualPayment =>
       individualPayment.amount > 0 &&
@@ -121,4 +125,10 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     val diff = Days.daysBetween(dateEntered, expectedDate).getDays
     diff >= (0 - appConfig.saPaymentTolerancePastDays) && diff <= appConfig.saPaymentToleranceFutureDays
   }
+
+  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
+
+  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
+
+  override protected def circuitBreakerConfig: CircuitBreakerConfig = ???
 }
