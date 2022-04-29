@@ -31,9 +31,9 @@ class SAPensionService @Inject() (
 //  with CircuitBreakerConfig
 {
 
-  override def connector: QuestionConnector[SelfAssessmentReturn] = connector
+  override def connector: QuestionConnector[SAReturn] = connector
 
-  type Record = SelfAssessmentReturn
+  type Record = SAReturn
 
   def currentDate: DateTime = DateTime.now()
 
@@ -58,53 +58,48 @@ class SAPensionService @Inject() (
       connector.getReturns(selection.nino.get, startYear, endYear)
   }
 
-//  val questionHandlers: Seq[QuestionHandler[Record]]  = Seq(
-//    new PenceQuestionHandler[SelfAssessmentReturn] {
-//      override def key: QuestionKey = SelfAssessedIncomeFromPensionsQuestion
-//
-//      override def validateAnswer(validAnswers: Seq[String], answer: String, selection: Selection)(implicit ec: ExecutionContext, appConfig: AppConfig): Future[AnswerCorrectness] = {
-//        val answers = validAnswers.map(convertAnswer).map(_.toBigInt)
-//        val intAnswer = convertAnswer(answer).toBigInt
-//        val offset = appConfig.saAnswerOffset
-//        val result = if (answers.exists(a => a - offset <= intAnswer && a + offset >= intAnswer)) Match else NoMatch(answers.map(_.toString))
-//        Future.successful(result)
-//      }
-//
-//      private def returnsToAdditionalInfo(returns: Seq[SAReturn]): Map[String, String] = {
-//        val yearToRecords: Map[Int, Seq[SARecord]] = returns.map(sar => sar.taxYear.startYear -> sar.returns).toMap
-//        val yearsWithSomeNotZero: Set[String] = yearToRecords.collect { case (year, records) if records.exists(_.incomeFromPensions > 0) => year.toString }.toSet
-//        additionalInfo.filter { case (_, year) => yearsWithSomeNotZero(year) }
-//      }
-//
-//      override def customAdditionalInfo(returns: Seq[SelfAssessmentReturn]): Map[String, String]= {
-//        if (returns.isEmpty) additionalInfo
-//        else {
-//              // it will always be an SAReturn
-//            returnsToAdditionalInfo(returns.asInstanceOf[Seq[SAReturn]])
-//        }
-//      }
-//
-//      override protected def additionalInfo: Map[String, String] = {
-//        val (previousYear, currentYear) = determinePeriod
-//        Map(
-//          currentYearKey -> currentYear.toString,
-//          previousYearKey -> previousYear.toString
-//        )
-//      }
-//
-//      override protected def correctAnswers(record: SelfAssessmentReturn): Seq[String] = {
-//        record match {
-//          case pension: SAReturn =>
-//            pension.returns.collect {
-//              case value if value.incomeFromPensions > 0 => value.incomeFromPensions.toString()
-//            }
-//          case _ => Seq()
-//        }
-//      }
+  override def evidenceTransformer(records: Seq[SAReturn]): Seq[Question] = {
+      val saPensionQuestions: Seq[Question] = records.map(correctAnswers(_)) match {
+        case Nil => Nil
+        case answers => Seq(Question(SelfAssessedIncomeFromPensionsQuestion, answers.map(_.toString), returnsToAdditionalInfo(records)))
+      }
+
+    println("\n\n\n records " +records)
+    println("\n\n\n saPensionQuestions " +saPensionQuestions)
+    println("evidenceTransformer called on SAPension Service")
+    println("\n\n\n")
+    saPensionQuestions
+  }
+
+  private def returnsToAdditionalInfo(returns: Seq[SAReturn]): Map[String, String] = {
+    val yearToRecords: Map[Int, Seq[SARecord]] = returns.map(sar => sar.taxYear.startYear -> sar.returns).toMap
+    val yearsWithSomeNotZero: Set[String] = yearToRecords.collect { case (year, records) if records.exists(_.incomeFromPensions > 0) => year.toString }.toSet
+    additionalInfo.filter { case (_, year) => yearsWithSomeNotZero(year) }
+  }
+
+//  override def customAdditionalInfo(returns: Seq[SelfAssessmentReturn]): Map[String, String] = {
+//    if (returns.isEmpty) additionalInfo
+//    else {
+//      // it will always be an SAReturn
+//      returnsToAdditionalInfo(returns.asInstanceOf[Seq[SAReturn]])
 //    }
-//  )
+//  }
+//
+   protected def additionalInfo: Map[String, String] = {
+    val (previousYear, currentYear) = determinePeriod
+    Map(
+      currentYearKey -> currentYear.toString,
+      previousYearKey -> previousYear.toString
+    )
+  }
 
-
-  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
-
+  protected def correctAnswers(record: SelfAssessmentReturn): Seq[String] = {
+    record match {
+      case pension: SAReturn =>
+        pension.returns.collect {
+          case value if value.incomeFromPensions > 0 => value.incomeFromPensions.toString()
+        }
+      case _ => Seq()
+    }
+  }
 }

@@ -11,19 +11,21 @@ import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
+import uk.gov.hmrc.questionrepository.evidences.sources.sa.{SAAnswerService, SAService}
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, QuestionKey, QuestionResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
+                                          saAnswerService: SAAnswerService,
                                           passportAnswerService: PassportAnswerService,
                                           scpEmailAnswerService: SCPEmailAnswerService,
                                           dvlaAnswerService: DvlaAnswerService)(implicit ec: ExecutionContext) {
 
   // ver-1281: disable passportAnswerService, scpEmailAnswerService, dvlaAnswerService for now, do services one by one
   //val answerServices: Seq[AnswerService] = Seq(p60AnswerService, passportAnswerService, scpEmailAnswerService, dvlaAnswerService)
-  val answerServices = Seq(p60AnswerService)
+  val answerServices = Seq(p60AnswerService, saAnswerService)
 
   private def getQuestionService(questionKey: QuestionKey): AnswerService = {
     answerServices.filter(_.supportedQuestions.contains(questionKey)) match {
