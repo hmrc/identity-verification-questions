@@ -9,7 +9,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.utilities.PenceAnswerConvertor
-
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,7 +18,7 @@ trait AnswerConnector[T] {
 
 class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(implicit ec: ExecutionContext) extends AnswerConnector[QuestionResult] with PenceAnswerConvertor {
 
-  private def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score = {
+   def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score = {
     //PE-2186 - for P60 answers ignore pence, eg, 100.38 convert to 100.00
     val newAnswerDetails: AnswerDetails =
       if (answerDetails.questionKey.evidenceOption.equals("P60")) {

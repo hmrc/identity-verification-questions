@@ -15,6 +15,7 @@ import uk.gov.hmrc.questionrepository.models.{Question, Selection, selfAssessmen
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.QuestionService
+import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,33 +24,26 @@ class SAService @Inject() (
     val saPensionService: SAPensionService,
     val saPaymentService: SAPaymentService,
     val eventDispatcher: EventDispatcher,
-    override implicit val auditService: AuditService
-                          ) extends QuestionService {
+    override implicit val auditService: AuditService) extends QuestionService
+    with CheckAvailability
+    with CircuitBreakerConfiguration {
   val serviceName = selfAssessmentService
   override def questions(selection: Selection)
                         (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Seq[Question]] = {
-    val pensionQuestionsFuture = saPensionService.questions(selection)
     val paymentQuestionsFuture = saPaymentService.questions(selection)
+    val pensionQuestionsFuture = saPensionService.questions(selection)
 
     for {
       paymentQuestion <- paymentQuestionsFuture
+      _ <- Future.successful(println("\n\n\n paymentQuestion" + paymentQuestion))
       pensionQuestion <- pensionQuestionsFuture
     } yield if (paymentQuestion.nonEmpty) paymentQuestion else pensionQuestion
   }
 
   override type Record = SelfAssessmentReturn
 
-//  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
-//
-//  override def questionHandlers: Seq[QuestionHandler[SelfAssessmentReturn]] =
-//    saPensionService.questionHandlers ++ saPaymentService.questionHandlers
-
-  override protected def circuitBreakerConfig: CircuitBreakerConfig = ???
-
   override def connector: connectors.QuestionConnector[SelfAssessmentReturn] = ???
-
-  override def isAvailable(selection: Selection): Boolean = ???
 
   override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
 }

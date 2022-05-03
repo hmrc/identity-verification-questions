@@ -16,7 +16,7 @@ import uk.gov.hmrc.questionrepository.models.Selection
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig)
-  extends QuestionConnector[SelfAssessmentReturn] {
+  extends QuestionConnector[SAPaymentReturn] {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
   def getReturns(saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAPaymentReturn]] = {

@@ -18,7 +18,7 @@ import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, Cir
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SAAnswerService @Inject()(p60AnswerConnector: P60AnswerConnector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends AnswerService
+class SAAnswerService @Inject()(saAnswerConnector: SAAnswerConnector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends AnswerService
   with CheckAvailability
   with CircuitBreakerConfiguration {
 
@@ -26,18 +26,11 @@ class SAAnswerService @Inject()(p60AnswerConnector: P60AnswerConnector)(implicit
 
   override def serviceName: ServiceName = selfAssessmentService
 
-  override def connector: AnswerConnector[QuestionResult] = p60AnswerConnector
+  override def connector: AnswerConnector[QuestionResult] = saAnswerConnector
 
   override def supportedQuestions: Seq[QuestionKey] =
     Seq(SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion)
 
   override def answerTransformer(records: Seq[QuestionResult], filteredAnswers: Seq[AnswerDetails]): Seq[QuestionResult] = records
 
-//    override def validateAnswer(validAnswers: Seq[String], answer: String, selection: Selection)(implicit ec: ExecutionContext, appConfig: AppConfig): Future[AnswerCorrectness] = {
-//      val answers = validAnswers.map(convertAnswer).map(_.toBigInt)
-//      val intAnswer = convertAnswer(answer).toBigInt
-//      val offset = appConfig.saAnswerOffset
-//      val result = if (answers.exists(a => a - offset <= intAnswer && a + offset >= intAnswer)) Match else NoMatch(answers.map(_.toString))
-//      Future.successful(result)
-//    }
 }

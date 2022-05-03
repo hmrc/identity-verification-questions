@@ -27,9 +27,7 @@ class SAPensionService @Inject() (
     val eventDispatcher: EventDispatcher,
     override implicit val auditService: AuditService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
-  with CircuitBreakerConfiguration
-//  with CircuitBreakerConfig
-{
+  with CircuitBreakerConfiguration {
 
   override def connector: QuestionConnector[SAReturn] = connector
 
@@ -58,18 +56,12 @@ class SAPensionService @Inject() (
       connector.getReturns(selection.nino.get, startYear, endYear)
   }
 
-  override def evidenceTransformer(records: Seq[SAReturn]): Seq[Question] = {
-      val saPensionQuestions: Seq[Question] = records.map(correctAnswers(_)) match {
-        case Nil => Nil
-        case answers => Seq(Question(SelfAssessedIncomeFromPensionsQuestion, answers.map(_.toString), returnsToAdditionalInfo(records)))
-      }
+  override def evidenceTransformer(records: Seq[SAReturn]): Seq[Question] =
+    records.flatMap(correctAnswers(_)) match {
+      case Nil => Nil
+      case answers => Seq(Question(SelfAssessedIncomeFromPensionsQuestion, answers, returnsToAdditionalInfo(records)))
+    }
 
-    println("\n\n\n records " +records)
-    println("\n\n\n saPensionQuestions " +saPensionQuestions)
-    println("evidenceTransformer called on SAPension Service")
-    println("\n\n\n")
-    saPensionQuestions
-  }
 
   private def returnsToAdditionalInfo(returns: Seq[SAReturn]): Map[String, String] = {
     val yearToRecords: Map[Int, Seq[SARecord]] = returns.map(sar => sar.taxYear.startYear -> sar.returns).toMap
@@ -77,14 +69,6 @@ class SAPensionService @Inject() (
     additionalInfo.filter { case (_, year) => yearsWithSomeNotZero(year) }
   }
 
-//  override def customAdditionalInfo(returns: Seq[SelfAssessmentReturn]): Map[String, String] = {
-//    if (returns.isEmpty) additionalInfo
-//    else {
-//      // it will always be an SAReturn
-//      returnsToAdditionalInfo(returns.asInstanceOf[Seq[SAReturn]])
-//    }
-//  }
-//
    protected def additionalInfo: Map[String, String] = {
     val (previousYear, currentYear) = determinePeriod
     Map(

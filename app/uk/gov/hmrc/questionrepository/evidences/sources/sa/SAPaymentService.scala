@@ -18,7 +18,7 @@ import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimu
 import uk.gov.hmrc.questionrepository.models.{Question, Selection, SelfAssessment, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
-import uk.gov.hmrc.questionrepository.services.utilities.CheckAvailability
+import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 import uk.gov.hmrc.questionrepository.models.JsonLocalDateFormats.dFormat
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,24 +28,18 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
   ec: ExecutionContext
 ) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
-//  with AnswerUrl
- // with CircuitBreakerConfig
-{
+  with CircuitBreakerConfiguration {
 
-  type Record = SelfAssessmentReturn
+  type Record = SAPaymentReturn
 
   def currentDate: LocalDate = LocalDate.now()
 
   override def serviceName = selfAssessmentService
 
-//  override def questionHandlers: Seq[QuestionHandler[SelfAssessmentReturn]] = Seq()
-
   val allowedPaymentTypes = List("PYT", "TFO")
 
   override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
     if (isAvailable(selection)) {
-      Future.successful(Seq())
-    } else {
       withCircuitBreaker {
         selection.sautr match {
           case Some(saUtr) =>
@@ -53,7 +47,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
               _ <- Future(logger.info(s"VER-858:  Retrieve SA UTR($saUtr)"))
               payments <- getRecordsFromSaUtr(saUtr)
               _ = logger.info(s"VER-858:  Retrieve SA UTR($saUtr) response : ${payments.mkString(",")}")
-              questions = convertPaymentsToQuestions(payments)
+              questions = evidenceTransformer(payments)
               _ = logger.info(s"VER-858: Retrieve SA UTR($saUtr) questions : ${questions.map(_.questionKey).mkString(",")}")
             } yield questions
           case _ => Future.successful(Seq())
@@ -70,12 +64,13 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
           Seq()
         }
       }
+    } else {
+      Future.successful(Seq())
     }
   }
 
-  private def convertPaymentsToQuestions(paymentReturns: Seq[SAPaymentReturn])
-                                        (implicit request: Request[_]): Seq[Question] =
-    paymentReturns.map { paymentReturn =>
+  override def evidenceTransformer(records: Seq[SAPaymentReturn]): Seq[Question]=
+    records.map { paymentReturn =>
     val paymentWindowStartDate = currentDate.minusYears(appConfig.saPaymentWindowYears)
     val recentPositivePayments = paymentReturn.payments.filter { individualPayment =>
       individualPayment.amount > 0 &&
@@ -87,7 +82,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     convertPaymentToQuestion(paymentReturn)
   }
 
-  private def convertPaymentToQuestion(paymentReturn: SAPaymentReturn)(implicit request: Request[_]): Question = {
+  private def convertPaymentToQuestion(paymentReturn: SAPaymentReturn): Question = {
     implicit val writes = Json.writes[SAPayment]
 
     Question(
@@ -121,14 +116,6 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     s"${payment.amount} on ${payment.paymentDate.map(_.toString("dd/MMM/yyyy")).getOrElse("Unspecified Date")}"
   }
 
-  private def insidePaymentToleranceWindow(dateEntered: LocalDate, expectedDate: LocalDate): Boolean = {
-    val diff = Days.daysBetween(dateEntered, expectedDate).getDays
-    diff >= (0 - appConfig.saPaymentTolerancePastDays) && diff <= appConfig.saPaymentToleranceFutureDays
-  }
+  override def connector: QuestionConnector[SAPaymentReturn] = connector
 
-  override def connector: QuestionConnector[SelfAssessmentReturn] = ???
-
-  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
-
-  override protected def circuitBreakerConfig: CircuitBreakerConfig = ???
 }

@@ -36,6 +36,7 @@ class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
   }
 
   def checkAnswers(answerToCheck: AnswerCheck)(implicit hc: HeaderCarrier): Future[Seq[QuestionResult]] ={
+    println("\n\n\n checkAnswers in service")
     for {
       seqSeqQuestionResult <- Future.sequence(answerToCheck.answers.map(answer => getQuestionService(answer.questionKey).checkAnswers(answerToCheck)))
       result = seqSeqQuestionResult.flatten
