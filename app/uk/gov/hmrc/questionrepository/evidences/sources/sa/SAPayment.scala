@@ -26,4 +26,6 @@ object SAPayment {
       (__ \ "").readNullable[Int]
     )((payments, _) => payments
   )
+
+  implicit val saPaymentWrites: Writes[SAPayment] = Json.writes[SAPayment]
 }

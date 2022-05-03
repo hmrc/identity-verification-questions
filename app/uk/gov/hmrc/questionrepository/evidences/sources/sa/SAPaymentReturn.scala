@@ -5,4 +5,4 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.sa
 
-case class SAPaymentReturn(payments: Vector[SAPayment]) extends SelfAssessmentReturn
+case class SAPaymentReturn(payments: Seq[SAPayment]) extends SelfAssessmentReturn

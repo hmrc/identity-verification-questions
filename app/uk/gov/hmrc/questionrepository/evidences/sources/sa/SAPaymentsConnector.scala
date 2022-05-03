@@ -5,14 +5,13 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.sa
 
-import akka.http.javadsl.model.headers.UserAgent
-import javax.inject.Inject
-import uk.gov.hmrc.domain.{Nino, SaUtr}
+import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.Selection
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig)
@@ -22,7 +21,7 @@ class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
   def getReturns(saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAPaymentReturn]] = {
     val url = s"$baseUrl/individuals/self-assessment/payments/utr/$saUtr"
     http.GET[Seq[SAPayment]](url).map { payments =>
-      Seq(SAPaymentReturn(payments.to[Vector]))
+      Seq(SAPaymentReturn(payments))
     }.recover {
       case _: NotFoundException =>
         List()
