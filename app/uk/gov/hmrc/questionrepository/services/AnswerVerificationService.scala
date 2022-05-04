@@ -5,26 +5,18 @@
 
 package uk.gov.hmrc.questionrepository.services
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
-import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerService
-import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
-import uk.gov.hmrc.questionrepository.evidences.sources.sa.{SAAnswerService, SAService}
+import uk.gov.hmrc.questionrepository.evidences.sources.sa.SAAnswerService
 import uk.gov.hmrc.questionrepository.models.{AnswerCheck, QuestionKey, QuestionResult}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
-                                          saAnswerService: SAAnswerService,
-                                          passportAnswerService: PassportAnswerService,
-                                          scpEmailAnswerService: SCPEmailAnswerService,
-                                          dvlaAnswerService: DvlaAnswerService)(implicit ec: ExecutionContext) {
+                                          saAnswerService: SAAnswerService)(implicit ec: ExecutionContext) {
 
-  // ver-1281: disable passportAnswerService, scpEmailAnswerService, dvlaAnswerService for now, do services one by one
-  //val answerServices: Seq[AnswerService] = Seq(p60AnswerService, passportAnswerService, scpEmailAnswerService, dvlaAnswerService)
   val answerServices = Seq(p60AnswerService, saAnswerService)
 
   private def getQuestionService(questionKey: QuestionKey): AnswerService = {

@@ -8,6 +8,8 @@ package uk.gov.hmrc.questionrepository.models
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{Format, JodaReads, JodaWrites, JsResult, JsValue}
 
+// TODO seems only to be used for SAPayment formats... why are we using Joda here??
+
 object JsonDateTimeFormats {
   implicit val dFormat: Format[DateTime] = new Format[DateTime] {
     override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)

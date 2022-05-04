@@ -8,10 +8,7 @@ package uk.gov.hmrc.questionrepository.services
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
-import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailService
 import uk.gov.hmrc.questionrepository.models.{CorrelationId, QuestionDataCache, QuestionResponse, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import java.time.{LocalDateTime, ZoneOffset}
@@ -25,15 +22,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          appConfig: AppConfig,
                                          p60Service: P60Service,
-                                         saService: SAService,
-                                         passportService: PassportService,
-                                         scpEmailService: SCPEmailService,
-                                         dvlaService: DvlaService)
+                                         saService: SAService)
                                         (implicit ec: ExecutionContext) {
 
   def callAllEvidenceSources(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
-    // ver-1281: disable passportService, scpEmailService and dvlaService for now, do services one by one
-    //val services = Seq(p60Service, passportService, scpEmailService, dvlaService)
+
     val services: Seq[QuestionService] = Seq(p60Service, saService)
 
     for {

@@ -7,10 +7,7 @@ package uk.gov.hmrc.questionrepository.services
 
 import Utils.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
-import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerService
-import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.sa.SAAnswerService
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
@@ -25,10 +22,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
       "the requested answer service returns Unknown" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
         (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Unknown))))
-        // ver-1281: not in use for now
-//        (mockPassportAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockSCPEmailAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockDvlaAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
       }
@@ -38,10 +31,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
       "the requested answer service returns Correct" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
         (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Correct))))
-        // ver-1281: not in use for now
-//        (mockPassportAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockSCPEmailAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockDvlaAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Correct))
       }
@@ -51,10 +40,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
       "the requested answer service returns Correct" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
         (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Incorrect))))
-        // ver-1281: not in use for now
-//        (mockPassportAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockSCPEmailAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockDvlaAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Incorrect))
       }
@@ -63,10 +48,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     "Throw a RuntimeException" when {
       "no supported answer service found for questionKey" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-        // ver-1281: not in use for now
-//        (mockPassportAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockSCPEmailAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockDvlaAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheck)
         }
@@ -75,10 +56,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
       /** can't be easily tested until we have multiple evidence sources **/
       "multiple supporting answer services found for questionKey" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        // ver-1281: not in use for now
-//        (mockPassportAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-//        (mockSCPEmailAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
-//        (mockDvlaAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheck)
         }
@@ -88,12 +65,9 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
 
   trait SetUp{
-    val mockP60AnswerService = mock[P60AnswerService]
-    val mockSAAnswerService = mock[SAAnswerService]
-    val mockPassportAnswerService = mock[PassportAnswerService]
-    val mockSCPEmailAnswerService = mock[SCPEmailAnswerService]
-    val mockDvlaAnswerService = mock[DvlaAnswerService]
-    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService, mockPassportAnswerService, mockSCPEmailAnswerService, mockDvlaAnswerService)
+    val mockP60AnswerService: P60AnswerService = mock[P60AnswerService]
+    val mockSAAnswerService: SAAnswerService = mock[SAAnswerService]
+    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService)
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("an answer")))
     val answerCheck: AnswerCheck = AnswerCheck(corrId, Selection(ninoIdentifier), answerDetails)
     (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
