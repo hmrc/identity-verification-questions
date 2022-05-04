@@ -20,7 +20,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
   val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
   val connector = new P60AnswerConnector(mongoRepo)
 
-  val answerDetails: AnswerDetails = AnswerDetails(PaymentToDate, DoubleAnswer(100.11))
+  val answerDetails: AnswerDetails = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
 
   override def afterEach(): Unit = {
     super.afterEach()

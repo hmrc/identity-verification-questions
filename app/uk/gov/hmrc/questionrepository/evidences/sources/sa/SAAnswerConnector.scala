@@ -5,15 +5,15 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.sa
 
-import javax.inject.{Inject, Singleton}
 import org.joda.time.{Days, LocalDate}
-import play.api.libs.json.{JsDefined, JsError, JsNumber, JsResult, JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.MongoAnswerConnector
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.{SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion}
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton

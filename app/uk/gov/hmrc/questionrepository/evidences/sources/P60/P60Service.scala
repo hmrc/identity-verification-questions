@@ -8,19 +8,18 @@ package uk.gov.hmrc.questionrepository.evidences.sources.P60
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.P60._
-import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models._
-import uk.gov.hmrc.questionrepository.services.QuestionService
-import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
+import uk.gov.hmrc.questionrepository.services.QuestionService
+import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 
+import javax.inject.{Inject, Singleton}
 import scala.collection.SortedSet
-import scala.concurrent.ExecutionContext
 
 @Singleton
-class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends QuestionService
+class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionService
   with CheckAvailability
   with CircuitBreakerConfiguration
   with TaxYearBuilder

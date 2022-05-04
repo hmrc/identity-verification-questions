@@ -5,20 +5,18 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.sa
 
-import javax.inject.Inject
 import org.joda.time.DateTime
-import play.api.mvc.Request
-import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimumNumberOfQuestions
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
-import uk.gov.hmrc.questionrepository.models.{Question, QuestionKey, Selection, selfAssessmentService}
+import uk.gov.hmrc.questionrepository.models.{Question, Selection, ServiceName, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPensionService @Inject() (
@@ -40,7 +38,7 @@ class SAPensionService @Inject() (
   private val currentYearKey = "currentTaxYear"
   private val previousYearKey = "previousTaxYear"
 
-  override def serviceName = selfAssessmentService
+  override def serviceName: ServiceName = selfAssessmentService
 
    def determinePeriod = {
     val switchDate = DateTime.parse(s"${currentDate.getYear}-$switchOverMonth-$switchOverDay")
@@ -51,7 +49,7 @@ class SAPensionService @Inject() (
     }
   }
 
-   def getRecords(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
+   def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAReturn]] = {
       val (startYear, endYear) = determinePeriod
       connector.getReturns(selection.nino.get, startYear, endYear)
   }
