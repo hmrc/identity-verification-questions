@@ -5,12 +5,17 @@ Backend service to provide question data and answer processing by unique user id
 
 This service extracts, refactors and replaces the question handling behaviour that is currently part of the https://github.com/hmrc/identity-verification making it available to other services.  This will promote re-use of IV behaviour across the platform and provide consistent verification standards.
 
-Currently, this service only provides questions from the P60 evidence source.  Other sources are currently being moved from identity-verification backend to here.
+Currently, this service only provides questions from the P60 and self assessment (SA) evidence sources.  Other sources are currently being moved from identity-verification backend to here.
 
 ## Evidence Sources
 
 * P60 - requires NINO; uses RTI DES API (#1001) to query data for the **current tax year**
 
+* SA - requires UTR or NINO; uses si-hod-proxy API to query user self assessment data.
+   
+    * provides SA Payment questions if calling service provides UTR
+    * provides SA Pensions questions if calling service provides NINO or SAPayments is not available for user.        
+         
 See https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?spaceKey=VER&title=IV+Evidence+Sources for a description of evidence sources and the question keys available for each.
 
 More evidence sources will be added in due course.
@@ -26,13 +31,16 @@ More evidence sources will be added in due course.
 Include a POST JSON body containing a set of identifiers for the questions such as: 
 ```
     { 
-      "nino":"AA000000A"
+      "nino":"AA000000A",
+      "sautr": "1234567890"  
     }
 ```
 You must supply *at least one* identifier, and you can only supply one *of each type of identifier*.
 Different identifier types support different **evidence sources** for question data.  Currently the **only** supported identifiers are:
 
 * **nino** - Must be a valid NINO (with suffix) according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Nino.scala
+
+* **sautr** - Must be a valid SaUtr according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/SaUtr.scala
 
 ## Authorised Callers
 
@@ -110,7 +118,16 @@ Send a json body containing the previous correlation id and identifier selection
 
 The structure of the answer data will depend on the **questionKey** being checked.
 
-For now, for **all** P60 evidence source questions, a *single string* answer is expected.
+For now, 
+    * for **all** P60/ SA Pension evidence source questions, a *single string* answer is expected.
+    * for **all** SA Payments evidence source questions, a json in *single string* answer is expected. Example: 
+
+```
+{
+          "amount": 100,
+          "paymentDate": "2020-06-01"
+}       
+```
 For details of the Answer *formats* for each question see:
 
 https://github.com/hmrc/question-repository/blob/main/app/uk/gov/hmrc/questionrepository/models/Answer.scala
@@ -152,7 +169,7 @@ It is up to the calling service to decide which answers they would like to know 
 
 ## How to run the tests
 
-```sbt clean test it:test```
+```sbt clean test``` and  ```sbt clean it:test```
 
 Note: acceptance testing is done as part of the main IV suite with question repository enabled from IV backend, see https://github.com/hmrc/identity-verification-ui-tests 
 
@@ -163,6 +180,8 @@ This service depends on the following collaborating services at runtime:
 * datastream (for Splunk auditing)
 * platform-analytics (for GA events)
 * iv_test_data (during IT tests and in stubbed or local environments)
+* si-hod-proxy (for SA questions) 
+* business_verification_stub (during IT tests and in stubbed or local environments)
 * des.ws.hmrc.gov.uk (in production, for P60 data)
 
 Locally, make sure you have https://github.com/hmrc/iv-test-data running and then do:

@@ -21,9 +21,11 @@ import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.mongo.{MongoComponent, MongoSpecSupport}
 import uk.gov.hmrc.questionrepository.models.CorrelationId
-
 import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
+
+import org.scalatest.concurrent.ScalaFutures
+
 import scala.concurrent.Future
 
 trait UnitSpec
@@ -38,6 +40,7 @@ trait UnitSpec
     with Writeables
     with FutureAwaits
     with MockFactory
+    with ScalaFutures
     with MongoSpecSupport
     with GuiceOneAppPerSuite
 {

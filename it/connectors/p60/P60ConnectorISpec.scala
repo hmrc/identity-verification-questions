@@ -3,7 +3,9 @@
  *
  */
 
-package connectors
+package connectors.p60
+
+import java.time.LocalDate
 
 import iUtils.BaseISpec
 import play.api.Application
@@ -11,10 +13,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Connector
-import uk.gov.hmrc.questionrepository.models.payment.Payment
 import uk.gov.hmrc.questionrepository.models.Selection
+import uk.gov.hmrc.questionrepository.models.payment.Payment
 
-import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}

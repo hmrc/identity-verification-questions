@@ -6,11 +6,11 @@
 package uk.gov.hmrc.questionrepository.services
 
 import java.time.Period
-
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
+
 import java.time.{LocalDate, Period}
 import Utils.UnitSpec
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
@@ -21,6 +21,7 @@ import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportService
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailService
+import uk.gov.hmrc.questionrepository.evidences.sources.sa.{SAAnswerService, SAService}
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 
@@ -32,6 +33,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
   "calling callAllEvidenceSources" should {
     "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
       (mockP60Service.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[Question]))
+      (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[Question]))
       // ver-1281: not in use for now
 //      (mockPassportService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
 //      (mockSCPEmailService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
@@ -73,12 +75,13 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockP60Service: P60Service = mock[P60Service]
+    val mockSAService: SAService = mock[SAService]
     val mockPassportService: PassportService = mock[PassportService]
     val mockSCPEmailService: SCPEmailService = mock[SCPEmailService]
     val mockDvlaService: DvlaService = mock[DvlaService]
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
     val mockMessageTextService: MessageTextService = mock[MessageTextService]
-    val service = new EvidenceRetrievalService(mongoRepo, mockMessageTextService, mockAppConfig, mockP60Service, mockPassportService, mockSCPEmailService, mockDvlaService)
+    val service = new EvidenceRetrievalService(mongoRepo, mockMessageTextService, mockAppConfig, mockP60Service, mockSAService, mockPassportService, mockSCPEmailService, mockDvlaService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")

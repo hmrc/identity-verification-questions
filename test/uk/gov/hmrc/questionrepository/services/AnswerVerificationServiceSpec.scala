@@ -11,6 +11,7 @@ import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.Passport.PassportAnswerService
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerService
+import uk.gov.hmrc.questionrepository.evidences.sources.sa.SAAnswerService
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
 
@@ -88,11 +89,13 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
   trait SetUp{
     val mockP60AnswerService = mock[P60AnswerService]
+    val mockSAAnswerService = mock[SAAnswerService]
     val mockPassportAnswerService = mock[PassportAnswerService]
     val mockSCPEmailAnswerService = mock[SCPEmailAnswerService]
     val mockDvlaAnswerService = mock[DvlaAnswerService]
-    val service = new AnswerVerificationService(mockP60AnswerService, mockPassportAnswerService, mockSCPEmailAnswerService, mockDvlaAnswerService)
+    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService, mockPassportAnswerService, mockSCPEmailAnswerService, mockDvlaAnswerService)
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("an answer")))
     val answerCheck: AnswerCheck = AnswerCheck(corrId, Selection(ninoIdentifier), answerDetails)
+    (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
   }
 }

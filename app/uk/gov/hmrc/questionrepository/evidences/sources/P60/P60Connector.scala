@@ -5,6 +5,7 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.P60
 
+import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -16,7 +17,6 @@ import uk.gov.hmrc.questionrepository.models.payment.{Employment, Payment}
 import uk.gov.hmrc.questionrepository.models.{Selection, ServiceName, p60Service}
 import uk.gov.hmrc.questionrepository.services.utilities.{TaxYear, TaxYearBuilder}
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
