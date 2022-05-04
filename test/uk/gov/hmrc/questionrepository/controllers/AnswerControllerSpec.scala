@@ -71,6 +71,6 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
     val correlationId: CorrelationId = CorrelationId()
     val ninoIdentifier: Nino = Nino("AA000000A")
     val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, SimpleAnswer("5"))))
-    val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, Selection(ninoIdentifier), Seq.empty[Question], LocalDateTime.now)
+    val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, Selection(ninoIdentifier), Seq.empty[QuestionWithAnswers], LocalDateTime.now)
   }
 }

@@ -11,7 +11,7 @@ import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimumNumberOfQuestions
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
-import uk.gov.hmrc.questionrepository.models.{Question, Selection, ServiceName, selfAssessmentService}
+import uk.gov.hmrc.questionrepository.models.{QuestionWithAnswers, Selection, ServiceName, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
@@ -54,10 +54,10 @@ class SAPensionService @Inject() (
       connector.getReturns(selection.nino.get, startYear, endYear)
   }
 
-  override def evidenceTransformer(records: Seq[SAReturn]): Seq[Question] =
+  override def evidenceTransformer(records: Seq[SAReturn]): Seq[QuestionWithAnswers] =
     records.flatMap(correctAnswers(_)) match {
       case Nil => Nil
-      case answers => Seq(Question(SelfAssessedIncomeFromPensionsQuestion, answers, returnsToAdditionalInfo(records)))
+      case answers => Seq(QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, answers, returnsToAdditionalInfo(records)))
     }
 
 

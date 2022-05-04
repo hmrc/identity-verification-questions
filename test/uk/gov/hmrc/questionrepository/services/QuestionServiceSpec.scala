@@ -124,7 +124,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
-          service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe List(Question(PaymentToDate,List(TestRecord(1).toString)))
+          service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe List(QuestionWithAnswers(PaymentToDate,List(TestRecord(1).toString)))
         }
       }
     }
@@ -172,7 +172,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -189,7 +189,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -206,7 +206,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]

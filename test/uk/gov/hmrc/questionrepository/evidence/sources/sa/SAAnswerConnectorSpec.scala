@@ -138,7 +138,7 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     implicit val request: Request[_] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val testSAPaymentQuestion = Question(SelfAssessedPaymentQuestion, Seq(
+    val testSAPaymentQuestion = QuestionWithAnswers(SelfAssessedPaymentQuestion, Seq(
       """{"amount":100,"paymentDate":"2020-02-20"}""",
       """{"amount":15.51,"paymentDate":"2017-06-01"}"""
     ))
@@ -146,7 +146,7 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     val selection = Selection(Nino("AA000003D"))
     val questionDataCacheForSAPayments: Seq[QuestionDataCache] = Seq(QuestionDataCache(CorrelationId(), selection, Seq(testSAPaymentQuestion), dateTime))
     def questionDataCacheForSAPensions(validAnswers: Seq[String]): Seq[QuestionDataCache] =
-      Seq(QuestionDataCache(CorrelationId(), selection, Seq(Question(SelfAssessedIncomeFromPensionsQuestion, validAnswers)), dateTime))
+      Seq(QuestionDataCache(CorrelationId(), selection, Seq(QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, validAnswers)), dateTime))
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
     val service = new SAAnswerConnector(appConfig, mongoRepo)
   }

@@ -57,6 +57,6 @@ trait Setup {
   val ninoIdentifier: Nino = Nino("AA000000D")
   val selection: Selection = Selection(ninoIdentifier)
   case class TestRecord(value: BigDecimal)
-  val questionList = List(Question(PaymentToDate,List(TestRecord(1).toString)))
+  val questionList = List(QuestionWithAnswers(PaymentToDate,List(TestRecord(1).toString)))
   val dateTime = LocalDateTime.now()
 }

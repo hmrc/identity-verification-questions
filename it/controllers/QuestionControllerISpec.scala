@@ -70,7 +70,7 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       response.status shouldBe 200
       val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
       questionResponse.isSuccess shouldBe true
-      questionResponse.get.questions shouldBe Seq.empty[Question]
+      questionResponse.get.questions shouldBe Seq.empty[QuestionWithAnswers]
     }
 
     "return 400 if provided with invalid json" in new Setup {
@@ -201,10 +201,10 @@ trait TestData extends P60TestData {
     "foo" -> "bar",
   )
 
-  val paymentToDateQuestion: Question = Question(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
-  val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
-  val passportQuestion: Question = Question(PassportQuestion, Seq.empty[String])
-  val scpEmailQuestion: Question = Question(SCPEmailQuestion, Seq.empty[String], Map.empty[String, String])
+  val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
+  val employeeNIContributionsQuestion: QuestionWithAnswers = QuestionWithAnswers(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
+  val passportQuestion: QuestionWithAnswers = QuestionWithAnswers(PassportQuestion, Seq.empty[String])
+  val scpEmailQuestion: QuestionWithAnswers = QuestionWithAnswers(SCPEmailQuestion, Seq.empty[String], Map.empty[String, String])
 
   val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
 }

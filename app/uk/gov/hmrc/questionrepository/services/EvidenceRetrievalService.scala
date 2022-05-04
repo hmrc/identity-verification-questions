@@ -9,10 +9,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
-import uk.gov.hmrc.questionrepository.models.{CorrelationId, QuestionDataCache, QuestionResponse, Selection}
+import uk.gov.hmrc.questionrepository.models.{CorrelationId, Question, QuestionDataCache, QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
-import java.time.{LocalDateTime, ZoneOffset}
 
+import java.time.{LocalDateTime, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.questionrepository.evidences.sources.sa.SAService
 
@@ -30,19 +30,18 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
     val services: Seq[QuestionService] = Seq(p60Service, saService)
 
     for {
-      qs <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)
+      questionWithAnswers <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)
       corrId = CorrelationId()
       _ <- mongoRepo.store(QuestionDataCache(
             correlationId = corrId,
             selection = selection,
-            questions = qs,
+            questions = questionWithAnswers,
             expiryDate = LocalDateTime.now(ZoneOffset.UTC) plus appConfig.questionRecordTTL))
-    } yield removeAnswers(QuestionResponse(corrId, qs))
+    } yield toResponse(corrId, questionWithAnswers)
   }
 
-  // TODO use a different data model for question return than answer checking
-  // we don't want to return an empty list on each call here
-  private def removeAnswers(questionResponse: QuestionResponse): QuestionResponse =
-    questionResponse.copy(questions = questionResponse.questions.map(_.copy(answers = Seq.empty[String])))
+  private def toResponse(correlationId: CorrelationId, qs: Seq[QuestionWithAnswers]): QuestionResponse = {
+    QuestionResponse(correlationId, qs.map(q => Question(q.questionKey, q.info)))
+  }
 
 }

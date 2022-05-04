@@ -20,7 +20,7 @@ import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.sa.{SAPayment, SAPaymentReturn, SAPaymentService, SAPaymentsConnector}
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedPaymentQuestion
-import uk.gov.hmrc.questionrepository.models.{Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{QuestionWithAnswers, Selection}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
@@ -42,7 +42,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 2
@@ -61,7 +61,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 1
@@ -84,7 +84,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 1
@@ -107,7 +107,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 2
@@ -124,7 +124,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(zeroRecords))
 
-      val actual: Seq[Question] = service.questions(testJourney).futureValue
+      val actual: Seq[QuestionWithAnswers] = service.questions(testJourney).futureValue
 
       actual.size shouldBe 0
     }

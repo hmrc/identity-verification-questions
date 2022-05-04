@@ -36,7 +36,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
 
   val allowedPaymentTypes = List("PYT", "TFO")
 
-  override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
+  override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     if (isAvailable(selection)) {
       withCircuitBreaker {
         selection.sautr match {
@@ -66,7 +66,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     }
   }
 
-  override def evidenceTransformer(records: Seq[SAPaymentReturn]): Seq[Question]=
+  override def evidenceTransformer(records: Seq[SAPaymentReturn]): Seq[QuestionWithAnswers]=
     records.map { paymentReturn =>
     val paymentWindowStartDate = currentDate.minusYears(appConfig.saPaymentWindowYears)
     val recentPositivePayments = paymentReturn.payments.filter { individualPayment =>
@@ -79,9 +79,9 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     convertPaymentToQuestion(paymentReturn)
   }
 
-  private def convertPaymentToQuestion(paymentReturn: SAPaymentReturn): Question = {
+  private def convertPaymentToQuestion(paymentReturn: SAPaymentReturn): QuestionWithAnswers = {
 
-    Question(
+    QuestionWithAnswers(
       SelfAssessment.SelfAssessedPaymentQuestion,
       paymentReturn.payments.map(Json.toJson(_).toString())
     )

@@ -9,9 +9,13 @@ import java.time.LocalDateTime
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
+/**
+ * Mongo record/document containing the id selection, questions found from various
+ * evidence sources, and answers for those questions which we can store on initial request
+ */
 case class QuestionDataCache(correlationId: CorrelationId,
                              selection: Selection,
-                             questions: Seq[Question],
+                             questions: Seq[QuestionWithAnswers],
                              expiryDate: LocalDateTime)
 
 object QuestionDataCache{

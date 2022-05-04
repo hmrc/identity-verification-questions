@@ -10,7 +10,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors
-import uk.gov.hmrc.questionrepository.models.{Question, Selection, selfAssessmentService}
+import uk.gov.hmrc.questionrepository.models.{QuestionWithAnswers, Selection, selfAssessmentService}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.QuestionService
@@ -29,7 +29,7 @@ class SAService @Inject() (
   val serviceName = selfAssessmentService
   override def questions(selection: Selection)
                         (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext)
-  : Future[Seq[Question]] = {
+  : Future[Seq[QuestionWithAnswers]] = {
     val paymentQuestionsFuture = saPaymentService.questions(selection)
     val pensionQuestionsFuture = saPensionService.questions(selection)
 
@@ -43,5 +43,5 @@ class SAService @Inject() (
 
   override def connector: connectors.QuestionConnector[SelfAssessmentReturn] = ???
 
-  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[Question] = ???
+  override def evidenceTransformer(records: Seq[SelfAssessmentReturn]): Seq[QuestionWithAnswers] = ???
 }

@@ -9,7 +9,7 @@ import play.api.Logging
 import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
-import uk.gov.hmrc.questionrepository.models.{Question, Selection, ServiceName}
+import uk.gov.hmrc.questionrepository.models.{QuestionWithAnswers, Selection, ServiceName}
 import play.api.mvc.Request
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
@@ -31,7 +31,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def isAvailable(selection: Selection): Boolean
 
-  def evidenceTransformer(records: Seq[Record]): Seq[Question]
+  def evidenceTransformer(records: Seq[Record]): Seq[QuestionWithAnswers]
 
   /** All the HODs return 404s for an unknown Nino, so these
    *  should never trigger the circuit breaker. The only exception
@@ -47,7 +47,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     case _ => true
   }
 
-  def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
+  def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailable(selection)) {
       withCircuitBreaker {

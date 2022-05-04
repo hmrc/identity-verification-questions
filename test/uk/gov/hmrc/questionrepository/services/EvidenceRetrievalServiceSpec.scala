@@ -24,15 +24,15 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
 
   "calling callAllEvidenceSources" should {
     "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
-      (mockP60Service.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[Question]))
-      (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[Question]))
+      (mockP60Service.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       // ver-1281: not in use for now
 //      (mockPassportService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
 //      (mockSCPEmailService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
 //      (mockDvlaService.questions(_: Selection)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq.empty[Question]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Period.parse("P1D"))
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
-      result.questions shouldBe Seq.empty[Question]
+      result.questions shouldBe Seq.empty[QuestionWithAnswers]
     }
 
     // ver-1281: not in use for now
