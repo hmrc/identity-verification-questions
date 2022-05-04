@@ -11,7 +11,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 
 import java.time.{LocalDateTime, ZoneOffset}
-import scala.util.{Failure, Success, Try}
 
 class QuestionDataCacheSpec extends UnitSpec{
 
@@ -43,6 +42,7 @@ class QuestionDataCacheSpec extends UnitSpec{
               case None => fail("No $date key with object found in date field")
               case jsValue => fail(s"Found wrong type of value for expiryDate: $jsValue")
             }
+            case _ => fail("expiryDate should be a JsObject")
           }
         case None => fail("No expiryDate field found in document")
       }

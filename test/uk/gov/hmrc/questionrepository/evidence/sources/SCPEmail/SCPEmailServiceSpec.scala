@@ -6,7 +6,6 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.SCPEmail
 
 import Utils.{LogCapturing, UnitSpec}
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher

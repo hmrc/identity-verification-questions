@@ -9,7 +9,6 @@ import Utils.UnitSpec
 import Utils.testData.PassportTestData
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.hooks.HttpHook

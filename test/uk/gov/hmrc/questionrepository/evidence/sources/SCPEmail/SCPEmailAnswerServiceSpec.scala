@@ -7,7 +7,6 @@ package uk.gov.hmrc.questionrepository.evidence.sources.SCPEmail
 
 import Utils.UnitSpec
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.questionrepository.evidences.sources.SCPEmail.SCPEmailAnswerConnector
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository

@@ -6,7 +6,6 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.DVLA
 
 import Utils.UnitSpec
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.questionrepository.evidences.sources.Dvla.DvlaConnector
 import uk.gov.hmrc.questionrepository.models.{Selection, dvlaService}
 

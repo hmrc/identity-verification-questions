@@ -6,7 +6,6 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
 import Utils.{LogCapturing, UnitSpec}
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.questionrepository.config.AppConfig

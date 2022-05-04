@@ -23,7 +23,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
-                                         messageTextService: MessageTextService,
                                          appConfig: AppConfig,
                                          p60Service: P60Service,
                                          saService: SAService,
@@ -45,10 +44,7 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
             selection = selection,
             questions = qs,
             expiryDate = LocalDateTime.now(ZoneOffset.UTC) plus appConfig.questionRecordTTL))
-      questionTextEn = qs.flatMap(q => messageTextService.getQuestionMessageEn(q.questionKey)).toMap
-      questionTextCy = qs.flatMap(q => messageTextService.getQuestionMessageCy(q.questionKey)).toMap
-      maybeQuestionTextCy = if(questionTextCy.isEmpty) None else Some(questionTextCy)
-    } yield removeAnswers(QuestionResponse(corrId, qs, questionTextEn, maybeQuestionTextCy))
+    } yield removeAnswers(QuestionResponse(corrId, qs))
   }
 
   // TODO use a different data model for question return than answer checking

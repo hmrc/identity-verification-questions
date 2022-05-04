@@ -7,7 +7,6 @@ package uk.gov.hmrc.questionrepository.services
 
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}

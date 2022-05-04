@@ -18,15 +18,15 @@ class QuestionResponseSpec extends UnitSpec {
     }
 
     "serialize a valid QuestionResponse object without optional fields" in new Setup {
-      Json.toJson(questionResponse).toString shouldBe s"""{"correlationId":"$correlationId","questions":[{"questionKey":"rti-p60-payment-for-year","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"rti-p60-employee-ni-contributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"passport","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
+      Json.toJson(questionResponse).toString shouldBe s"""{"correlationId":"$correlationId","questions":[{"questionKey":"rti-p60-payment-for-year","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"rti-p60-employee-ni-contributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},{"questionKey":"passport","answers":[],"info":{}}]}""".stripMargin
     }
 
     "deserialize valid json into a QuestionResponse" in new Setup {
       val validQuestionResponseStr = s"""{"correlationId":"$correlationId","questions":[{"questionKey":"rti-p60-payment-for-year","answers":["3000.00","1266.00"],"info":{"currentTaxYear":"2019/20"}},
                                         |{"questionKey":"rti-p60-employee-ni-contributions","answers":["34.00","34.00"],"info":{"currentTaxYear":"2019/20"}},
-                                        |{"questionKey":"passport","answers":[],"info":{}}],"questionTextEn":{"PaymentToDate":"some text"}}""".stripMargin
+                                        |{"questionKey":"passport","answers":[],"info":{}}]}""".stripMargin
       val json: JsValue = Json.parse(validQuestionResponseStr)
-      json.validate[QuestionResponse] shouldBe JsSuccess(QuestionResponse(correlationId, questions, questionTextEn, None))
+      json.validate[QuestionResponse] shouldBe JsSuccess(QuestionResponse(correlationId, questions))
     }
 
     "error when attempting to deserialize invalid json" in {
@@ -49,9 +49,7 @@ class QuestionResponseSpec extends UnitSpec {
     val questionTextEn = Map("PaymentToDate" -> "some text")
     val questionResponse: QuestionResponse = QuestionResponse(
       correlationId,
-      Seq(paymentToDateQuestion, employeeNIContributionsQuestion, passportQuestion),
-      questionTextEn,
-      None
+      Seq(paymentToDateQuestion, employeeNIContributionsQuestion, passportQuestion)
     )
   }
 }

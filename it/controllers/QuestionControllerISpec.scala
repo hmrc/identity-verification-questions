@@ -8,11 +8,9 @@ package controllers
 import ch.qos.logback.classic.Level
 import iUtils.TestData.P60TestData
 import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.P60._
@@ -35,9 +33,6 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       questionResponse.get.questions.nonEmpty shouldBe true
       questionResponse.get.questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
 
-      //ver-1281: SCPEmail disabled for now
-      val mongoResult = questionRepository.findAnswers(questionResponse.get.correlationId, Selection(Nino("AA000000A"))).futureValue
-      //mongoResult.flatMap(qdc => qdc.questions.flatMap(q => q.answers)).count(_ == "email@email.com") shouldBe 1
     }
 
 //    "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
@@ -171,8 +166,6 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions.nonEmpty shouldBe true
-        questionResponse.get.questionTextEn.nonEmpty shouldBe true
-        questionResponse.get.questionTextCy.isDefined shouldBe true
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }

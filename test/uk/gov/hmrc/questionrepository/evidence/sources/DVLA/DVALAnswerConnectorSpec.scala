@@ -11,7 +11,6 @@ import Utils.UnitSpec
 import Utils.testData.AppConfigTestData
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.Configuration
 import play.api.libs.json.Writes
 import uk.gov.hmrc.domain.Nino

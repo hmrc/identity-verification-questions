@@ -6,7 +6,6 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.DVLA
 
 import Utils.UnitSpec
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier

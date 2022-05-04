@@ -47,7 +47,7 @@ class QuestionControllerSpec extends UnitSpec with LogCapturing {
 
   trait Setup {
     val selection: Selection = Selection(Nino("AA000000D"))
-    val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question], Map.empty[String, String], None)
+    val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question])
     val jsonBody: JsValue = Json.toJson(selection)
     val badJson: JsValue = Json.parse("""
                             |{
