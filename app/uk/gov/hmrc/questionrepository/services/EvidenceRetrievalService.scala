@@ -48,6 +48,8 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
     } yield removeAnswers(QuestionResponse(corrId, qs, questionTextEn, maybeQuestionTextCy))
   }
 
+  // TODO use a different data model for question return than answer checking
+  // we don't want to return an empty list on each call here
   private def removeAnswers(questionResponse: QuestionResponse): QuestionResponse =
     questionResponse.copy(questions = questionResponse.questions.map(_.copy(answers = Seq.empty[String])))
 

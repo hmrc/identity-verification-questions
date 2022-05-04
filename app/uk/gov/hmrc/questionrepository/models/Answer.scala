@@ -11,6 +11,9 @@ import play.api.libs.json._
 
 sealed trait Answer
 
+/**
+ * Answer format used for all P60 (single monetary value) questions
+ */
 case class StringAnswer(value: String) extends Answer {
   override val toString: String = value
 }
@@ -22,6 +25,7 @@ object StringAnswer {
   }
 }
 
+// TODO do we really need/use this class?
 case class IntegerAnswer(value: Int) extends Answer {
   override val toString: String = value.toString
 }
@@ -35,6 +39,7 @@ object IntegerAnswer {
   def apply(value: String): IntegerAnswer = apply(value.toInt)
 }
 
+// TODO do we actually need/use this class?
 case class DoubleAnswer(value: Double) extends Answer {
   override val toString: String = value.toString
 }
@@ -47,6 +52,7 @@ object DoubleAnswer {
   def apply(value: String): DoubleAnswer = apply(value.toDouble)
 }
 
+// TODO again, not sure we need this!
 case class BooleanAnswer(value: Boolean) extends Answer {
   override val toString: String = value.toString
 }
@@ -60,12 +66,14 @@ object BooleanAnswer {
   def apply(value: String): BooleanAnswer = apply(value.toBoolean)
 }
 
+// XXX May be needed *later* when doing passport question responses
 case class PassportAnswer(passportNumber: String, surname: String, forenames: String, dateOfExpiry: LocalDate) extends Answer
 
 object PassportAnswer {
   implicit val format: Format[PassportAnswer] = Json.format[PassportAnswer]
 }
 
+// Ditto
 case class UkDrivingLicenceAnswer(drivingLicenceNumber: String, surname: String, validFrom: LocalDate, validTo: LocalDate,
                                   issueNumber: String) extends Answer
 

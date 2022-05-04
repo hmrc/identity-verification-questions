@@ -11,6 +11,7 @@ import uk.gov.hmrc.questionrepository.services.json.{Mapping, Mappings}
 abstract class QuestionKey(val name: String, val evidenceOption: String) extends Ordered[QuestionKey] {
   override def compare(that: QuestionKey): Int = this.name.compareTo(that.name)
 }
+
 object QuestionKey {
   val keys = Seq(
     P60.PaymentToDate,
@@ -33,6 +34,12 @@ object QuestionKey {
     keys.find(_.name == keyName)
   }
 }
+
+/**
+ * All P60 question keys will provide the following info fields:
+ * - currentTaxYear (YYYY/YY)
+ * - previousTaxYear (YYYY/YY)
+ */
 case object P60 {
   case object PaymentToDate extends QuestionKey("rti-p60-payment-for-year", "P60")
   case object EmployeeNIContributions extends QuestionKey("rti-p60-employee-ni-contributions", "P60")
