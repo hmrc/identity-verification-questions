@@ -180,7 +180,7 @@ This service depends on the following collaborating services at runtime:
 * datastream (for Splunk auditing)
 * platform-analytics (for GA events)
 * iv_test_data (during IT tests and in stubbed or local environments)
-* si-hod-proxy (for SA questions) 
+* si_hod_proxy (for SA questions) 
 * business_verification_stub (during IT tests and in stubbed or local environments)
 * des.ws.hmrc.gov.uk (in production, for P60 data)
 
