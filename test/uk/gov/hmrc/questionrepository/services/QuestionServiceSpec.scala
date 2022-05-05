@@ -7,22 +7,19 @@ package uk.gov.hmrc.questionrepository.services
 
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
-import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
+import play.api.mvc.{AnyContentAsEmpty, Request}
+import play.api.test.FakeRequest
+import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException}
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.models.P60.PaymentToDate
 import uk.gov.hmrc.questionrepository.models._
-import java.time.LocalDateTime
-
-import play.api.mvc.{AnyContentAsEmpty, Request}
-import play.api.test.FakeRequest
-import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
+import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -127,7 +124,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
-          service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe List(Question(PaymentToDate,List(TestRecord(1).toString)))
+          service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe List(QuestionWithAnswers(PaymentToDate,List(TestRecord(1).toString)))
         }
       }
     }
@@ -175,7 +172,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -192,7 +189,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -209,7 +206,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[Question] = records.map(r => Question(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]

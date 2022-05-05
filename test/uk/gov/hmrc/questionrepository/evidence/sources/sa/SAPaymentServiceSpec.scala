@@ -20,7 +20,7 @@ import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.sa.{SAPayment, SAPaymentReturn, SAPaymentService, SAPaymentsConnector}
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.SelfAssessedPaymentQuestion
-import uk.gov.hmrc.questionrepository.models.{Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{QuestionWithAnswers, Selection}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 
@@ -32,7 +32,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
   implicit override val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = scaled(Span(10, Seconds)), interval = scaled(Span(500, Millis)))
 
-  val testRequest = Selection(Nino("AA000003D"))
+  val testRequest: Selection = Selection(Nino("AA000003D"))
 
   "Obtain Questions" should {
     "obtain the correct questions" in new Setup {
@@ -42,7 +42,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 2
@@ -61,7 +61,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 1
@@ -70,7 +70,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     }
 
     "limit questions to those with a transaction code of PYT" in new Setup {
-      val updatedRecords = testRecords.map { record =>
+      val updatedRecords: Seq[SAPaymentReturn] = testRecords.map { record =>
         val updatedPayments = record.payments.map {
           case payment if payment.amount == 100 => payment.copy(transactionCode = Some("BCC"))
           case payment => payment
@@ -84,7 +84,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 1
@@ -93,7 +93,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     }
 
     "limit questions to those with a transaction code of PYT and TFO" in new Setup {
-      val updatedRecords = testRecords.map { record =>
+      val updatedRecords: Seq[SAPaymentReturn] = testRecords.map { record =>
         val updatedPayments = record.payments.map {
           case payment if payment.amount == 100 => payment.copy(transactionCode = Some("TFO"))
           case payment => payment
@@ -107,7 +107,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       actual.size shouldBe 1
 
-      val actualQuestion: Question = actual.head
+      val actualQuestion: QuestionWithAnswers = actual.head
 
       actualQuestion.questionKey shouldBe SelfAssessedPaymentQuestion
       actualQuestion.answers.size shouldBe 2
@@ -124,7 +124,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(zeroRecords))
 
-      val actual = service.questions(testJourney).futureValue
+      val actual: Seq[QuestionWithAnswers] = service.questions(testJourney).futureValue
 
       actual.size shouldBe 0
     }
@@ -167,29 +167,29 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
       "sa.payment.tolerance.future.days" -> 3,
       "sa.payment.tolerance.past.days" -> 3
     ) ++ additionalConfig
-    val config = Configuration.from(configData)
+    val config: Configuration = Configuration.from(configData)
     val servicesConfig = new ServicesConfig(config)
     implicit val appConfig: AppConfig = new AppConfig(config, servicesConfig)
 
     implicit val request: Request[_] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val fixedDate = LocalDate.parse("2020-06-01")
+    val fixedDate: LocalDate = LocalDate.parse("2020-06-01")
 
-    protected val mockConnector = mock[SAPaymentsConnector]
-    protected val mockEventDispatcher = mock[EventDispatcher]
-    protected val mockAuditService = mock[AuditService]
+    protected val mockConnector: SAPaymentsConnector = mock[SAPaymentsConnector]
+    protected val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
+    protected val mockAuditService: AuditService = mock[AuditService]
 
-    val sautr = SaUtr("123456789")
+    val sautr: SaUtr = SaUtr("123456789")
 
-    val testJourney = Selection(SaUtr("123456789"))
+    val testJourney: Selection = Selection(SaUtr("123456789"))
 
     val testRecords: Seq[SAPaymentReturn] = Seq(SAPaymentReturn(Vector(
       SAPayment(BigDecimal(100), Some(fixedDate), Some("PYT")),
       SAPayment(BigDecimal(15.51), Some(fixedDate.minusYears(3)), Some("PYT"))
     )))
 
-    val service = new SAPaymentService(mockConnector, mockEventDispatcher, mockAuditService)(appConfig, global) {
+    val service: SAPaymentService = new SAPaymentService(mockConnector, mockEventDispatcher, mockAuditService)(appConfig) {
       override def currentDate: LocalDate = fixedDate
     }
 

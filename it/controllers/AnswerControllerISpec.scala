@@ -79,19 +79,19 @@ class AnswerControllerISpec extends BaseISpec {
       val ninoIdentifier: Nino = Nino("AA000000D")
       val ninoIdentifier2: Nino = Nino("AA000002D")
       val utrIdentifier: SaUtr = SaUtr("123456789")
-      val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("3000.00")))
+      val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("3000.00")))
       val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), answerDetails)
-      val incorrectAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, StringAnswer("666.00")))
+      val incorrectAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("666.00")))
       val incorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), incorrectAnswerDetails)
       val incorrectNoIdentifier: AnswerCheck = AnswerCheck(correlationId, Selection(utrIdentifier), incorrectAnswerDetails)
       val incorrectIdentifierCheck: AnswerCheck = AnswerCheck(correlationId, Selection(Some(ninoIdentifier2), Some(utrIdentifier), None), incorrectAnswerDetails)
       val questionResultUnknown: QuestionResult = QuestionResult(PaymentToDate, Unknown)
       val questionResultCorrect: QuestionResult = QuestionResult(PaymentToDate, Correct)
       val questionResultIncorrect: QuestionResult = QuestionResult(PaymentToDate, Incorrect)
-      val paymentToDateQuestion: Question = Question(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-      val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
+      val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
+      val employeeNIContributionsQuestion: QuestionWithAnswers = QuestionWithAnswers(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
       val questions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
-      def questionDataCache(correlationId: CorrelationId, selection: Selection, questionSeq: Seq[Question] = questions) =
+      def questionDataCache(correlationId: CorrelationId, selection: Selection, questionSeq: Seq[QuestionWithAnswers] = questions) =
         QuestionDataCache(
           correlationId,
           selection,

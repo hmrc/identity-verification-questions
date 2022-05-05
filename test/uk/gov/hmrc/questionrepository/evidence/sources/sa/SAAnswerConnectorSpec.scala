@@ -33,49 +33,49 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     "return Correct if the correct data is passed in" in new Setup {
 
       val answer = """{"amount":15.51,"paymentDate":"2017-06-01"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Correct
     }
 
     "return Match if the correct amount is used and the payment date supplied is within the tolerance in the past" in new Setup {
       val answer = """{"amount":100,"paymentDate":"2020-02-18"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Correct
     }
 
     "return Match if the correct amount is used and the payment date supplied is within the tolerance in the future" in new Setup {
       val answer = """{"amount":100,"paymentDate":"2020-02-21"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Correct
     }
 
     "return NoMatch if the payment amount is incorrect" in new Setup {
       val answer = """{"amount":11,"paymentDate":"2017-06-01"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Incorrect
     }
 
     "return NoMatch if the payment date is incorrect" in new Setup {
       val answer = """{"amount":15.51,"paymentDate":"2017-03-01"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Incorrect
     }
 
     "return NoMatch if the payment date is just before the tolerance period" in new Setup {
       val answer = """{"amount":100,"paymentDate":"2020-02-16"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Incorrect
     }
 
     "return NoMatch if the payment date is just after the tolerance period" in new Setup {
       val answer = """{"amount":15.51,"paymentDate":"2017-06-05"}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Incorrect
     }
 
     "return NoMatch if the payment date is missing" in new Setup {
       val answer = """{"amount":15.51}"""
-      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, StringAnswer(answer)))
+      val result = service.checkResult(questionDataCacheForSAPayments, AnswerDetails(testSAPaymentQuestion.questionKey, SimpleAnswer(answer)))
       result shouldBe Incorrect
     }
   }
@@ -138,7 +138,7 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     implicit val request: Request[_] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val testSAPaymentQuestion = Question(SelfAssessedPaymentQuestion, Seq(
+    val testSAPaymentQuestion = QuestionWithAnswers(SelfAssessedPaymentQuestion, Seq(
       """{"amount":100,"paymentDate":"2020-02-20"}""",
       """{"amount":15.51,"paymentDate":"2017-06-01"}"""
     ))
@@ -146,10 +146,10 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     val selection = Selection(Nino("AA000003D"))
     val questionDataCacheForSAPayments: Seq[QuestionDataCache] = Seq(QuestionDataCache(CorrelationId(), selection, Seq(testSAPaymentQuestion), dateTime))
     def questionDataCacheForSAPensions(validAnswers: Seq[String]): Seq[QuestionDataCache] =
-      Seq(QuestionDataCache(CorrelationId(), selection, Seq(Question(SelfAssessedIncomeFromPensionsQuestion, validAnswers)), dateTime))
+      Seq(QuestionDataCache(CorrelationId(), selection, Seq(QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, validAnswers)), dateTime))
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
     val service = new SAAnswerConnector(appConfig, mongoRepo)
   }
 
-  def userAnswer(userAnswerVal: String): AnswerDetails = AnswerDetails(SelfAssessedIncomeFromPensionsQuestion, StringAnswer(userAnswerVal))
+  def userAnswer(userAnswerVal: String): AnswerDetails = AnswerDetails(SelfAssessedIncomeFromPensionsQuestion, SimpleAnswer(userAnswerVal))
 }

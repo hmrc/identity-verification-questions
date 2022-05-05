@@ -11,7 +11,6 @@ import ch.qos.logback.classic.Level
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.models.p60Service
-import uk.gov.hmrc.questionrepository.models.passport.PassportAuthData
 
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.time.{LocalDateTime, Period}
@@ -297,19 +296,6 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
       }
     }
 
-    "getting passportAuthData" should {
-      "return a populated PassportAuthData object" in new Setup {
-        override def testConfig: Map[String, Any] = baseConfig ++ passportAuthDataData
-        appConfig.passportAuthData shouldBe PassportAuthData("THMRC", "THMRC001", "THMRC_WS", "passport-pwd")
-      }
-
-      "throw an Exception if any/all values are missing from conf" in new Setup {
-        override def testConfig: Map[String, Any] = baseConfig
-        an[RuntimeException] shouldBe thrownBy {
-          appConfig.passportAuthData
-        }
-      }
-    }
   }
 
   trait Setup extends TestData {

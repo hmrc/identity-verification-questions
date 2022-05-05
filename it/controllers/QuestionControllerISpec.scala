@@ -8,11 +8,9 @@ package controllers
 import ch.qos.logback.classic.Level
 import iUtils.TestData.P60TestData
 import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60Service
 import uk.gov.hmrc.questionrepository.models.P60._
@@ -35,9 +33,6 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       questionResponse.get.questions.nonEmpty shouldBe true
       questionResponse.get.questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
 
-      //ver-1281: SCPEmail disabled for now
-      val mongoResult = questionRepository.findAnswers(questionResponse.get.correlationId, Selection(Nino("AA000000A"))).futureValue
-      //mongoResult.flatMap(qdc => qdc.questions.flatMap(q => q.answers)).count(_ == "email@email.com") shouldBe 1
     }
 
 //    "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
@@ -75,7 +70,7 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       response.status shouldBe 200
       val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
       questionResponse.isSuccess shouldBe true
-      questionResponse.get.questions shouldBe Seq.empty[Question]
+      questionResponse.get.questions shouldBe Seq.empty[QuestionWithAnswers]
     }
 
     "return 400 if provided with invalid json" in new Setup {
@@ -171,8 +166,6 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions.nonEmpty shouldBe true
-        questionResponse.get.questionTextEn.nonEmpty shouldBe true
-        questionResponse.get.questionTextCy.isDefined shouldBe true
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }
     }
@@ -208,10 +201,10 @@ trait TestData extends P60TestData {
     "foo" -> "bar",
   )
 
-  val paymentToDateQuestion: Question = Question(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
-  val employeeNIContributionsQuestion: Question = Question(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
-  val passportQuestion: Question = Question(PassportQuestion, Seq.empty[String])
-  val scpEmailQuestion: Question = Question(SCPEmailQuestion, Seq.empty[String], Map.empty[String, String])
+  val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
+  val employeeNIContributionsQuestion: QuestionWithAnswers = QuestionWithAnswers(EmployeeNIContributions, Seq.empty[String], Map("currentTaxYear" -> "2019/20"))
+  val passportQuestion: QuestionWithAnswers = QuestionWithAnswers(PassportQuestion, Seq.empty[String])
+  val scpEmailQuestion: QuestionWithAnswers = QuestionWithAnswers(SCPEmailQuestion, Seq.empty[String], Map.empty[String, String])
 
   val testQuestions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
 }

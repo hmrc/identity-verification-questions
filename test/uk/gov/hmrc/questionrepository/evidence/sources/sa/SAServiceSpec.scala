@@ -16,7 +16,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.sa._
 import uk.gov.hmrc.questionrepository.models.SelfAssessment.{SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion}
-import uk.gov.hmrc.questionrepository.models.{Question, Selection}
+import uk.gov.hmrc.questionrepository.models.{QuestionWithAnswers, Selection}
 import uk.gov.hmrc.questionrepository.monitoring.EventDispatcher
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.services.utilities.TaxYear
@@ -96,8 +96,8 @@ class SAServiceSpec extends UnitSpec {
     protected val mockAuditService = mock[AuditService]
 
 
-    val paymentQuestion = Question(SelfAssessedPaymentQuestion,  Seq("123.11"))
-    val pensionQuestion = Question(SelfAssessedIncomeFromPensionsQuestion, Seq("456.22"))
+    val paymentQuestion = QuestionWithAnswers(SelfAssessedPaymentQuestion,  Seq("123.11"))
+    val pensionQuestion = QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, Seq("456.22"))
 
     val testRecords : Seq[SAReturn] = Seq(
       SAReturn(

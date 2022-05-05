@@ -22,8 +22,10 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(impl
     //PE-2186 - for P60 answers ignore pence, eg, 100.38 convert to 100.00
     val newAnswerDetails: AnswerDetails =
       if (answerDetails.questionKey.evidenceOption.equals("P60")) {
-        answerDetails.copy(answer = StringAnswer(convertAnswer(answerDetails.answer.toString.trim).toString()))
-      } else answerDetails
+        answerDetails.copy(answer = SimpleAnswer(convertAnswer(answerDetails.answer.toString.trim).toString()))
+      } else {
+        answerDetails
+      }
     questionDataCaches.flatMap(qdc => qdc.questions.filter(_.questionKey == newAnswerDetails.questionKey)
       .flatMap(_.answers)).count(_ == newAnswerDetails.answer.toString) match {
       case 0 => Incorrect

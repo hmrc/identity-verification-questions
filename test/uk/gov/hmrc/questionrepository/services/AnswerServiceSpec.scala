@@ -7,18 +7,17 @@ package uk.gov.hmrc.questionrepository.services
 
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, Outage}
 import uk.gov.hmrc.questionrepository.connectors.AnswerConnector
 import uk.gov.hmrc.questionrepository.models.P60._
-import uk.gov.hmrc.questionrepository.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, DoubleAnswer, QuestionKey, QuestionResult, Score, Selection, ServiceName, Unknown, p60Service}
+import uk.gov.hmrc.questionrepository.models._
 
 import java.time.LocalDateTime
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
@@ -164,8 +163,8 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     val pastOutage: Outage = Outage(LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1))
     val currentOutage: Outage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
 
-    val paymentToDateAnswer = AnswerDetails(PaymentToDate, DoubleAnswer(100.11))
-    val EmployeeNIContributionsAnswer = AnswerDetails(EmployeeNIContributions, DoubleAnswer(200.22))
+    val paymentToDateAnswer = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
+    val EmployeeNIContributionsAnswer = AnswerDetails(EmployeeNIContributions, SimpleAnswer("200.22"))
 
     case class TestRecord(questionKey: QuestionKey, answer: Score)
 

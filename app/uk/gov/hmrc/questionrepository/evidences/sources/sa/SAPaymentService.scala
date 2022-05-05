@@ -5,27 +5,25 @@
 
 package uk.gov.hmrc.questionrepository.evidences.sources.sa
 
-import javax.inject.Inject
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import play.api.mvc.Request
-import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException}
+import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.connectors.QuestionConnector
 import uk.gov.hmrc.questionrepository.evidences.sources.QuestionServiceMeoMinimumNumberOfQuestions
-import uk.gov.hmrc.questionrepository.models.{Question, Selection, SelfAssessment, selfAssessmentService}
+import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.monitoring.auditing.AuditService
 import uk.gov.hmrc.questionrepository.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 import uk.gov.hmrc.questionrepository.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
-import uk.gov.hmrc.questionrepository.models.JsonLocalDateFormats.dFormat
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispatcher: EventDispatcher, override implicit val auditService: AuditService)(
-  implicit val appConfig: AppConfig,
-  ec: ExecutionContext
+  implicit val appConfig: AppConfig
 ) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
@@ -34,11 +32,11 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
 
   def currentDate: LocalDate = LocalDate.now()
 
-  override def serviceName = selfAssessmentService
+  override def serviceName: ServiceName = selfAssessmentService
 
   val allowedPaymentTypes = List("PYT", "TFO")
 
-  override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Question]] = {
+  override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     if (isAvailable(selection)) {
       withCircuitBreaker {
         selection.sautr match {
@@ -59,17 +57,16 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
           logger.error(s"Unexpected response from $serviceName", u)
           Seq()
         case _: NotFoundException => Seq()
-        case t: Throwable => {
+        case t: Throwable =>
           logger.error(s"Unexpected response from $serviceName", t)
           Seq()
-        }
       }
     } else {
       Future.successful(Seq())
     }
   }
 
-  override def evidenceTransformer(records: Seq[SAPaymentReturn]): Seq[Question]=
+  override def evidenceTransformer(records: Seq[SAPaymentReturn]): Seq[QuestionWithAnswers]=
     records.map { paymentReturn =>
     val paymentWindowStartDate = currentDate.minusYears(appConfig.saPaymentWindowYears)
     val recentPositivePayments = paymentReturn.payments.filter { individualPayment =>
@@ -82,10 +79,9 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     convertPaymentToQuestion(paymentReturn)
   }
 
-  private def convertPaymentToQuestion(paymentReturn: SAPaymentReturn): Question = {
-    implicit val writes = Json.writes[SAPayment]
+  private def convertPaymentToQuestion(paymentReturn: SAPaymentReturn): QuestionWithAnswers = {
 
-    Question(
+    QuestionWithAnswers(
       SelfAssessment.SelfAssessedPaymentQuestion,
       paymentReturn.payments.map(Json.toJson(_).toString())
     )

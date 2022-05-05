@@ -14,7 +14,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 import uk.gov.hmrc.questionrepository.config.AppConfig
-import uk.gov.hmrc.questionrepository.models.{CorrelationId, Question, QuestionResponse, Selection}
+import uk.gov.hmrc.questionrepository.models.{CorrelationId, Question, QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.questionrepository.services.EvidenceRetrievalService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +47,7 @@ class QuestionControllerSpec extends UnitSpec with LogCapturing {
 
   trait Setup {
     val selection: Selection = Selection(Nino("AA000000D"))
-    val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question], Map.empty[String, String], None)
+    val questionResponse: QuestionResponse = QuestionResponse(CorrelationId(), Seq.empty[Question])
     val jsonBody: JsValue = Json.toJson(selection)
     val badJson: JsValue = Json.parse("""
                             |{

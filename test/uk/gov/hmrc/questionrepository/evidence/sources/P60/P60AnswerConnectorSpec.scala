@@ -7,7 +7,6 @@ package uk.gov.hmrc.questionrepository.evidence.sources.P60
 
 import Utils.UnitSpec
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.questionrepository.evidences.sources.P60.P60AnswerConnector
 import uk.gov.hmrc.questionrepository.models.P60._
 import uk.gov.hmrc.questionrepository.models._
@@ -21,7 +20,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
   val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
   val connector = new P60AnswerConnector(mongoRepo)
 
-  val answerDetails: AnswerDetails = AnswerDetails(PaymentToDate, DoubleAnswer(100.11))
+  val answerDetails: AnswerDetails = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
 
   override def afterEach(): Unit = {
     super.afterEach()
@@ -31,7 +30,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
   "verifyAnswer" should {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo" in {
-        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(Question(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
+        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
 
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
@@ -40,7 +39,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
     "return score of 'Incorrect'" when {
       "answer does not match an answer retrieved from repo" in {
-        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(Question(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
+        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
 
         await(mongoRepo.store(inCorrectQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)

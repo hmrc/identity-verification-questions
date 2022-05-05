@@ -12,7 +12,6 @@ import Utils.{LogCapturing, UnitSpec}
 import akka.actor.ActorSystem
 import ch.qos.logback.classic.Level
 import com.typesafe.config.Config
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.questionrepository.config.{AppConfig, HodConf}
