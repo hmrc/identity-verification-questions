@@ -6,12 +6,15 @@
 package uk.gov.hmrc.questionrepository.evidence.sources.sa
 
 import Utils.UnitSpec
+import org.joda.time.DateTime
 import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.questionrepository.config.AppConfig
 import uk.gov.hmrc.questionrepository.evidences.sources.sa.{SAPensionsConnector, SARecord, SAReturn}
 import uk.gov.hmrc.questionrepository.services.utilities.TaxYear
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,6 +60,23 @@ class SAPensionsConnectorSpec extends UnitSpec {
 
       ex.getCause.getMessage shouldBe errorMessage
     }
+
+    "if we are before the switch over date then take the start year as 2 years ago and the end year is last year" in new Setup {
+      override lazy val additionalConfig: Map[String, Any] = Map(
+        "sa.switch.day" -> 1,
+        "sa.switch.month" -> 8
+      )
+      connector.determinePeriod shouldBe ((2017, 2018))
+    }
+
+    "if we are after the switch over date then take the start year as 1 year ago and the end year is this year" in new Setup {
+      override lazy val additionalConfig: Map[String, Any] = Map(
+        "sa.switch.day" -> 1,
+        "sa.switch.month" -> 3
+      )
+      connector.determinePeriod shouldBe ((2018, 2019))
+    }
+
   }
 
   trait Setup {
@@ -73,10 +93,15 @@ class SAPensionsConnectorSpec extends UnitSpec {
     ) ++ additionalConfig
     val config = Configuration.from(configData)
     val servicesConfig = new ServicesConfig(config)
+    implicit val appConfig : AppConfig = new AppConfig(config, servicesConfig)
 
     val testNino = Nino("AA000003D")
     val testYear = 2019
 
-    val connector = new SAPensionsConnector(mockHttpClient, servicesConfig)
+    val fixedDate = DateTime.parse("2020-06-01")
+
+    val connector = new SAPensionsConnector(mockHttpClient, servicesConfig, appConfig) {
+      override def currentDate: DateTime = fixedDate
+    }
   }
 }

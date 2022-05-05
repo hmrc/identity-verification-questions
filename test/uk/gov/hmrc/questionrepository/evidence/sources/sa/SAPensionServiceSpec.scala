@@ -28,28 +28,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class SAPensionServiceSpec extends UnitSpec {
 
   "Self Assessment Pension Service" should {
-    "if we are before the switch over date then take the start year as 2 years ago and the end year is last year" in new Setup {
-      override lazy val additionalConfig: Map[String, Any] = Map(
-        "sa.switch.day" -> 1,
-        "sa.switch.month" -> 8
-      )
-      service.determinePeriod shouldBe ((2017, 2018))
-    }
-
-    "if we are after the switch over date then take the start year as 1 year ago and the end year is this year" in new Setup {
-      override lazy val additionalConfig: Map[String, Any] = Map(
-        "sa.switch.day" -> 1,
-        "sa.switch.month" -> 3
-      )
-      service.determinePeriod shouldBe ((2018, 2019))
-    }
-
     "contain a question handler for the self assessment income question" in new Setup {
       override lazy val additionalConfig: Map[String, Any] = Map(
         "sa.switch.day" -> 1,
         "sa.switch.month" -> 3
       )
-
+      (() => mockConnector.determinePeriod).expects().returning((2018,2019))
       service shouldBe a [QuestionService]
       service.serviceName shouldBe selfAssessmentService
 
@@ -70,7 +54,7 @@ class SAPensionServiceSpec extends UnitSpec {
         "sa.switch.day" -> 1,
         "sa.switch.month" -> 3
       )
-
+      (() => mockConnector.determinePeriod).expects().returning((2018,2019))
       service shouldBe a [QuestionService]
       service.serviceName shouldBe selfAssessmentService
 
@@ -98,7 +82,7 @@ class SAPensionServiceSpec extends UnitSpec {
         "sa.switch.month" -> 8,
         "microservice.services.selfAssessmentService.minimumMeoQuestions" -> 1
       )
-
+      (() => mockConnector.determinePeriod).expects().returning((2018,2019))
       (mockConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
         .expects(selection, *, *).returning(Future.successful(testRecords))
 
