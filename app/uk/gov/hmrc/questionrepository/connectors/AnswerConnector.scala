@@ -26,8 +26,18 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(impl
       } else {
         answerDetails
       }
-    questionDataCaches.flatMap(qdc => qdc.questions.filter(_.questionKey == newAnswerDetails.questionKey)
-      .flatMap(_.answers)).count(_ == newAnswerDetails.answer.toString) match {
+    questionDataCaches
+      .flatMap(qdc => qdc.questions.filter(_.questionKey == newAnswerDetails.questionKey)
+        .flatMap(_.answers))
+      .count{ answer =>
+        try {
+          val toleranceLowerBoundary: Double = answer.toDouble - 1
+          val toleranceHigherBoundary: Double = answer.toDouble + 1
+          (toleranceLowerBoundary <= newAnswerDetails.answer.toString.toDouble) && (toleranceHigherBoundary >= newAnswerDetails.answer.toString.toDouble)
+        } catch {
+          case _: Throwable => answer == newAnswerDetails.answer.toString
+        }
+      } match {
       case 0 => Incorrect
       case _ => Correct
     }

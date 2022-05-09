@@ -35,6 +35,12 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
       }
+      "answer matches an answer retrieved from repo with tolerance" in {
+        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
+
+        await(mongoRepo.store(correctQDC))
+        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetails.copy(answer = SimpleAnswer("101.11"))).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
+      }
     }
 
     "return score of 'Incorrect'" when {
