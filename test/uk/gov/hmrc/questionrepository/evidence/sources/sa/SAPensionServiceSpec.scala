@@ -118,7 +118,7 @@ class SAPensionServiceSpec extends UnitSpec {
       "hods.circuit.breaker.numberOfCallsToTrigger" -> 3,
       "hods.circuit.breaker.unavailablePeriodDurationInSec" -> 15,
       "hods.circuit.breaker.unstablePeriodDurationInSec" -> 30,
-      "microservice.services.SelfAssessmentPensionService.minimumMeoQuestions" -> 1
+      "microservice.services.selfAssessmentPensionService.minimumMeoQuestions" -> 1
     ) ++ additionalConfig
     val config = Configuration.from(configData)
     val servicesConfig = new ServicesConfig(config)
