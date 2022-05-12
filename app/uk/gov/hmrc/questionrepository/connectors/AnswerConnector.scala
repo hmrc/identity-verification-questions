@@ -6,9 +6,11 @@
 package uk.gov.hmrc.questionrepository.connectors
 
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.questionrepository.models.P60.EarningsAbovePT
 import uk.gov.hmrc.questionrepository.models._
 import uk.gov.hmrc.questionrepository.repository.QuestionMongoRepository
 import uk.gov.hmrc.questionrepository.services.utilities.PenceAnswerConvertor
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,12 +32,13 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(impl
       .flatMap(qdc => qdc.questions.filter(_.questionKey == newAnswerDetails.questionKey)
         .flatMap(_.answers))
       .count{ answer =>
-        try {
+        if (answerDetails.questionKey.equals(EarningsAbovePT)) {
           val toleranceLowerBoundary: Double = answer.toDouble - 1
           val toleranceHigherBoundary: Double = answer.toDouble + 1
           (toleranceLowerBoundary <= newAnswerDetails.answer.toString.toDouble) && (toleranceHigherBoundary >= newAnswerDetails.answer.toString.toDouble)
-        } catch {
-          case _: Throwable => answer == newAnswerDetails.answer.toString
+        }
+        else {
+          answer == newAnswerDetails.answer.toString
         }
       } match {
       case 0 => Incorrect
