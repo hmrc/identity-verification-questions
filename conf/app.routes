@@ -1,3 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.identityverificationquestions.controllers.MicroserviceHelloWorldController.hello
+POST       /questions               uk.gov.hmrc.identityverificationquestions.controllers.QuestionController.question
+POST       /answers                 uk.gov.hmrc.identityverificationquestions.controllers.AnswerController.answer
