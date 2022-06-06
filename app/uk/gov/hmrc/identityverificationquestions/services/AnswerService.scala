@@ -16,20 +16,23 @@
 
 package uk.gov.hmrc.identityverificationquestions.services
 
-import javax.inject.Inject
 import play.api.Logging
+import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
-import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-abstract class AnswerService @Inject()(implicit val appConfig: AppConfig, ec: ExecutionContext) extends UsingCircuitBreaker
+abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends UsingCircuitBreaker
   with Logging {
   type Record
+
+  def auditService: AuditService
 
   def serviceName: ServiceName
 
@@ -49,8 +52,8 @@ abstract class AnswerService @Inject()(implicit val appConfig: AppConfig, ec: Ex
     case _ => true
   }
 
-  def checkAnswers(answerCheck: AnswerCheck)(implicit hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
-    val filteredAnswers = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
+  def checkAnswers(answerCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
+    val filteredAnswers: Seq[AnswerDetails] = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
 
     if (isAvailable(answerCheck.selection)) {
       withCircuitBreaker {

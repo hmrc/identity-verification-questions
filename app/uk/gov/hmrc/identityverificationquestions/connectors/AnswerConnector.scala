@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.identityverificationquestions.connectors
 
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.mvc.Request
 import uk.gov.hmrc.identityverificationquestions.models.P60.EarningsAbovePT
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, Correct, CorrelationId, Incorrect, QuestionDataCache, QuestionResult, Score, Selection, SimpleAnswer, Unknown}
+import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.services.utilities.PenceAnswerConvertor
 
@@ -26,12 +27,13 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AnswerConnector[T] {
-  def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[T]
+  def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[T]
 }
 
-class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(implicit ec: ExecutionContext) extends AnswerConnector[QuestionResult] with PenceAnswerConvertor {
+class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService)(implicit ec: ExecutionContext)
+  extends AnswerConnector[QuestionResult] with PenceAnswerConvertor {
 
-   def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score = {
+   def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails)(implicit request: Request[_]): Score = {
     //PE-2186 - for P60 answers ignore pence, eg, 100.38 convert to 100.00
     val newAnswerDetails: AnswerDetails =
       if (answerDetails.questionKey.evidenceOption.equals("P60")) {
@@ -52,12 +54,16 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(impl
           answer == newAnswerDetails.answer.toString
         }
       } match {
-      case 0 => Incorrect
-      case _ => Correct
+      case 0 =>
+        auditService.sendQuestionAnsweredResult(answerDetails, questionDataCaches.head, Incorrect)
+        Incorrect
+      case _ =>
+        auditService.sendQuestionAnsweredResult(answerDetails, questionDataCaches.head, Correct)
+        Correct
     }
   }
 
-  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[QuestionResult] = {
+  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId, selection) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
       case questionDataCaches => QuestionResult(answer.questionKey, checkResult(questionDataCaches, answer))

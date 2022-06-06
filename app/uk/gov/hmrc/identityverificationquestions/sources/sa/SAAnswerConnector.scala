@@ -18,20 +18,22 @@ package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.json._
+import play.api.mvc.Request
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.{SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion}
 import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SAAnswerConnector @Inject()(appConfig: AppConfig, questionRepo: QuestionMongoRepository)
-                                 (implicit ec: ExecutionContext) extends MongoAnswerConnector(questionRepo) {
+class SAAnswerConnector @Inject()(appConfig: AppConfig, questionRepo: QuestionMongoRepository, auditService: AuditService)
+                                 (implicit ec: ExecutionContext) extends MongoAnswerConnector(questionRepo, auditService) {
 
-  override def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score = {
+  override def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails)(implicit request: Request[_]): Score = {
 
     answerDetails.questionKey match {
       case SelfAssessedIncomeFromPensionsQuestion => handleSAIncomeFromPensionsQuestion(questionDataCaches, answerDetails)

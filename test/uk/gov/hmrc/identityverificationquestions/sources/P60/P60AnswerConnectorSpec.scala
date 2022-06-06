@@ -18,16 +18,22 @@ package uk.gov.hmrc.identityverificationquestions.sources.P60
 
 import Utils.UnitSpec
 import org.scalatest.BeforeAndAfterEach
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, Correct, Incorrect, QuestionDataCache, QuestionResult, QuestionWithAnswers, Selection, SimpleAnswer, Unknown}
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EarningsAbovePT, PaymentToDate}
+import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
+  implicit val request: Request[_] = FakeRequest()
   val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
-  val connector = new P60AnswerConnector(mongoRepo)
+  val auditService: AuditService = mock[AuditService]
+  val connector = new P60AnswerConnector(mongoRepo, auditService)
 
   val answerDetailsPaymentToDate: AnswerDetails = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
   val answerDetailsEarningsAbovePT: AnswerDetails = AnswerDetails(EarningsAbovePT, SimpleAnswer("100.11"))
@@ -41,21 +47,24 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo PaymentToDate" in {
         val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
-
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score)(_: Request[_], _: ExecutionContext))
+          .expects(*, correctQDC, Correct, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsPaymentToDate).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
       }
       "answer matches an answer retrieved from repo EarningsAbovePT" in {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
-
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score)(_: Request[_], _: ExecutionContext))
+          .expects(*, correctQDC, Correct, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsEarningsAbovePT).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
       }
       "answer matches an answer retrieved from repo EarningsAbovePT with tolerance" in {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
-
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score)(_: Request[_], _: ExecutionContext))
+          .expects(*, correctQDC, Correct, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("101.11"))).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
       }
@@ -65,12 +74,18 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       "answer does not match an answer retrieved from repo" in {
         val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
 
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score)(_: Request[_], _: ExecutionContext))
+          .expects(*, inCorrectQDC, Incorrect, *, *)
+
         await(mongoRepo.store(inCorrectQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsPaymentToDate).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
       }
       "answer matches an answer retrieved from repo EarningsAbovePT over tolerance" in {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
+
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score)(_: Request[_], _: ExecutionContext))
+          .expects(*, correctQDC, Incorrect, *, *)
 
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("102.11"))).futureValue shouldBe QuestionResult(EarningsAbovePT, Incorrect)

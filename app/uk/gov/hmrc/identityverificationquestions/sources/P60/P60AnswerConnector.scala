@@ -17,12 +17,14 @@
 package uk.gov.hmrc.identityverificationquestions.sources.P60
 
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class P60AnswerConnector @Inject()(questionRepo: QuestionMongoRepository)(implicit ec: ExecutionContext) extends MongoAnswerConnector(questionRepo) {
+class P60AnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService)(implicit ec: ExecutionContext)
+  extends MongoAnswerConnector(questionRepo, auditService) {
 
 }

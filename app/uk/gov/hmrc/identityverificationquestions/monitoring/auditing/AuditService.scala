@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.identityverificationquestions.monitoring.auditing
 
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.models.Selection
+import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, AnswerDetails, QuestionDataCache, QuestionKey, QuestionResult, Score, Selection}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
@@ -28,7 +29,6 @@ class AuditService @Inject()(auditConnector: AuditConnector){
 
   val AuditSource = "identity-verification-questions"
 
-
   def sendCircuitBreakerEvent(identifiers: Selection, unavailableServiceName: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[AuditResult] = {
     val tags = Map("transactionName" -> "CircuitBreakerUnhealthyEvent")
 
@@ -38,6 +38,39 @@ class AuditService @Inject()(auditConnector: AuditConnector){
         auditType = "CircuitBreakerUnhealthyService",
         detail = Map("unavailableServiceName" -> s"$unavailableServiceName", "identifiers" -> identifiers.toString),
         tags = tags
+      )
+    )
+  }
+
+  def sendQuestionAnsweredResult(answerDetails: AnswerDetails, questionData: QuestionDataCache, score: Score)(implicit request: Request[_], executionContext: ExecutionContext): Future[AuditResult] = {
+
+    val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
+
+    val identifier: String = questionData.selection.toString //nino: Option[Nino], sautr: Option[SaUtr], dob: Option[LocalDate]
+
+    val questionKey: QuestionKey = answerDetails.questionKey
+    val name: String = questionKey.name //sub evidence option such as rti-p60-payment-for-year, rti-p60-employee-ni-contributions etc.
+    val evidenceOption: String = questionKey.evidenceOption //such as P60, SelfAssessment etc.
+
+    val givenAnswer = answerDetails.answer.toString
+    val validAnswers = questionData.questions.filter(_.questionKey == questionKey).head.answers.toString
+
+    val correlationId = questionData.correlationId
+
+    auditConnector.sendEvent(
+      DataEvent(
+        auditSource = AuditSource,
+        auditType = "IdentityVerificationAnswer",
+        detail = Map(
+          "correlationId" -> correlationId.id,
+          "callingService" -> callingService,
+          "identifier" -> identifier,
+          "source" -> evidenceOption,
+          "question" -> name,
+          "givenAnswer" -> givenAnswer,
+          "validAnswers"-> validAnswers,
+          "outcome" -> score.value
+        )
       )
     )
   }

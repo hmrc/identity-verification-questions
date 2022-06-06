@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.controllers
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,7 +40,7 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
     "return 200 with a valid json body" when {
       "origin, correlationId and identifiers match entry in mongo repo" in new Setup {
         await(questionMongoRepository.collection.insertOne(questionDataCache).toFuture())
-        (answersService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(answerCheck, *).returning(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
+        (answersService.checkAnswers(_: AnswerCheck)(_: Request[_], _: HeaderCarrier)).expects(answerCheck, *, *).returning(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
         val result: Future[Result] = controller.answer()(fakeRequest)
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(List(QuestionResult(PaymentToDate, Unknown)))
