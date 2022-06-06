@@ -20,6 +20,7 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60._
 import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, QuestionKey, QuestionResult, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.AnswerService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
@@ -27,11 +28,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class P60AnswerService @Inject()(p60AnswerConnector: P60AnswerConnector)(implicit override val appConfig: AppConfig, ec: ExecutionContext) extends AnswerService
-  with CheckAvailability
-  with CircuitBreakerConfiguration {
+class P60AnswerService @Inject()(p60AnswerConnector: P60AnswerConnector, as: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext)
+  extends AnswerService with CheckAvailability with CircuitBreakerConfiguration {
 
   override type Record = QuestionResult
+
+  override def auditService: AuditService = as
 
   override def serviceName: ServiceName = p60Service
 

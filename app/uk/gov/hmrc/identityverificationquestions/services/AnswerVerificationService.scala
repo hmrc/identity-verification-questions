@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.services
 
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60AnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAAnswerService
@@ -38,7 +39,7 @@ class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
     }
   }
 
-  def checkAnswers(answerToCheck: AnswerCheck)(implicit hc: HeaderCarrier): Future[Seq[QuestionResult]] ={
+  def checkAnswers(answerToCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] ={
     for {
       seqSeqQuestionResult <- Future.sequence(answerToCheck.answers.map(answer => getQuestionService(answer.questionKey).checkAnswers(answerToCheck)))
       result = seqSeqQuestionResult.flatten

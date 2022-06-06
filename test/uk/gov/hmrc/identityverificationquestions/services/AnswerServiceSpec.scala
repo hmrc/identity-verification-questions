@@ -18,6 +18,8 @@ package uk.gov.hmrc.identityverificationquestions.services
 
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
@@ -25,6 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, Outage}
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
 import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, QuestionKey, QuestionResult, Score, Selection, ServiceName, SimpleAnswer, Unknown, p60Service}
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.CheckAvailability
 
 import java.time.LocalDateTime
@@ -138,11 +141,12 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    implicit val request: Request[_] = FakeRequest()
 
     def connectorResult: Future[TestRecord] = illegalAccessResult
 
     def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
-      def verifyAnswer(correlationId: CorrelationId,  selection: Selection, answer: AnswerDetails)(implicit hc: HeaderCarrier): Future[TestRecord] = connectorResult
+      def verifyAnswer(correlationId: CorrelationId,  selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[TestRecord] = connectorResult
     }
 
     abstract class TestService extends AnswerService with CheckAvailability
@@ -162,6 +166,9 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
+      override def auditService: AuditService = mock[AuditService]
+
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 

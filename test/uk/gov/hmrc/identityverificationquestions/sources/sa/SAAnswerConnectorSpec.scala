@@ -27,7 +27,8 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.{SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion}
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, Correct, CorrelationId, Incorrect, QuestionDataCache, QuestionWithAnswers, Selection, SimpleAnswer}
+import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
@@ -158,7 +159,8 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     def questionDataCacheForSAPensions(validAnswers: Seq[String]): Seq[QuestionDataCache] =
       Seq(QuestionDataCache(CorrelationId(), selection, Seq(QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, validAnswers)), dateTime))
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
-    val service = new SAAnswerConnector(appConfig, mongoRepo)
+    val auditService: AuditService = mock[AuditService]
+    val service = new SAAnswerConnector(appConfig, mongoRepo, auditService)
   }
 
   def userAnswer(userAnswerVal: String): AnswerDetails = AnswerDetails(SelfAssessedIncomeFromPensionsQuestion, SimpleAnswer(userAnswerVal))

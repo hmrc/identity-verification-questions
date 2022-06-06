@@ -17,6 +17,8 @@
 package uk.gov.hmrc.identityverificationquestions.services
 
 import Utils.UnitSpec
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 import uk.gov.hmrc.identityverificationquestions.models._
@@ -32,7 +34,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     "return a Future of QuestionResult with a result of Unknown" when {
       "the requested answer service returns Unknown" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Unknown))))
+        (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: Request[_], _: HeaderCarrier)).expects(*, *, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Unknown))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
       }
@@ -41,7 +43,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     "return a Future of QuestionResult with a result of Correct" when {
       "the requested answer service returns Correct" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Correct))))
+        (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: Request[_], _: HeaderCarrier)).expects(*, *, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Correct))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Correct))
       }
@@ -50,7 +52,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     "return a Future of QuestionResult with a result of Incorrect" when {
       "the requested answer service returns Correct" in new SetUp {
         (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Incorrect))))
+        (mockP60AnswerService.checkAnswers(_: AnswerCheck)(_: Request[_], _: HeaderCarrier)).expects(*, *, *).returning(Future.successful(Seq(QuestionResult(PaymentToDate, Incorrect))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheck))
         result shouldBe Seq(QuestionResult(PaymentToDate, Incorrect))
       }
@@ -76,6 +78,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
 
   trait SetUp{
+    implicit val request: Request[_] = FakeRequest()
     val mockP60AnswerService: P60AnswerService = mock[P60AnswerService]
     val mockSAAnswerService: SAAnswerService = mock[SAAnswerService]
     val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService)
