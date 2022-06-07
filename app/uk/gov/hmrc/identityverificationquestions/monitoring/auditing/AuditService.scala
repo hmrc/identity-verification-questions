@@ -18,7 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.monitoring.auditing
 
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, AnswerDetails, QuestionDataCache, QuestionKey, QuestionResult, Score, Selection}
+import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 

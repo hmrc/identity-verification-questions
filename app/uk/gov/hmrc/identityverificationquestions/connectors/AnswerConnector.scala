@@ -54,19 +54,18 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, audi
           answer == newAnswerDetails.answer.toString
         }
       } match {
-      case 0 =>
-        auditService.sendQuestionAnsweredResult(answerDetails, questionDataCaches.head, Incorrect)
-        Incorrect
-      case _ =>
-        auditService.sendQuestionAnsweredResult(answerDetails, questionDataCaches.head, Correct)
-        Correct
+      case 0 => Incorrect
+      case _ => Correct
     }
   }
 
   override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId, selection) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
-      case questionDataCaches => QuestionResult(answer.questionKey, checkResult(questionDataCaches, answer))
+      case questionDataCaches =>
+        val result = checkResult(questionDataCaches, answer)
+        auditService.sendQuestionAnsweredResult(answer, questionDataCaches.head, result)
+        QuestionResult(answer.questionKey, result)
     }
   }
 }
