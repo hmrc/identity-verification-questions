@@ -62,18 +62,6 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     val correlationId = questionData.correlationId
     val outCome: String = if (score.equals(Correct)) "Success" else "Failure"
 
-    println(s"\n\n${Map(
-      "correlationId" -> correlationId.id,
-      "callingService" -> callingService,
-      "nino" -> nino.toString,
-      "sautr" -> sautr.toString,
-      "dob" -> dob.toString,
-      "source" -> evidenceOption,
-      "question" -> name,
-      "givenAnswer" -> givenAnswer,
-      "validAnswers"-> validAnswers,
-      "outcome" -> outCome
-    )}\n")
     auditConnector.sendEvent(
       DataEvent(
         auditSource = AuditSource,
