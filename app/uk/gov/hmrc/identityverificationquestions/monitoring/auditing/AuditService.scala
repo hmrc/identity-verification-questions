@@ -17,11 +17,13 @@
 package uk.gov.hmrc.identityverificationquestions.monitoring.auditing
 
 import play.api.mvc.Request
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,16 +48,19 @@ class AuditService @Inject()(auditConnector: AuditConnector){
 
     val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
 
-    val identifier: String = questionData.selection.toString //nino: Option[Nino], sautr: Option[SaUtr], dob: Option[LocalDate]
+    val nino: Option[Nino] = questionData.selection.nino
+    val sautr: Option[SaUtr] = questionData.selection.sautr
+    val dob: Option[LocalDate] = questionData.selection.dob
 
     val questionKey: QuestionKey = answerDetails.questionKey
     val name: String = questionKey.name //sub evidence option such as rti-p60-payment-for-year, rti-p60-employee-ni-contributions etc.
     val evidenceOption: String = questionKey.evidenceOption //such as P60, SelfAssessment etc.
 
     val givenAnswer = answerDetails.answer.toString
-    val validAnswers = questionData.questions.filter(_.questionKey == questionKey).head.answers.toString
+    val validAnswers: String = s"Answer should be ${questionData.questions.filter(_.questionKey == questionKey).head.answers.mkString(",")}"
 
     val correlationId = questionData.correlationId
+    val outCome: String = if (score.equals(Correct)) "Success" else "Failure"
 
     auditConnector.sendEvent(
       DataEvent(
@@ -64,12 +69,14 @@ class AuditService @Inject()(auditConnector: AuditConnector){
         detail = Map(
           "correlationId" -> correlationId.id,
           "callingService" -> callingService,
-          "identifier" -> identifier,
+          "nino" -> nino.toString,
+          "sautr" -> sautr.toString,
+          "dob" -> dob.toString,
           "source" -> evidenceOption,
           "question" -> name,
           "givenAnswer" -> givenAnswer,
           "validAnswers"-> validAnswers,
-          "outcome" -> score.value
+          "outcome" -> outCome
         )
       )
     )
