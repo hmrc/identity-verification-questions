@@ -32,7 +32,6 @@ class AnswerControllerISpec extends BaseISpec {
     val journeyPath = "/identity-verification-questions/answers"
 
     "return 200 with score unknown" when {
-
       "questions identifier not passed" in new SetUp {
         await(identityverificationquestions.store(questionDataCache(correlationId, Selection(Some(ninoIdentifier), Some(utrIdentifier), None))))
         val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(incorrectNoIdentifier)))
@@ -91,11 +90,11 @@ class AnswerControllerISpec extends BaseISpec {
       val ninoIdentifier2: Nino = Nino("AA000002D")
       val utrIdentifier: SaUtr = SaUtr("123456789")
       val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("3000.00")))
-      val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), answerDetails)
+      val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), answerDetails, None)
       val incorrectAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("666.00")))
-      val incorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), incorrectAnswerDetails)
-      val incorrectNoIdentifier: AnswerCheck = AnswerCheck(correlationId, Selection(utrIdentifier), incorrectAnswerDetails)
-      val incorrectIdentifierCheck: AnswerCheck = AnswerCheck(correlationId, Selection(Some(ninoIdentifier2), Some(utrIdentifier), None), incorrectAnswerDetails)
+      val incorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), incorrectAnswerDetails, None)
+      val incorrectNoIdentifier: AnswerCheck = AnswerCheck(correlationId, Selection(utrIdentifier), incorrectAnswerDetails, None)
+      val incorrectIdentifierCheck: AnswerCheck = AnswerCheck(correlationId, Selection(Some(ninoIdentifier2), Some(utrIdentifier), None), incorrectAnswerDetails, None)
       val questionResultUnknown: QuestionResult = QuestionResult(PaymentToDate, Unknown)
       val questionResultCorrect: QuestionResult = QuestionResult(PaymentToDate, Correct)
       val questionResultIncorrect: QuestionResult = QuestionResult(PaymentToDate, Incorrect)
