@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, Outage}
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, QuestionKey, QuestionResult, Score, Selection, ServiceName, SimpleAnswer, Unknown, p60Service}
+import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, IvJourney, QuestionKey, QuestionResult, Score, Selection, ServiceName, SimpleAnswer, Unknown, p60Service}
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.CheckAvailability
 
@@ -75,7 +75,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = badRequestResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
+            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
             errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}, selection: AA000000D,12345678"
@@ -88,7 +88,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = notFoundResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
+            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.INFO)
             errorLogs.size shouldBe 1
             errorLogs.head.getMessage shouldBe s"p60Service, no answers returned for selection, correlationId: ${correlationId.id}, selection: AA000000D,12345678"
@@ -103,7 +103,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = testRecordResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
+            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             logs.size shouldBe 0
           }
         }
@@ -115,7 +115,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = testRecordResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
+            service.checkAnswers(AnswerCheck(correlationId, Selection(saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             logs.size shouldBe 0
           }
         }
@@ -128,7 +128,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = testRecordResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer))).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Correct))
+            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Correct))
             logs.size shouldBe 0
           }
         }
@@ -146,7 +146,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     def connectorResult: Future[TestRecord] = illegalAccessResult
 
     def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
-      def verifyAnswer(correlationId: CorrelationId,  selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[TestRecord] = connectorResult
+      override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[TestRecord] = connectorResult
     }
 
     abstract class TestService extends AnswerService with CheckAvailability
@@ -155,7 +155,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
       type Record = TestRecord
     } = new TestService {
       override type Record = TestRecord
-      override val serviceName = p60Service
+      override val serviceName: ServiceName = p60Service
 
       override def connector: AnswerConnector[TestRecord] = self.connector
 
@@ -180,8 +180,8 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     val pastOutage: Outage = Outage(LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1))
     val currentOutage: Outage = Outage(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
 
-    val paymentToDateAnswer = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
-    val EmployeeNIContributionsAnswer = AnswerDetails(EmployeeNIContributions, SimpleAnswer("200.22"))
+    val paymentToDateAnswer: AnswerDetails = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
+    val EmployeeNIContributionsAnswer: AnswerDetails = AnswerDetails(EmployeeNIContributions, SimpleAnswer("200.22"))
 
     case class TestRecord(questionKey: QuestionKey, answer: Score)
 

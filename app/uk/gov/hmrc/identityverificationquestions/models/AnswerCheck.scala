@@ -18,7 +18,13 @@ package uk.gov.hmrc.identityverificationquestions.models
 
 import play.api.libs.json.{Format, Json}
 
-case class AnswerCheck(correlationId: CorrelationId, selection: Selection, answers: Seq[AnswerDetails])
+case class IvJourney(journeyId: String, journeyType: String, authProviderId: String, origin: String)
+
+object IvJourney {
+  implicit val format: Format[IvJourney] = Json.format[IvJourney]
+}
+
+case class AnswerCheck(correlationId: CorrelationId, selection: Selection, answers: Seq[AnswerDetails], ivJourney: Option[IvJourney])
 
 object AnswerCheck {
   implicit val format: Format[AnswerCheck] = Json.format[AnswerCheck]

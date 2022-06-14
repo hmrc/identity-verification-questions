@@ -17,6 +17,7 @@
 package uk.gov.hmrc.identityverificationquestions.connectors
 
 import play.api.mvc.Request
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.P60.EarningsAbovePT
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
@@ -27,7 +28,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AnswerConnector[T] {
-  def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[T]
+  def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[T]
 }
 
 class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService)(implicit ec: ExecutionContext)
@@ -59,12 +60,12 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, audi
     }
   }
 
-  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails)(implicit request: Request[_]): Future[QuestionResult] = {
+  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId, selection) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
       case questionDataCaches =>
         val result = checkResult(questionDataCaches, answer)
-        auditService.sendQuestionAnsweredResult(answer, questionDataCaches.head, result)
+        auditService.sendQuestionAnsweredResult(answer, questionDataCaches.head, result, ivJourney)
         QuestionResult(answer.questionKey, result)
     }
   }
