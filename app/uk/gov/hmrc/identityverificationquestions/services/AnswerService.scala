@@ -58,7 +58,14 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
     if (isAvailable(answerCheck.selection)) {
       withCircuitBreaker {
         for {
-          correctAnswers <- Future.sequence(filteredAnswers.map(answer => connector.verifyAnswer(answerCheck.correlationId, answerCheck.selection, answer)))
+          correctAnswers <- Future.sequence(filteredAnswers.map(answer =>
+            connector.verifyAnswer(
+              answerCheck.correlationId,
+              answerCheck.selection,
+              answer,
+              ivJourney = answerCheck.ivJourney //for iv calls only
+            )
+          ))
           result = answerTransformer(correctAnswers, filteredAnswers)
         } yield result
       } recover {

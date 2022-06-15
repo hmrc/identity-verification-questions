@@ -83,7 +83,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     val mockSAAnswerService: SAAnswerService = mock[SAAnswerService]
     val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService)
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("an answer")))
-    val answerCheck: AnswerCheck = AnswerCheck(corrId, Selection(ninoIdentifier), answerDetails)
+    val answerCheck: AnswerCheck = AnswerCheck(corrId, Selection(ninoIdentifier), answerDetails, None)
     (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
   }
 }

@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.identityverificationquestions.monitoring.auditing
 
-import play.api.mvc.Request
-import uk.gov.hmrc.domain.{Nino, SaUtr}
+import com.google.common.io.BaseEncoding
+import play.api.Logger
+import play.api.mvc.{Request, RequestHeader}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
-class AuditService @Inject()(auditConnector: AuditConnector){
+class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFingerprint {
 
   val AuditSource = "identity-verification-questions"
 
@@ -44,42 +46,94 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
-  def sendQuestionAnsweredResult(answerDetails: AnswerDetails, questionData: QuestionDataCache, score: Score)(implicit request: Request[_], executionContext: ExecutionContext): Future[AuditResult] = {
+  def sendQuestionAnsweredResult(answerDetails: AnswerDetails,
+                                 questionData: QuestionDataCache,
+                                 score: Score,
+                                 ivJourney: Option[IvJourney])
+                                (implicit hc: HeaderCarrier, request: Request[_], executionContext: ExecutionContext): Future[AuditResult] = {
 
     val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
 
     val nino: Option[Nino] = questionData.selection.nino
-    val sautr: Option[SaUtr] = questionData.selection.sautr
-    val dob: Option[LocalDate] = questionData.selection.dob
+    val deviceID: String = hc.deviceID.getOrElse("unknown")
 
     val questionKey: QuestionKey = answerDetails.questionKey
     val name: String = questionKey.name //sub evidence option such as rti-p60-payment-for-year, rti-p60-employee-ni-contributions etc.
     val evidenceOption: String = questionKey.evidenceOption //such as P60, SelfAssessment etc.
 
     val givenAnswer = answerDetails.answer.toString
-    val validAnswers: String = s"Answer should be ${questionData.questions.filter(_.questionKey == questionKey).head.answers.mkString(",")}"
+
+    val validAnswers: String = questionData.questions.filter(_.questionKey == questionKey).head.answers.mkString(",")
 
     val correlationId = questionData.correlationId
     val outCome: String = if (score.equals(Correct)) "Success" else "Failure"
+
+    val outComeDetails: Map[String, String] =
+      if (outCome.equals("Failure")) {
+        Map(
+          "validAnswers"-> validAnswers,
+          "outcome" -> outCome
+        )
+      }
+      else {
+        Map("outcome" -> outCome)
+      }
+
+    val ivJourneyDetails : Map[String, String] =
+      if (ivJourney.isDefined) {
+        val journeyDetails = ivJourney.get
+        Map(
+          "origin" -> journeyDetails.origin,
+          "journeyId" -> journeyDetails.journeyId,
+          "journeyType" -> journeyDetails.journeyType,
+          "authProviderId" -> journeyDetails.authProviderId
+        )
+      }
+      else {
+        Map.empty[String, String]
+      }
 
     auditConnector.sendEvent(
       DataEvent(
         auditSource = AuditSource,
         auditType = "IdentityVerificationAnswer",
         detail = Map(
+          "deviceFingerprint" -> deviceFingerprintFrom(request),
+          "deviceID" -> deviceID,
           "correlationId" -> correlationId.id,
           "callingService" -> callingService,
           "nino" -> nino.toString,
-          "sautr" -> sautr.toString,
-          "dob" -> dob.toString,
           "source" -> evidenceOption,
           "question" -> name,
-          "givenAnswer" -> givenAnswer,
-          "validAnswers"-> validAnswers,
-          "outcome" -> outCome
-        )
+          "givenAnswer" -> givenAnswer
+        ) ++ outComeDetails ++ ivJourneyDetails
       )
     )
   }
 }
 
+trait DeviceFingerprint {
+
+  private val logger = Logger(getClass)
+
+  val deviceFingerprintCookieName = "mdtpdf"
+
+  def deviceFingerprintFrom(request: RequestHeader): String =
+    request.cookies
+      .get(deviceFingerprintCookieName)
+      .map { cookie =>
+        val decodeAttempt = Try {
+          BaseEncoding.base64().decode(cookie.value)
+        }
+        decodeAttempt.failed.foreach { e =>
+          logger.info(
+            s"Failed to decode device fingerprint '${cookie.value}' caused by '${e.getClass.getSimpleName}:${e.getMessage}'")
+        }
+        decodeAttempt
+          .map {
+            new String(_, "UTF-8")
+          }
+          .getOrElse("-")
+      }
+      .getOrElse("-")
+}
