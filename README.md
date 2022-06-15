@@ -115,6 +115,32 @@ Send a json body containing the previous correlation id and identifier selection
       ]
 }
 ```
+For answers calls from IV the body should also contains some iv journey details for auditing purpose, 
+```
+    {
+      "correlationId": "66d89bcf-847e-446e-b0e9-348591d118d3",
+      "selection": {
+        "nino":"AA000000A"
+      },
+      "answers":[
+        {
+          "questionKey": "rti-p60-payment-for-year",
+          "answer": "100.00"
+        },
+        {
+          "questionKey": "rti-p60-employee-ni-contributions",
+          "answer": "250.00"
+        }
+      ],
+      "ivJourney": {
+        "journeyId":"journeyId"，
+        "journeyType":"journeyType"，
+        "authProviderId":"authProviderId"，
+        "origin":"origin"
+      }
+}
+```
+PS. if your service needs some special requirements like iv please connect team verification.
 
 The structure of the answer data will depend on the **questionKey** being checked.
 
