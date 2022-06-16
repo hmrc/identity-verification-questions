@@ -19,7 +19,6 @@ package uk.gov.hmrc.identityverificationquestions.monitoring.auditing
 import com.google.common.io.BaseEncoding
 import play.api.Logger
 import play.api.mvc.{Request, RequestHeader}
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -54,7 +53,11 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
 
     val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
 
-    val nino: Option[Nino] = questionData.selection.nino
+    val nino: String = questionData.selection.nino.map {
+      case ni => ni.nino
+      case _ => "Unknown Nino"
+    }.getOrElse("Unknown Nino")
+
     val deviceID: String = hc.deviceID.getOrElse("unknown")
 
     val questionKey: QuestionKey = answerDetails.questionKey
@@ -102,7 +105,7 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
           "deviceID" -> deviceID,
           "correlationId" -> correlationId.id,
           "callingService" -> callingService,
-          "nino" -> nino.toString,
+          "nino" -> nino,
           "source" -> evidenceOption,
           "question" -> name,
           "givenAnswer" -> givenAnswer
