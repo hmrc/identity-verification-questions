@@ -78,7 +78,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
             service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}, selection: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}, selection: XXXX0000D,XXXX5678"
           }
         }
 
@@ -89,9 +89,9 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
             service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
-            val errorLogs = logs.filter(_.getLevel == Level.INFO)
+            val errorLogs = logs.filter(_.getLevel == Level.WARN)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe s"p60Service, no answers returned for selection, correlationId: ${correlationId.id}, selection: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe s"p60Service, no answers returned for selection, correlationId: ${correlationId.id}, selection: XXXX0000D,XXXX5678"
           }
         }
       }

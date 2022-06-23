@@ -33,6 +33,19 @@ class SelectionSpec extends UnitSpec {
     "deserialization from json" in new Setup {
       selectionJson.validate[Selection] shouldBe JsSuccess(selection)
     }
+
+    "Selection to list" in new Setup {
+      selection.toList shouldBe List("AA000000D")
+    }
+
+    "Selection to string" in new Setup {
+      selection.toString shouldBe "AA000000D"
+    }
+
+    "Selection for obscureIdentifier" in new Setup {
+      selection.obscureIdentifier(selection.toString) shouldBe "XXXX0000D"
+      selection.toList.map(selection.obscureIdentifier).mkString(",") shouldBe "XXXX0000D"
+    }
   }
 
   trait Setup {

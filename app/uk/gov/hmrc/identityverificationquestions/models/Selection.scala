@@ -43,10 +43,11 @@ case class Selection(nino: Option[Nino], sautr: Option[SaUtr], dob: Option[Local
     containsNino || containsUtr || containsDob
   }
 
-  override def toString: String =
-    List(nino.map(_.nino), sautr.map(_.utr), dob.map(_.toString))
-      .flatten
-      .mkString(",")
+  def obscureIdentifier(identifier: String): String = ("X" * 4) + identifier.drop(4) //eg AA000000D to XXXX0000D
+
+  def toList: List[String] = List(nino.map(_.nino), sautr.map(_.utr), dob.map(_.toString)).flatten
+
+  override def toString: String = toList.mkString(",")
 }
 
 object Selection {

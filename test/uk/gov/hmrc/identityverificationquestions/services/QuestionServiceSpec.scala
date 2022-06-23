@@ -78,7 +78,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, selection: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, selection: XXXX0000D,XXXX5678"
           }
         }
 
@@ -88,9 +88,9 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.INFO)
+            val errorLogs = logs.filter(_.getLevel == Level.WARN)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection, origin: origin, identifiers: AA000000D,12345678"
+            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection: origin: origin, identifiers: XXXX0000D,XXXX5678"
           }
         }
 

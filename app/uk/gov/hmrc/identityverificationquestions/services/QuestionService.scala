@@ -65,14 +65,14 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
         connector.getRecords(selection).map(evidenceTransformer)
       } recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 =>
-          logger.info(s"$serviceName, no records returned for selection, origin: ${origin}, identifiers: ${selection}")
+          logger.warn(s"$serviceName, no records returned for selection: origin: $origin, identifiers: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
           Seq()
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           Seq()
         case t: Throwable =>
-          logger.error(s"$serviceName, threw exception $t, selection: $selection")
+          logger.error(s"$serviceName, threw exception $t, selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
           Seq()
       }
     } else {
