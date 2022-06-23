@@ -55,13 +55,14 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
   def checkAnswers(answerCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     val filteredAnswers: Seq[AnswerDetails] = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
 
-    if (isAvailable(answerCheck.selection)) {
+    val selection = answerCheck.selection
+    if (isAvailable(selection)) {
       withCircuitBreaker {
         for {
           correctAnswers <- Future.sequence(filteredAnswers.map(answer =>
             connector.verifyAnswer(
               answerCheck.correlationId,
-              answerCheck.selection,
+              selection,
               answer,
               ivJourney = answerCheck.ivJourney //for iv calls only
             )
@@ -70,11 +71,13 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
         } yield result
       } recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 => {
-          logger.info(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}, selection: ${answerCheck.selection}")
+          logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}, " +
+            s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
           unknownResult(filteredAnswers)
         }
         case t: Throwable => {
-          logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, selection: ${answerCheck.selection}")
+          logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, " +
+            s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
           unknownResult(filteredAnswers)
         }
       }
