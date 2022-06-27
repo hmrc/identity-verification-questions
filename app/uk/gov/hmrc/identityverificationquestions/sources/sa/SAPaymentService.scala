@@ -48,7 +48,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
   val allowedPaymentTypes = List("PYT", "TFO")
 
   override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
-    if (isAvailable(selection)) {
+    if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
         selection.sautr match {
           case Some(saUtr) =>

@@ -41,19 +41,19 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
       "no outage is defined, and required identifiers are present" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "outage defined but is in the past, and required identifiers are present" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(pastOutage), List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "outage defined but is in the future, and required identifiers are present" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(futureOutage), List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
     }
@@ -62,7 +62,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
       "outage defined and covers the period now" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(currentOutage), List("nino", "utr")))
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe false
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe false
       }
 
     }
@@ -70,8 +70,6 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     "checkAnswers" should {
       "return list of supported questions with score of 'unknown'" when {
         "connector throws error" in new Setup {
-          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
-
           override def connectorResult: Future[TestRecord] = badRequestResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
@@ -83,8 +81,6 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
         }
 
         "connector returns not found" in new Setup {
-          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
-
           override def connectorResult: Future[TestRecord] = notFoundResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
@@ -96,35 +92,8 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
         }
       }
 
-      "return list of supported questions with score of 'unknown' if service is unavailable" when {
-        "outage set and covers current time" in new Setup {
-          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(currentOutage), List("nino", "utr")))
-
-          override def connectorResult: Future[TestRecord] = testRecordResult
-
-          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
-            logs.size shouldBe 0
-          }
-        }
-
-
-        "no outage set not all required Identifiers are present" in new Setup {
-          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
-
-          override def connectorResult: Future[TestRecord] = testRecordResult
-
-          withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
-            logs.size shouldBe 0
-          }
-        }
-      }
-
       "return list of questions if service available" when {
         "connector successful" in new Setup {
-          (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
-
           override def connectorResult: Future[TestRecord] = testRecordResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
@@ -146,7 +115,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
     def connectorResult: Future[TestRecord] = illegalAccessResult
 
     def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
-      override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[TestRecord] = connectorResult
+      override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[TestRecord] = connectorResult
     }
 
     abstract class TestService extends AnswerService with CheckAvailability

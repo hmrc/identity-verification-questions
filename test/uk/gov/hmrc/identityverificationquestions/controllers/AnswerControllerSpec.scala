@@ -48,13 +48,6 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
       }
     }
 
-    "return 404" when {
-      "origin, correlationId and identifiers do not match entry in mongo repo" in new Setup {
-        val result: Future[Result] = controller.answer()(fakeRequest)
-        status(result) shouldBe NOT_FOUND
-      }
-    }
-
     "return 403" when {
       "Unauthorised client called question repository" in new Setup {
         withCaptureOfLoggingFrom[AnswerController] { logs =>

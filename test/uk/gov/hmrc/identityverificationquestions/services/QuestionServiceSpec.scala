@@ -42,19 +42,19 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       "no outage is defined, disabledOrigins & enabledOrigins are empty and required identifiers are present" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "outage defined but is in the past, disabledOrigins & enabledOrigins are empty and required identifiers are present" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(pastOutage), List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
       "outage defined but is in the future, disabledOrigins & enabledOrigins are empty and required identifiers are present" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(futureOutage), List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe true
       }
 
     }
@@ -63,7 +63,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       "outage defined and covers the period now" in new Setup {
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(Some(currentOutage), List("nino", "utr")))
 
-        service.isAvailable(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe false
+        service.isAvailableForRequestedSelection(Selection(ninoIdentifier, saUtrIdentifier)) shouldBe false
       }
 
     }

@@ -42,17 +42,8 @@ class AnswerController @Inject()(answersVerificationService: AnswerVerificationS
 
     if (userAllowed) {
       withJsonBody[AnswerCheck] { answerCheck =>
-        withValidIdentifiers(answerCheck).flatMap { _ =>
-          answersVerificationService.checkAnswers(answerCheck) map { score =>
-            Ok(Json.toJson(score))
-          }
-        }.recoverWith {
-          case IdentifiersMismatch =>
-            logger.warn(s"supplied correlationId and selection not found for questionKey(s) ${answerCheck.answers.map{a => a.questionKey}.mkString(",")}")
-            Future.successful(NotFound)
-          case e =>
-            logger.warn(s"An unexpected error has occurred: ${e.getClass}, ${e.getMessage}")
-            Future.successful(InternalServerError(e.getMessage))
+        answersVerificationService.checkAnswers(answerCheck) map { score =>
+          Ok(Json.toJson(score))
         }
       }
     } else {
@@ -61,9 +52,5 @@ class AnswerController @Inject()(answersVerificationService: AnswerVerificationS
     }
 
   }
-
-  def withValidIdentifiers(answerCheck: AnswerCheck): Future[Done] =
-    questionMongoRepository.findAnswers(answerCheck.correlationId, answerCheck.selection) map
-      (questionDataCaches => if (questionDataCaches.nonEmpty) Done else throw IdentifiersMismatch)
 
 }

@@ -38,8 +38,6 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
 
   def connector: AnswerConnector[Record]
 
-  def isAvailable(selection: Selection): Boolean
-
   def supportedQuestions: Seq[QuestionKey]
 
   def answerTransformer(records: Seq[Record], filteredAnswers: Seq[AnswerDetails]): Seq[QuestionResult]
@@ -54,35 +52,33 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
 
   def checkAnswers(answerCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     val filteredAnswers: Seq[AnswerDetails] = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
-
     val selection = answerCheck.selection
-    if (isAvailable(selection)) {
-      withCircuitBreaker {
-        for {
-          correctAnswers <- Future.sequence(filteredAnswers.map(answer =>
-            connector.verifyAnswer(
-              answerCheck.correlationId,
-              selection,
-              answer,
-              ivJourney = answerCheck.ivJourney //for iv calls only
-            )
-          ))
-          result = answerTransformer(correctAnswers, filteredAnswers)
-        } yield result
-      } recover {
-        case e: UpstreamErrorResponse if e.statusCode == 404 => {
-          logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}, " +
-            s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-          unknownResult(filteredAnswers)
-        }
-        case t: Throwable => {
-          logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, " +
-            s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-          unknownResult(filteredAnswers)
-        }
+
+    // Removed isAvailable check in VER-2219
+    // We don't need to check the availability of services where we cache the answer data up-front
+    // For services that we call after answer submission, we will need to check availability, but not the selection
+    withCircuitBreaker {
+      for {
+        correctAnswers <- Future.sequence(filteredAnswers.map(answer =>
+          connector.verifyAnswer(
+            answerCheck.correlationId,
+            answer,
+            ivJourney = answerCheck.ivJourney //for iv calls only
+          )
+        ))
+        result = answerTransformer(correctAnswers, filteredAnswers)
+      } yield result
+    } recover {
+      case e: UpstreamErrorResponse if e.statusCode == 404 => {
+        logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}, " +
+          s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+        unknownResult(filteredAnswers)
       }
-    } else {
-      Future.successful(unknownResult(filteredAnswers))
+      case t: Throwable => {
+        logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, " +
+          s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+        unknownResult(filteredAnswers)
+      }
     }
   }
 }
