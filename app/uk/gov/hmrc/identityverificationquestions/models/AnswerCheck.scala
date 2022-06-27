@@ -24,7 +24,7 @@ object IvJourney {
   implicit val format: Format[IvJourney] = Json.format[IvJourney]
 }
 
-case class AnswerCheck(correlationId: CorrelationId, selection: Selection, answers: Seq[AnswerDetails], ivJourney: Option[IvJourney])
+case class AnswerCheck(correlationId: CorrelationId, answers: Seq[AnswerDetails], ivJourney: Option[IvJourney])
 
 object AnswerCheck {
   implicit val format: Format[AnswerCheck] = Json.format[AnswerCheck]

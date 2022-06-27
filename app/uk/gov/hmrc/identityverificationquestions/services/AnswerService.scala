@@ -52,7 +52,6 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
 
   def checkAnswers(answerCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     val filteredAnswers: Seq[AnswerDetails] = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
-    val selection = answerCheck.selection
 
     // Removed isAvailable check in VER-2219
     // We don't need to check the availability of services where we cache the answer data up-front
@@ -70,13 +69,11 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
       } yield result
     } recover {
       case e: UpstreamErrorResponse if e.statusCode == 404 => {
-        logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}, " +
-          s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+        logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}")
         unknownResult(filteredAnswers)
       }
       case t: Throwable => {
-        logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, " +
-          s"selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+        logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, ")
         unknownResult(filteredAnswers)
       }
     }
