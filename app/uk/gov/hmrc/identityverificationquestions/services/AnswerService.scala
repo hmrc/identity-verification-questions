@@ -73,7 +73,7 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
         unknownResult(filteredAnswers)
       }
       case t: Throwable => {
-        logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}, ")
+        logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}")
         unknownResult(filteredAnswers)
       }
     }

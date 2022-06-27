@@ -73,10 +73,10 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = badRequestResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
+            service.checkAnswers(AnswerCheck(correlationId, Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}, selection: XXXX0000D,XXXX5678"
+            errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}"
           }
         }
 
@@ -84,10 +84,10 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = notFoundResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
+            service.checkAnswers(AnswerCheck(correlationId, Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.WARN)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe s"p60Service, no answers returned for selection, correlationId: ${correlationId.id}, selection: XXXX0000D,XXXX5678"
+            errorLogs.head.getMessage shouldBe s"p60Service, no answers returned for selection, correlationId: ${correlationId.id}"
           }
         }
       }
@@ -97,7 +97,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[TestRecord] = testRecordResult
 
           withCaptureOfLoggingFrom[AnswerServiceSpec] { logs =>
-            service.checkAnswers(AnswerCheck(correlationId, Selection(ninoIdentifier, saUtrIdentifier), Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Correct))
+            service.checkAnswers(AnswerCheck(correlationId, Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None)).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Correct))
             logs.size shouldBe 0
           }
         }
