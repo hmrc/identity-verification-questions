@@ -40,7 +40,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def connector: QuestionConnector[Record]
 
-  def isAvailable(selection: Selection): Boolean
+  def isAvailableForRequestedSelection(selection: Selection): Boolean
 
   def evidenceTransformer(records: Seq[Record]): Seq[QuestionWithAnswers]
 
@@ -60,7 +60,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
-    if (isAvailable(selection)) {
+    if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
         connector.getRecords(selection).map(evidenceTransformer)
       } recover {

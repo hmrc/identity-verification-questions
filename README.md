@@ -187,7 +187,7 @@ The possible values for "score" are:
 
 * "correct" - the supplied answer was correct
 * "incorrect" - the answer was incorrect (or missing)
-* "unknown" - no matching question/answer data found for correlation id and selection
+* "unknown" - no matching question/answer data found for correlation id
 * "error" - there was an error from an evidence source while checking the answer
 
 Answers which were expected but not supplied in the query will be considered "incorrect".
