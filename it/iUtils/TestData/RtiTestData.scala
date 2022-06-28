@@ -18,8 +18,8 @@ package iUtils.TestData
 
 import play.api.libs.json.Json
 
-trait P60TestData {
-  val p60ResponseJson = Json.parse(
+trait RtiTestData {
+  val rtiResponseJson = Json.parse(
     """
       |{
       |  "queryResult": 0,

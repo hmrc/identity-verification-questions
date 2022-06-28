@@ -22,9 +22,10 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, Question, QuestionDataCache, QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
-
 import java.time.{LocalDateTime, ZoneOffset}
+
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,12 +34,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          appConfig: AppConfig,
                                          p60Service: P60Service,
-                                         saService: SAService)
+                                         saService: SAService,
+                                         payslipService: PayslipService)
                                         (implicit ec: ExecutionContext) {
 
   def callAllEvidenceSources(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
 
-    val services: Seq[QuestionService] = Seq(p60Service, saService)
+    val services: Seq[QuestionService] = Seq(p60Service, saService, payslipService)
 
     for {
       questionWithAnswers <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)

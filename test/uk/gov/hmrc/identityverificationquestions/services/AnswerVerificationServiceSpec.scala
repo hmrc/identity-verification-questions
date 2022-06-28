@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60AnswerService
+import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipAnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAAnswerService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -81,7 +82,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     implicit val request: Request[_] = FakeRequest()
     val mockP60AnswerService: P60AnswerService = mock[P60AnswerService]
     val mockSAAnswerService: SAAnswerService = mock[SAAnswerService]
-    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService)
+    val mockPayslipAnswerService: PayslipAnswerService = mock[PayslipAnswerService]
+    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService, mockPayslipAnswerService)
     val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("an answer")))
     val answerCheck: AnswerCheck = AnswerCheck(corrId, Selection(ninoIdentifier), answerDetails, None)
     (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())

@@ -79,4 +79,6 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   private def getIntOrThrowError(key: String): Int = config.getOptional[Int](key).getOrElse(configNotFoundError(key))
   def configNotFoundError(key: String) = throw new RuntimeException(s"Could not find configuration key '$key'")
+
+  lazy val rtiNumberOfPayslipMonthsToCheck: Int = getIntOrThrowError("rti.tax-year.payslips.months")
 }

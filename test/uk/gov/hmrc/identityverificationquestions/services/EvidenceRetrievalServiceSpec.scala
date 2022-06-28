@@ -26,8 +26,10 @@ import uk.gov.hmrc.identityverificationquestions.models.{QuestionResponse, Quest
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
-
 import java.time.{LocalDate, Period}
+
+import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -80,9 +82,10 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
 
     val mockP60Service: P60Service = mock[P60Service]
     val mockSAService: SAService = mock[SAService]
+    val mockPayslipService: PayslipService = mock[PayslipService]
 
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
-    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService)
+    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")
