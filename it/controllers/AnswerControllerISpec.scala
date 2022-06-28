@@ -31,15 +31,6 @@ class AnswerControllerISpec extends BaseISpec {
 
     val journeyPath = "/identity-verification-questions/answers"
 
-    "return 200 with score unknown" when {
-      "questions identifier not passed" in new SetUp {
-        await(identityverificationquestions.store(questionDataCache(correlationId, Selection(Some(ninoIdentifier), Some(utrIdentifier), None))))
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(incorrectNoIdentifier)))
-        response.status shouldBe OK
-        response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultUnknown))
-      }
-    }
-
     "return 200 with score correct" when {
       "answer matches correct answer stored against identifier" in new SetUp {
         await(identityverificationquestions.store(questionDataCache(correlationId, Selection(ninoIdentifier))))
@@ -66,19 +57,6 @@ class AnswerControllerISpec extends BaseISpec {
       }
     }
 
-    "return 404" when {
-      "no questions found" in new SetUp {
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
-        response.status shouldBe NOT_FOUND
-      }
-
-      "no questions found for requested identifier" in new SetUp {
-        await(identityverificationquestions.store(questionDataCache(correlationId, Selection(utrIdentifier))))
-        val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(answerCheck)))
-        response.status shouldBe NOT_FOUND
-      }
-    }
-
     "return 400 for a bad request" in {
       val response: WSResponse = await(resourceRequest(journeyPath).post(JsString("")))
       response.status shouldBe 400
@@ -90,12 +68,10 @@ class AnswerControllerISpec extends BaseISpec {
       val ninoIdentifier2: Nino = Nino("AA000002D")
       val utrIdentifier: SaUtr = SaUtr("123456789")
       val answerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("3000.00")))
-      val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), answerDetails, None)
+      val answerCheck: AnswerCheck = AnswerCheck(correlationId, answerDetails, None)
       val incorrectAnswerDetails: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("666.00")))
-      val incorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), incorrectAnswerDetails, None)
-      val incorrectNoIdentifier: AnswerCheck = AnswerCheck(correlationId, Selection(utrIdentifier), incorrectAnswerDetails, None)
-      val incorrectIdentifierCheck: AnswerCheck = AnswerCheck(correlationId, Selection(Some(ninoIdentifier2), Some(utrIdentifier), None), incorrectAnswerDetails, None)
-      val questionResultUnknown: QuestionResult = QuestionResult(PaymentToDate, Unknown)
+      val incorrectAnswerCheck: AnswerCheck = AnswerCheck(correlationId, incorrectAnswerDetails, None)
+      val incorrectIdentifierCheck: AnswerCheck = AnswerCheck(correlationId, incorrectAnswerDetails, None)
       val questionResultCorrect: QuestionResult = QuestionResult(PaymentToDate, Correct)
       val questionResultIncorrect: QuestionResult = QuestionResult(PaymentToDate, Incorrect)
       val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))

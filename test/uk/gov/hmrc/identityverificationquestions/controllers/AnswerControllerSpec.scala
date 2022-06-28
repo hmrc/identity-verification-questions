@@ -48,13 +48,6 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
       }
     }
 
-    "return 404" when {
-      "origin, correlationId and identifiers do not match entry in mongo repo" in new Setup {
-        val result: Future[Result] = controller.answer()(fakeRequest)
-        status(result) shouldBe NOT_FOUND
-      }
-    }
-
     "return 403" when {
       "Unauthorised client called question repository" in new Setup {
         withCaptureOfLoggingFrom[AnswerController] { logs =>
@@ -80,7 +73,7 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
   trait TestData {
     val correlationId: CorrelationId = CorrelationId()
     val ninoIdentifier: Nino = Nino("AA000000A")
-    val answerCheck: AnswerCheck = AnswerCheck(correlationId, Selection(ninoIdentifier), Seq(AnswerDetails(PaymentToDate, SimpleAnswer("5"))), None)
+    val answerCheck: AnswerCheck = AnswerCheck(correlationId, Seq(AnswerDetails(PaymentToDate, SimpleAnswer("5"))), None)
     val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, Selection(ninoIdentifier), Seq.empty[QuestionWithAnswers], LocalDateTime.now)
   }
 }

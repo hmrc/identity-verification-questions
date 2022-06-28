@@ -51,7 +51,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
+        connector.verifyAnswer(corrId, answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
       }
       "answer matches an answer retrieved from repo EarningsAbovePT" in {
         val correctQDC: QuestionDataCache =
@@ -59,7 +59,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsEarningsAbovePT, None).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
+        connector.verifyAnswer(corrId, answerDetailsEarningsAbovePT, None).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
       }
       "answer matches an answer retrieved from repo EarningsAbovePT with tolerance" in {
         val correctQDC: QuestionDataCache =
@@ -67,7 +67,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("101.11")), None).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
+        connector.verifyAnswer(corrId, answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("101.11")), None).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
       }
     }
 
@@ -79,7 +79,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
           .expects(*, inCorrectQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(inCorrectQDC))
-        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
+        connector.verifyAnswer(corrId, answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
       }
       "answer matches an answer retrieved from repo EarningsAbovePT over tolerance" in {
         val correctQDC: QuestionDataCache =
@@ -89,13 +89,13 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("102.11")), None).futureValue shouldBe QuestionResult(EarningsAbovePT, Incorrect)
+        connector.verifyAnswer(corrId, answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("102.11")), None).futureValue shouldBe QuestionResult(EarningsAbovePT, Incorrect)
       }
     }
 
     "return score of 'Unknown'" when {
       "no answers retrieved from repo" in {
-        connector.verifyAnswer(corrId, Selection(ninoIdentifier, saUtrIdentifier), answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Unknown)
+        connector.verifyAnswer(corrId, answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Unknown)
       }
     }
   }

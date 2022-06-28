@@ -28,7 +28,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AnswerConnector[T] {
-  def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[T]
+  def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[T]
 }
 
 class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService)(implicit ec: ExecutionContext)
@@ -60,8 +60,8 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, audi
     }
   }
 
-  override def verifyAnswer(correlationId: CorrelationId, selection: Selection, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
-    questionRepo.findAnswers(correlationId, selection) map {
+  override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
+    questionRepo.findAnswers(correlationId) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
       case questionDataCaches =>
         val result = checkResult(questionDataCaches, answer)

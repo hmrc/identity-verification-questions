@@ -44,7 +44,7 @@ trait CheckAvailability {
          case _ => false
       }
 
-   def isAvailable(selection: Selection): Boolean =
+   def isAvailableForRequestedSelection(selection: Selection): Boolean =
       hasRequiredIdentifiers(selection) && !isDisabledByTime()
 
 }
