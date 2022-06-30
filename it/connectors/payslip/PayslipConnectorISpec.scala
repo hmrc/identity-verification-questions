@@ -39,7 +39,7 @@ class PayslipConnectorISpec extends BaseISpec {
 
   "get payslip returns" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val paymentDate: LocalDate = LocalDate.now().minusMonths(6).minusDays(5)
+    val paymentDate: LocalDate = LocalDate.now().minusMonths(1).minusDays(25)
 
     "successfully obtain data for nino AA000003D" in {
       val ninoIdentifier: Nino = Nino("AA000003D")
@@ -48,7 +48,7 @@ class PayslipConnectorISpec extends BaseISpec {
       val connector: PayslipConnector = fakeApplication.injector.instanceOf[PayslipConnector]
 
       val result = await(connector.getRecords(selectionNino))
-      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(130.99), Some(155.02), Some(100.02), None, None, None, None, None, None)
+      result.toList.head shouldBe Payment(paymentDate, Some(3000), Some(120.99), Some(155.02), Some(100.02), None, None, None, None, None, None)
     }
   }
 }
