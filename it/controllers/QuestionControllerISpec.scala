@@ -138,7 +138,6 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
         response.status shouldBe 200
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
         questionResponse.isSuccess shouldBe true
-        println("\n\n\nquestionResponse.get.questions "+ questionResponse.get.questions)
         questionResponse.get.questions.nonEmpty shouldBe true
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
       }

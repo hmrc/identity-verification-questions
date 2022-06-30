@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.payslip
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -37,7 +37,7 @@ class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppC
 
   def serviceName: ServiceName = payslipService
 
-  lazy val checkLastThisManyMonths = appConfig.rtiNumberOfPayslipMonthsToCheck
+  lazy val checkLastThisManyMonths = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
 
   //PE-2125 to use only till the (5th of April + valueOf('rti.tax-year.payslips.months'))
   // the two years here may be the same in which case the Set() will deduplicate
@@ -60,7 +60,13 @@ class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppC
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec)
+      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+        case _: NotFoundException =>
+          Future.successful(Seq())
+        case ex: Throwable =>
+          logger.warn(s"Error in requesting RTI payments for tax year $tYear, error: ${ex.getMessage}")
+          Future.successful(Seq())
+      }
     }
 
     selection.nino.map { nino =>

@@ -17,22 +17,15 @@
 package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.CoreGet
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
-import uk.gov.hmrc.identityverificationquestions.models.P60.{EarningsAbovePT, EmployeeNIContributions, PaymentToDate, PostgraduateLoanDeductions, StatutoryAdoptionPay, StatutoryMaternityPay, StatutorySharedParentalPay, StudentLoanDeductions}
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.{IncomeTax, NationalInsurance}
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, ServiceName, p60Service}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
+import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, ServiceName, p60Service}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
-import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Connector
-import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
-import scala.collection.SortedSet
 
 @Singleton
 class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionService
@@ -41,7 +34,7 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDisp
   with TaxYearBuilder
   with PenceAnswerConvertor {
 
-  lazy val payslipMonths: Int = appConfig.rtiNumberOfPayslipMonthsToCheck
+  lazy val payslipMonths: Int = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
 
 
   override type Record = Payment
@@ -51,7 +44,6 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDisp
   override def connector: QuestionConnector[Payment] = payslipConnector
 
   override def evidenceTransformer(records: Seq[Payment]): Seq[QuestionWithAnswers] = {
-
     def additionalInfoMap = Map("months" -> payslipMonths.toString)
 
     val payslipQuestions: Seq[QuestionWithAnswers] = {

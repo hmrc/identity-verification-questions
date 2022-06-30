@@ -62,6 +62,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
 
+  def rtiNumberOfPayslipMonthsToCheck(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.monthsToCheck")
+
   def questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
 
   lazy val platformAnalyticsUrl: String = servicesConfig.baseUrl("platform-analytics")
@@ -80,5 +82,4 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   private def getIntOrThrowError(key: String): Int = config.getOptional[Int](key).getOrElse(configNotFoundError(key))
   def configNotFoundError(key: String) = throw new RuntimeException(s"Could not find configuration key '$key'")
 
-  lazy val rtiNumberOfPayslipMonthsToCheck: Int = getIntOrThrowError("rti.tax-year.payslips.months")
 }
