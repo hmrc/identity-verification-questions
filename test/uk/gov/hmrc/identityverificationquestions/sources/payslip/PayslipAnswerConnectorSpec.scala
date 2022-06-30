@@ -61,14 +61,6 @@ class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsNI, None).futureValue shouldBe QuestionResult(NationalInsurance, Correct)
       }
-      "answer matches an answer retrieved from repo NationalInsurance with tolerance" in {
-        val correctQDC: QuestionDataCache =
-          QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(NationalInsurance, Seq("200.22", "100.11"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
-          .expects(*, correctQDC, Correct, *, *, *, *)
-        await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, answerDetailsNI.copy(answer = SimpleAnswer("101.11")), None).futureValue shouldBe QuestionResult(NationalInsurance, Correct)
-      }
     }
 
     "return score of 'Incorrect'" when {
