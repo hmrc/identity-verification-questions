@@ -91,9 +91,8 @@ class P60ConnectorISpec extends BaseISpec {
       val selectionNino: Selection = Selection(ninoIdentifier)
 
       val connector: P60Connector = fakeApplication.injector.instanceOf[P60Connector]
-      the [UpstreamErrorResponse] thrownBy {
-        val result = await(connector.getRecords(selectionNino))
-      }
+      val result = await(connector.getRecords(selectionNino))
+      result shouldBe Seq[Payment]()
     }
   }
 }
