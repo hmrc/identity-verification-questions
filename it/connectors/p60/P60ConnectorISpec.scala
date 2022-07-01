@@ -87,5 +87,15 @@ class P60ConnectorISpec extends BaseISpec {
                                           studentLoanDeductions = Some(0),
                                           postgraduateLoanDeductions = Some(0))
     }
+    "return empty payment when P60 data not found nino AA002099B" in {
+      val ninoIdentifier: Nino = Nino("AA002099B")
+      val selectionNino: Selection = Selection(ninoIdentifier)
+
+      val connector: P60Connector = fakeApplication.injector.instanceOf[P60Connector]
+
+      val result = await(connector.getRecords(selectionNino))
+
+      result.toList shouldBe Seq[Payment]()
+    }
   }
 }
