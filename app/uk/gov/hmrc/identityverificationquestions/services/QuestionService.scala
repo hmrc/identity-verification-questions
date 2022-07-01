@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.services
 import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName}
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
@@ -61,7 +61,11 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
-        connector.getRecords(selection).map(evidenceTransformer)
+        connector.getRecords(selection).map(evidenceTransformer).recoverWith {
+          case e: UpstreamErrorResponse if e.statusCode == 404 =>
+            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+            Future.successful(Seq())
+        }
       } recover {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
