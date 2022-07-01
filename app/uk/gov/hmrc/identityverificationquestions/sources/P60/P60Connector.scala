@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -48,7 +48,11 @@ class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec)
+      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+        case _: NotFoundException =>
+          logger.info(s"VER-2420: P60 information is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+          Future.successful(Seq())
+      }
     }
 
     selection.nino.map { nino =>
