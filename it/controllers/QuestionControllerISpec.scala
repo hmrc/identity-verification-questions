@@ -42,9 +42,7 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       questionResponse.isSuccess shouldBe true
       private val questions: Seq[Question] = questionResponse.get.questions
       questions.nonEmpty shouldBe true
-      private val evidences: Set[String] = questions.map(_.questionKey.evidenceOption).toSet
-      evidences.contains("P60") shouldBe true
-      evidences.contains("Payslip") shouldBe true
+      questions.map(_.questionKey.evidenceOption).contains("P60") shouldBe true
       questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
     }
 

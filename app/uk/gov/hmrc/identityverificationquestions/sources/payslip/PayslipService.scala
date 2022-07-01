@@ -21,7 +21,7 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.{IncomeTax, NationalInsurance}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, ServiceName, payslipService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
@@ -39,7 +39,7 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDisp
 
   override type Record = Payment
 
-  override def serviceName: ServiceName = p60Service
+  override def serviceName: ServiceName = payslipService
 
   override def connector: QuestionConnector[Payment] = payslipConnector
 

@@ -60,13 +60,7 @@ class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppC
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
-        case _: NotFoundException =>
-          Future.successful(Seq())
-        case ex: Throwable =>
-          logger.warn(s"Error in requesting RTI payments for tax year $tYear, error: ${ex.getMessage}")
-          Future.successful(Seq())
-      }
+      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec)
     }
 
     selection.nino.map { nino =>
