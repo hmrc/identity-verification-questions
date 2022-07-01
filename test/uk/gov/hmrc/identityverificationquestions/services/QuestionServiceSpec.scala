@@ -78,19 +78,19 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, selection: XXXX0000D,XXXX5678"
+            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: origin, selection: XXXX0000D,XXXX5678"
           }
         }
 
-        "connector returns not found" in new Setup {
+        "connector returns internalServerErrorResult" in new Setup {
           (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
-          override def connectorResult: Future[Seq[TestRecord]] = notFoundResult
+          override def connectorResult: Future[Seq[TestRecord]] = internalServerErrorResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
             service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
-            val errorLogs = logs.filter(_.getLevel == Level.WARN)
+            val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, no records returned for selection: origin: origin, identifiers: XXXX0000D,XXXX5678"
+            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream5xxResponse: internal server error, origin: origin, selection: XXXX0000D,XXXX5678"
           }
         }
 
@@ -236,7 +236,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     def illegalAccessResult: Future[Seq[TestRecord]] = Future.failed(new IllegalAccessException("Connector should not have been called"))
     def testRecordResult: Future[Seq[TestRecord]] = Future.successful(Seq(TestRecord(1)))
-    def notFoundResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("no no nooooo, no records found", NOT_FOUND))
+    def internalServerErrorResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("internal server error", INTERNAL_SERVER_ERROR))
     def badRequestResult: Future[Seq[TestRecord]] = Future.failed(UpstreamErrorResponse("bad bad bad request", BAD_REQUEST))
     def unhealthyServiceExceptionResult: Future[Seq[TestRecord]] = Future.failed(new UnhealthyServiceException("issue with service"))
   }

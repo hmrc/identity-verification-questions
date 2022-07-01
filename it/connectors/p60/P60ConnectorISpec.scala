@@ -20,11 +20,10 @@ import iUtils.BaseISpec
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Connector
-
 import java.time.LocalDate
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -86,6 +85,15 @@ class P60ConnectorISpec extends BaseISpec {
                                           statutoryAdoptionPay = Some(0),
                                           studentLoanDeductions = Some(0),
                                           postgraduateLoanDeductions = Some(0))
+    }
+    "return UpstreamErrorResponse when P60 data not found for nino AA002099B" in {
+      val ninoIdentifier: Nino = Nino("AA002099B")
+      val selectionNino: Selection = Selection(ninoIdentifier)
+
+      val connector: P60Connector = fakeApplication.injector.instanceOf[P60Connector]
+      the [UpstreamErrorResponse] thrownBy {
+        val result = await(connector.getRecords(selectionNino))
+      }
     }
   }
 }

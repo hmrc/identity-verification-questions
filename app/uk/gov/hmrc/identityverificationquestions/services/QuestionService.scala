@@ -17,14 +17,13 @@
 package uk.gov.hmrc.identityverificationquestions.services
 
 import play.api.Logging
+import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName}
-import play.api.mvc.Request
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
-
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,17 +61,19 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
-        connector.getRecords(selection).map(evidenceTransformer)
+        connector.getRecords(selection).map(evidenceTransformer).recoverWith {
+          case e: UpstreamErrorResponse if e.statusCode == 404 =>
+            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+            Future.successful(Seq())
+        }
       } recover {
-        case e: UpstreamErrorResponse if e.statusCode == 404 =>
-          logger.warn(s"$serviceName, no records returned for selection: origin: $origin, identifiers: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-          Seq()
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
+          logger.error(s"$serviceName is Unavailable, UnhealthyServiceException raised.")
           Seq()
         case t: Throwable =>
-          logger.error(s"$serviceName, threw exception $t, selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+          logger.error(s"$serviceName, threw exception $t, origin: $origin, selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
           Seq()
       }
     } else {
