@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.services
 import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName}
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
