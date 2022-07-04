@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
 import Utils.{LogCapturing, UnitSpec}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{Authorization, BadRequestException, HeaderCarrier, HttpGet, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpGet, HttpReads, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.models.payment.{Employment, Payment}
@@ -35,7 +35,6 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
   trait Setup {
 
     val httpClientMock = mock[HttpGet]
-//    implicit val userAgent: Option[UserAgent] = None
     implicit val appConfig = app.injector.instanceOf[AppConfig]
     val servicesConfig = app.injector.instanceOf[ServicesConfig]
 
@@ -132,32 +131,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
       (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
         (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
         .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16", *, *, *, *, *)
-        .returning(Future.failed(new NotFoundException("")))
-
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15", *, *, *, *, *)
-        .returning(Future.successful(Seq(Employment(payments))))
-
-      override def month = "04"
-
-      override def payments = Seq(
-        Payment(toDate("2015-06-28"), Some(BigDecimal(0)), Some(BigDecimal("10.10")), Some(BigDecimal("10.00"))),
-        Payment(toDate("2015-07-30"), Some(BigDecimal("3000")), Some(BigDecimal("11.11")), Some(BigDecimal("11.00")), Some(BigDecimal("5.00"))),
-        Payment(toDate("2014-12-30"), Some(BigDecimal("1200")), Some(BigDecimal("0")), Some(BigDecimal("8.00"))),
-        Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
-      )
-
-      val res = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
-      res.seq.isEmpty should be(false)
-      res.size should be(3)
-    }
-
-    "return payments when data are available for previous tax year and we are in April and for the current tax year we got 400 " in new Setup {
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16", *, *, *, *, *)
-        .returning(Future.failed(new BadRequestException("")))
+        .returning(Future.failed(UpstreamErrorResponse("NotFound", 404, 404)))
 
       (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
         (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))

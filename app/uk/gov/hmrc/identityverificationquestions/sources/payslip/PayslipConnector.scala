@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.payslip
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -60,7 +60,11 @@ class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppC
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec)
+      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+        case e: UpstreamErrorResponse if e.statusCode == 404 =>
+          logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+          Future.successful(Seq())
+      }
     }
 
     selection.nino.map { nino =>

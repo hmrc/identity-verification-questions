@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.{IncomeTax, NationalInsurance}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, payslipService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 
@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PayslipServiceSpec extends UnitSpec with LogCapturing {
 
   "Service Name should be set" in new Setup {
-    service.serviceName shouldBe p60Service
+    service.serviceName shouldBe payslipService
   }
 
   "calling `questions`" should {
