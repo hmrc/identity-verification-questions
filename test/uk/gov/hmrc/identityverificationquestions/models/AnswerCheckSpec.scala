@@ -18,7 +18,6 @@ package uk.gov.hmrc.identityverificationquestions.models
 
 import Utils.UnitSpec
 import play.api.libs.json.{JsSuccess, JsValue, Json}
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 
 class AnswerCheckSpec extends UnitSpec {

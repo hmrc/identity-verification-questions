@@ -22,7 +22,7 @@ import iUtils.TestData.SCPEmailTestData
 import play.api.libs.json.{JsValue, Json}
 
 trait WireMockStubs extends SCPEmailTestData {
-  def p60ProxyReturnOk(payments: JsValue): StubMapping =
+  def rtiProxyReturnOk(payments: JsValue): StubMapping =
     stubFor(
       get(
         urlMatching("/rti/individual/payments/nino/AA000000/tax-year/([0-9]{2}+(-[0-9]{2}))"))

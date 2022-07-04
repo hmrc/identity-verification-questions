@@ -17,32 +17,33 @@
 package controllers
 
 import ch.qos.logback.classic.Level
-import iUtils.TestData.P60TestData
+import iUtils.TestData.RtiTestData
 import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
-import uk.gov.hmrc.identityverificationquestions.models.{PassportQuestion, QuestionResponse, QuestionWithAnswers, SCPEmailQuestion}
+import uk.gov.hmrc.identityverificationquestions.models.{P60, PassportQuestion, Payslip, Question, QuestionResponse, QuestionWithAnswers, SCPEmailQuestion}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
-
 import java.time.LocalDateTime
 
 class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneServerPerSuite {
   "POST /questions" should {
     "return 200 if provided with valid json" in new Setup {
       val questionRepository = app.injector.instanceOf[QuestionMongoRepository]
-      p60ProxyReturnOk(p60ResponseJson)
+      rtiProxyReturnOk(rtiResponseJson)
       ivReturnOk
       basGatewayStub
       val response: WSResponse = await(resourceRequest(questionRoute).post(validQuestionRequest))
       response.status shouldBe 200
       val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
       questionResponse.isSuccess shouldBe true
-      questionResponse.get.questions.nonEmpty shouldBe true
-      questionResponse.get.questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
+      private val questions: Seq[Question] = questionResponse.get.questions
+      questions.nonEmpty shouldBe true
+      questions.map(_.questionKey.evidenceOption).contains("P60") shouldBe true
+      questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
     }
 
 //    "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
@@ -127,7 +128,7 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
 
   "POST /questions for service with scheduled outage" should {
     "return 200 and sequence of questions if outage window is in future" in new Setup {
-      p60ProxyReturnOk(p60ResponseJson)
+      rtiProxyReturnOk(rtiResponseJson)
       ivReturnOk
       basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
@@ -167,7 +168,7 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
 
   "POST /questions for service with past outage" should {
     "return 200 and sequence of questions if outage window is in past" in new Setup {
-      p60ProxyReturnOk(p60ResponseJson)
+      rtiProxyReturnOk(rtiResponseJson)
       ivReturnOk
       basGatewayStub
       withCaptureOfLoggingFrom[AppConfig] { logs =>
@@ -192,7 +193,7 @@ trait Setup extends WireMockStubs with TestData {
 
 }
 
-trait TestData extends P60TestData {
+trait TestData extends RtiTestData {
 
   val validQuestionRequest: JsObject = Json.obj(
     "nino" -> "AA000000A",

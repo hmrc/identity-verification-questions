@@ -62,6 +62,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
 
+  def rtiNumberOfPayslipMonthsToCheck(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.monthsToCheck")
+
   def questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
 
   lazy val platformAnalyticsUrl: String = servicesConfig.baseUrl("platform-analytics")

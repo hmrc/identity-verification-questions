@@ -14,31 +14,43 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.identityverificationquestions.sources.P60
+package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.identityverificationquestions.models.payment.{Employment, Payment}
-import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, payslipService}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{TaxYear, TaxYearBuilder}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
-  with HodConnectorConfig
-  with TaxYearBuilder
-  with Logging {
+class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
+    with HodConnectorConfig
+    with TaxYearBuilder
+    with Logging {
 
-  def serviceName: ServiceName = p60Service
+  def serviceName: ServiceName = payslipService
 
-  protected def getTaxYears = Set(currentTaxYear.previous, currentTaxYearWithBuffer.previous).toSeq
+  lazy val checkLastThisManyMonths = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
+
+  //PE-2125 to use only till the (5th of April + valueOf('rti.tax-year.payslips.months'))
+  // the two years here may be the same in which case the Set() will deduplicate
+  protected def getTaxYears = Set(currentTaxYear, currentTaxYearWithBuffer(checkLastThisManyMonths)).toSeq
+
+  def selectPayments(employments: Seq[Employment]): Seq[Payment] = {
+    val startPoint = today.minusMonths(checkLastThisManyMonths)
+    for {
+      employment <- employments
+      payment <- employment.payments
+      if payment.paymentDate isAfter startPoint
+    } yield payment
+  }
 
   override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Payment]] = {
 
@@ -57,11 +69,11 @@ class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
 
     selection.nino.map { nino =>
       val futureSeqSeqEmployment = Future.sequence(getTaxYears.map(tYear => getRecordsForYear(nino, tYear)))
-      val futureEmployments = futureSeqSeqEmployment.map(_.flatten)
+      val futureEmployments: Future[Seq[Employment]] = futureSeqSeqEmployment.map(_.flatten)
       for {
         employments <- futureEmployments
-        newest = employments.flatMap(_.newest)
-      } yield newest
+        selectedPayments = selectPayments(employments)
+      } yield selectedPayments
     }.getOrElse {
       logger.warn(s"$serviceName, No nino identifier for selection: $selection")
       Future.successful(Seq.empty[Payment])

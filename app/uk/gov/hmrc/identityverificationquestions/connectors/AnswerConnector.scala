@@ -37,7 +37,7 @@ class MongoAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, audi
    def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails)(implicit request: Request[_]): Score = {
     //PE-2186 - for P60 answers ignore pence, eg, 100.38 convert to 100.00
     val newAnswerDetails: AnswerDetails =
-      if (answerDetails.questionKey.evidenceOption.equals("P60")) {
+      if (answerDetails.questionKey.evidenceOption.equals("P60") || answerDetails.questionKey.evidenceOption.equals("Payslip")) {
         answerDetails.copy(answer = SimpleAnswer(convertAnswer(answerDetails.answer.toString.trim).toString()))
       } else {
         answerDetails
