@@ -61,11 +61,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
-        connector.getRecords(selection).map(evidenceTransformer).recoverWith {
-          case e: UpstreamErrorResponse if e.statusCode == 404 =>
-            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-            Future.successful(Seq())
-        }
+        connector.getRecords(selection).map(evidenceTransformer)
       } recover {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
