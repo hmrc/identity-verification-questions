@@ -19,6 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.sa
 import javax.inject.Inject
 import org.joda.time.DateTime
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector

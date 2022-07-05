@@ -17,6 +17,7 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import uk.gov.hmrc.domain.SaUtr
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector

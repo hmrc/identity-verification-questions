@@ -19,6 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.monitoring.analytics
 import akka.Done
 import play.api.Logging
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 
