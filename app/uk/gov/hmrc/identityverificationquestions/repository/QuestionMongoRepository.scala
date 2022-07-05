@@ -18,7 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.repository
 
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
-import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionDataCache}
+import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionDataCache, Selection}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 

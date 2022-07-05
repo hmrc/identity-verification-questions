@@ -20,7 +20,7 @@ lazy val scoverageSettings = {
         |.*views.*;
         |.*Routes.*;
         |.*RoutesPrefix.*;""".stripMargin,
-    ScoverageKeys.coverageMinimumStmtTotal := 90,
+    ScoverageKeys.coverageMinimum := 90,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true
   )}
@@ -43,6 +43,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(scoverageSettings: _*)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers ++= Seq(
+    Resolver.bintrayRepo("hmrc", "releases"),
     Resolver.jcenterRepo
   ))
   .settings(serviceManagerSettings: _*)
