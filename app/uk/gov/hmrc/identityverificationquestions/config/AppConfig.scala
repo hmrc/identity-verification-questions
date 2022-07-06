@@ -20,7 +20,7 @@ import play.api.Configuration
 import uk.gov.hmrc.identityverificationquestions.models.ServiceName
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.Period
+import java.time.Duration
 import javax.inject.{Inject, Singleton}
 
 @Singleton
@@ -64,7 +64,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def rtiNumberOfPayslipMonthsToCheck(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.monthsToCheck")
 
-  def questionRecordTTL: Period = Period.parse(getStringOrDefault("question.record.duration", "P1D"))
+  def questionRecordTTL: Duration = Duration.ofSeconds(getIntOrDefault("question.record.duration", 86400))
 
   lazy val platformAnalyticsUrl: String = servicesConfig.baseUrl("platform-analytics")
 

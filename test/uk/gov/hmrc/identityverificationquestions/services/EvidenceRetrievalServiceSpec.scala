@@ -25,13 +25,13 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
-import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
-import java.time.{LocalDate, Period}
-
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
+import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
+import java.time.{Duration, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.matching.Regex
 
 class EvidenceRetrievalServiceSpec extends UnitSpec {
 
@@ -40,12 +40,20 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
       (mockP60Service.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockPayslipService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockAppConfig.questionRecordTTL _).expects().returning(Period.parse("P1D"))
+      (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
       result.questions shouldBe Seq.empty[QuestionWithAnswers]
     }
   }
 
+  "setExpiryDate" should {
+    "return a expiry date" in new Setup {
+      (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
+      val result: LocalDateTime = service.setExpiryDate
+      val dateStampRegex: Regex = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])(T)([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9]).([0-9]{1,3})$".r //eg "2022-07-07T11:45:26.828"
+      dateStampRegex.pattern.matcher(result.toString).matches shouldBe true
+    }
+  }
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()

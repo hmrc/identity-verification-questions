@@ -49,8 +49,12 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
             correlationId = corrId,
             selection = selection,
             questions = questionWithAnswers,
-            expiryDate = LocalDateTime.now(ZoneOffset.UTC) plus appConfig.questionRecordTTL))
+            expiryDate = setExpiryDate))
     } yield toResponse(corrId, questionWithAnswers)
+  }
+
+  def setExpiryDate: LocalDateTime = {
+    LocalDateTime.now(ZoneOffset.UTC).plus(appConfig.questionRecordTTL)
   }
 
   private def toResponse(correlationId: CorrelationId, qs: Seq[QuestionWithAnswers]): QuestionResponse = {
