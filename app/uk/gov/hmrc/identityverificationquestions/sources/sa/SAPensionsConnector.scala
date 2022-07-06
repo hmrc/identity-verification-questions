@@ -18,9 +18,10 @@ package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import javax.inject.Inject
 import org.joda.time.DateTime
+import play.api.Logging
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Selection
@@ -29,7 +30,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig, appConfig: AppConfig)
-  extends QuestionConnector[SAReturn] {
+  extends QuestionConnector[SAReturn] with Logging {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
   def currentDate: DateTime = DateTime.now()
@@ -44,9 +45,9 @@ class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
     endYear: Int
   )(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAReturn]] = {
     val url = s"$baseUrl/individuals/nino/$nino/self-assessment/income?startYear=$startYear&endYear=$endYear"
-    http.GET[Seq[SAReturn]](url).recover {
-      case _: NotFoundException =>
-        Seq()
+    http.GET[Seq[SAReturn]](url).recoverWith {
+      case e: UpstreamErrorResponse if e.statusCode == 404 =>
+        Future.successful(Seq())
     }
   }
 

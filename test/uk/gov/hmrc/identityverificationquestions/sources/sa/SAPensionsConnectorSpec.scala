@@ -20,7 +20,7 @@ import Utils.UnitSpec
 import org.joda.time.DateTime
 import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -49,7 +49,7 @@ class SAPensionsConnectorSpec extends UnitSpec {
       (mockHttpClient.GET[Seq[SAReturn]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
         (_: HttpReads[Seq[SAReturn]], _: HeaderCarrier, _: ExecutionContext))
         .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.failed(new NotFoundException("intentional failure")))
+        .returning(Future.failed(UpstreamErrorResponse("intentional failure", 404)))
 
       connector.getReturns(testNino, testYear, testYear).futureValue shouldBe Seq()
     }

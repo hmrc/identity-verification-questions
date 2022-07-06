@@ -20,7 +20,7 @@ import Utils.UnitSpec
 import org.joda.time.LocalDate
 import play.api.Configuration
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -63,7 +63,7 @@ class SAPaymentsConnectorSpec extends UnitSpec {
       (mockHttpClient.GET[Seq[SAPayment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
         (_: HttpReads[Seq[SAPayment]], _: HeaderCarrier, _: ExecutionContext))
         .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.failed(new NotFoundException("intentional failure")))
+        .returning(Future.failed(UpstreamErrorResponse("intentional failure", 404)))
 
       connector.getReturns(SAUTR).futureValue shouldBe List()
     }
