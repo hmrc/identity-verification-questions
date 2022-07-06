@@ -16,25 +16,26 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
+import javax.inject.Inject
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Selection
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig)
   extends QuestionConnector[SAPaymentReturn] {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
-  def getReturns(saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAPaymentReturn]] = {
+  def getReturns(saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAPaymentReturn]] = {
     val url = s"$baseUrl/individuals/self-assessment/payments/utr/$saUtr"
     http.GET[Seq[SAPayment]](url).map { payments =>
       Seq(SAPaymentReturn(payments))
     }.recover {
+      case e: UpstreamErrorResponse if e.statusCode == 404 => List()
       case _: NotFoundException =>
         List()
     }

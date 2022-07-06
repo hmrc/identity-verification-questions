@@ -20,7 +20,7 @@ import javax.inject.Inject
 import org.joda.time.DateTime
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Selection
@@ -45,6 +45,7 @@ class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
   )(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAReturn]] = {
     val url = s"$baseUrl/individuals/nino/$nino/self-assessment/income?startYear=$startYear&endYear=$endYear"
     http.GET[Seq[SAReturn]](url).recover {
+      case e: UpstreamErrorResponse if e.statusCode == 404 => Seq()
       case _: NotFoundException =>
         Seq()
     }
