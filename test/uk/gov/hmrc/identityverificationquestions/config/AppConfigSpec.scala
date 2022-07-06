@@ -20,11 +20,11 @@ import Utils.testData.AppConfigTestData
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
 import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.identityverificationquestions.models.p60Service
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-import java.time.{LocalDateTime, Period}
+import java.time.{Duration, LocalDateTime}
 
 class AppConfigSpec extends UnitSpec with LogCapturing {
 
@@ -298,12 +298,12 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     "get 'questionRecordTT'" should {
       "return the value in application.conf if present" in new Setup {
         override def testConfig: Map[String, Any] = baseConfig ++ questionRepoTtlPeriod
-        appConfig.questionRecordTTL shouldBe Period.parse("P2D")
+        appConfig.questionRecordTTL shouldBe Duration.ofSeconds(86400)
       }
 
-      "return the default value of 'P1D' if not set in application.conf" in new Setup {
+      "return the default value of 86400 if not set in application.conf" in new Setup {
         override def testConfig: Map[String, Any] = baseConfig
-        appConfig.questionRecordTTL shouldBe Period.parse("P1D")
+        appConfig.questionRecordTTL shouldBe Duration.ofSeconds(86400)
       }
     }
 
@@ -352,7 +352,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
 
     val bufferInMonthsForService: Map[String, Any] = Map("microservice.services.p60Service.bufferInMonths" -> 2)
 
-    val questionRepoTtlPeriod: Map[String, Any] = Map("question.record.duration" -> "P2D")
+    val questionRepoTtlPeriod: Map[String, Any] = Map("question.record.duration" -> 86400)
 
     val passportAuthDataData: Map[String, Any] = Map(
       "microservice.services.passportService.authenticationData.organisationId" -> "THMRC",
