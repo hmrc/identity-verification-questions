@@ -32,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
   implicit val request: Request[_] = FakeRequest()
-  val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
+  val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
   val auditService: AuditService = mock[AuditService]
   val connector = new PayslipAnswerConnector(mongoRepo, auditService)
 

@@ -63,7 +63,7 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
 
   trait Setup extends TestData {
     val answersService: AnswerVerificationService = mock[AnswerVerificationService]
-    val questionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
+    val questionMongoRepository = new QuestionMongoRepository(mongoComponent)
     val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck)).withHeaders("User-Agent" -> "identity-verification")
     val fakeRequestWithUnknownAgent: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck)).withHeaders("User-Agent" -> "Unknown")
     val appConfig: AppConfig = app.injector.instanceOf[AppConfig]

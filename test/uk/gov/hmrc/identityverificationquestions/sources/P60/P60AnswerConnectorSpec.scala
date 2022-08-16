@@ -32,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
   implicit val request: Request[_] = FakeRequest()
-  val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
+  val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
   val auditService: AuditService = mock[AuditService]
   val connector = new P60AnswerConnector(mongoRepo, auditService)
 

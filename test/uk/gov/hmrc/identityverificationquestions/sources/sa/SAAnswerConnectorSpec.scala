@@ -158,7 +158,7 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     val questionDataCacheForSAPayments: Seq[QuestionDataCache] = Seq(QuestionDataCache(CorrelationId(), selection, Seq(testSAPaymentQuestion), dateTime))
     def questionDataCacheForSAPensions(validAnswers: Seq[String]): Seq[QuestionDataCache] =
       Seq(QuestionDataCache(CorrelationId(), selection, Seq(QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, validAnswers)), dateTime))
-    val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
+    val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
     val auditService: AuditService = mock[AuditService]
     val service = new SAAnswerConnector(appConfig, mongoRepo, auditService)
   }
