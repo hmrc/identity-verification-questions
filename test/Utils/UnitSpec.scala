@@ -30,7 +30,7 @@ import play.api.mvc.Result
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, ResultExtractors, Writeables}
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
-import uk.gov.hmrc.mongo.{MongoComponent, MongoSpecSupport}
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.identityverificationquestions.models.CorrelationId
 import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
@@ -52,7 +52,6 @@ trait UnitSpec
     with FutureAwaits
     with MockFactory
     with ScalaFutures
-    with MongoSpecSupport
     with GuiceOneAppPerSuite
 {
 
@@ -84,6 +83,6 @@ trait UnitSpec
 
   def header(headerName: String, result: Result): Option[String] = header(headerName, Future.successful(result))
 
-  val reactiveMongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
+  val mongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
 
 }

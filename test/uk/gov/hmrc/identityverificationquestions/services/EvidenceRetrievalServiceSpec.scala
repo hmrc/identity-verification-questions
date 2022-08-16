@@ -64,7 +64,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     val mockSAService: SAService = mock[SAService]
     val mockPayslipService: PayslipService = mock[PayslipService]
 
-    val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(reactiveMongoComponent)
+    val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
     val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
