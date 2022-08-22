@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.P60
 
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60._
@@ -23,14 +24,13 @@ import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
-import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
+import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
-import javax.inject.{Inject, Singleton}
 import scala.collection.SortedSet
 
 @Singleton
-class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionService
+class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration
   with TaxYearBuilder
