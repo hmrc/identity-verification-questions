@@ -62,6 +62,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
+        (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
         (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
@@ -69,6 +70,13 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
 
       "P60Connector returns an empty sequence of Payment's" in new WithStubbing {
         (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
+
+        service.questions(selectionNino).futureValue shouldBe Seq()
+      }
+
+      "P60Connector returns an insufficient Payment's" in new WithStubbing {
+        (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentSix)))
+        (mockAppConfig.bufferInMonthsForService(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
         service.questions(selectionNino).futureValue shouldBe Seq()
       }
@@ -87,6 +95,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
+    (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
     (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
@@ -101,6 +110,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
     val paymentFive: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), None, None, None, None,
       Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.00))
+    val paymentSix: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), None, None, None)
 
     val ninoIdentifier: Nino = Nino("AA000000D")
     val utrIdentifier: SaUtr = SaUtr("12345678")

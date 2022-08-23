@@ -54,6 +54,7 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
+        (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
         (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
         service.questions(selectionNoNino).futureValue shouldBe Seq()
@@ -61,6 +62,12 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
 
       "PayslipConnector returns an empty sequence of Payment's" in new WithStubbing {
         (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
+
+        service.questions(selectionNino).futureValue shouldBe Seq()
+      }
+      "PayslipConnector returns an insufficient Payment's" in new WithStubbing {
+        (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentThree)))
+        (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
         service.questions(selectionNino).futureValue shouldBe Seq()
       }
@@ -79,6 +86,7 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
+    (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
     (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
@@ -88,6 +96,7 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
   trait TestDate {
     val paymentOne: Payment = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), incomeTax = Some(340.82), nationalInsurancePaid = Some(10))
     val paymentTwo: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), incomeTax = Some(356.56), nationalInsurancePaid = Some(11))
+    val paymentThree: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), incomeTax = Some(356.56))
 
     val ninoIdentifier: Nino = Nino("AA000000D")
     val utrIdentifier: SaUtr = SaUtr("12345678")
