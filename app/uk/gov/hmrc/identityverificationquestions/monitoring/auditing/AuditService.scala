@@ -23,8 +23,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
-
 import javax.inject.Inject
+import play.api.libs.json.Json
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -39,7 +40,9 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
       DataEvent(
         auditSource = AuditSource,
         auditType = "CircuitBreakerUnhealthyService",
-        detail = Map("unavailableServiceName" -> s"$unavailableServiceName", "identifiers" -> identifiers.toString),
+        detail = Map("unavailableServiceName" -> s"$unavailableServiceName",
+          "nino" -> identifiers.nino.fold("n/a")(nino => nino.value),
+          "satur" -> identifiers.sautr.fold("n/a")(sautr => sautr.value)),
         tags = tags
       )
     )
