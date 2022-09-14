@@ -18,9 +18,9 @@ package uk.gov.hmrc.identityverificationquestions.config
 
 import play.api.{Configuration, Logging}
 
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.time.format.DateTimeParseException
+import java.time.{LocalDateTime, ZoneId}
 import javax.inject.Inject
 
 class ConfigHelper @Inject()(config: Configuration)
@@ -31,11 +31,16 @@ class ConfigHelper @Inject()(config: Configuration)
 
   protected def getDateTime(key: String) : Either[DateParsingIssue, LocalDateTime] = config.getOptional[String](key) match {
     case Some(possibleDate) => try {
-      Right(LocalDateTime.parse(possibleDate, ISO_LOCAL_DATE_TIME))
+      Right(changeTimeToUtc(possibleDate))
     } catch {
       case _: DateTimeParseException => Left(InvalidDateFound(key, possibleDate))
     }
     case None => Left(DateMissing)
+  }
+
+  def changeTimeToUtc(dateTime: String): LocalDateTime = {
+    LocalDateTime.parse(dateTime, ISO_LOCAL_DATE_TIME)
+      .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime
   }
 
   protected def getStringList(key: String): Option[Seq[String]] = config.getOptional[Seq[String]](key)
