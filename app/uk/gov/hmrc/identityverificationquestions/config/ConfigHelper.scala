@@ -39,8 +39,12 @@ class ConfigHelper @Inject()(config: Configuration)
   }
 
   def changeTimeToUtc(dateTime: String): LocalDateTime = {
-    LocalDateTime.parse(dateTime, ISO_LOCAL_DATE_TIME)
-      .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime
+    //todo: remove the following two logger after Ver-2569
+    logger.info(s"\n\ndateTime in config $dateTime\n\n")
+    val dateTimeInBst = LocalDateTime.parse(dateTime, ISO_LOCAL_DATE_TIME)
+      .atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
+    logger.info(s"\n\ndateTimeInBst $dateTimeInBst\n\n")
+    dateTimeInBst
   }
 
   protected def getStringList(key: String): Option[Seq[String]] = config.getOptional[Seq[String]](key)
