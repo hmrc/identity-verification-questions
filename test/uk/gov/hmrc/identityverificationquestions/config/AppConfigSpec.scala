@@ -93,11 +93,8 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
-          //VER-2569. the localTime is different in local and Jenkins.
-          //In local, we are using summer time, so inorder to get this test pass in local during summer time, use the infoLogs.count that commented out.
-          //infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T20:00 and 2020-08-08T22:00") shouldBe 1
-          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //fail in local but good for Jenkins
+          infoLogs.size shouldBe 6
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
@@ -126,7 +123,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 6
           infoLogs.count(_.getMessage == "Scheduled p60Service outage startDate: 2020-08-08T23:00 must be earlier than endDate: 2020-08-08T21:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -141,7 +138,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 5
           infoLogs.count(_.getMessage == "Scheduled p60Service outage Invalid date in `microservice.services.p60Service.disabled.start` : `Not A Date`") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -156,7 +153,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 5
           infoLogs.count(_.getMessage == "Scheduled p60Service outage Invalid date in `microservice.services.p60Service.disabled.end` : `Not A Date`") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -171,7 +168,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 4
           infoLogs.count(_.getMessage == "Scheduled p60Service outage p60Service.disabled.start missing") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -186,7 +183,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(None, testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 4
           infoLogs.count(_.getMessage == "Scheduled p60Service outage p60Service.disabled.end missing") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -201,7 +198,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 6
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -216,7 +213,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), testIdentifiers)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 6
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
@@ -231,7 +228,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
           appConfig.serviceStatus(p60Service) shouldBe appConfig.ServiceState(Some(testOutage), List.empty)
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
-          infoLogs.size shouldBe 2
+          infoLogs.size shouldBe 6
           infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service not specified") shouldBe 1
         }
@@ -339,9 +336,9 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
     )
 
     val testStartTime: LocalDateTime =
-      LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime
+      LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
     val testEndTime: LocalDateTime =
-      LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime
+      LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
     val testOutage: Outage = Outage(testStartTime, testEndTime) //time in UTC
 
     val testIdentifiers = List ("nino", "utr")
