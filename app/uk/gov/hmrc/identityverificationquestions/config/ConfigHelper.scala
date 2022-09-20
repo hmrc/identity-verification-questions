@@ -40,10 +40,10 @@ class ConfigHelper @Inject()(config: Configuration)
 
   def changeTimeToUtc(dateTime: String): LocalDateTime = {
     //todo: remove the following two logger after Ver-2569
-    logger.info(s"\n\ndateTime in config $dateTime\n\n")
+    logger.info(s"\nVer-2569 dateTime in config $dateTime\n")
     val dateTimeInBst = LocalDateTime.parse(dateTime, ISO_LOCAL_DATE_TIME)
       .atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
-    logger.info(s"\n\ndateTimeInBst $dateTimeInBst\n\n")
+    logger.info(s"\nVer-2569 dateTimeInBst $dateTimeInBst\n")
     dateTimeInBst
   }
 
