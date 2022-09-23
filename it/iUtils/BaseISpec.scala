@@ -28,6 +28,9 @@ import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, Injecting}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
+import java.time.{LocalDateTime, ZoneId, ZoneOffset}
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
 trait BaseISpec extends AnyWordSpecLike
   with Matchers
   with WireMockSupport
@@ -39,6 +42,11 @@ trait BaseISpec extends AnyWordSpecLike
   with FutureAwaits
   with Injecting
   with BeforeAndAfterEach {
+
+  def toBTZ(time: String) = {
+    val timeZone = LocalDateTime.parse(time, ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London"))
+    LocalDateTime.ofInstant(timeZone.toInstant, ZoneOffset.UTC)
+  }
 
   protected def extraConfig: Map[String, Any] = Map.empty
 
