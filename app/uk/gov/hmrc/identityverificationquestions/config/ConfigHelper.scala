@@ -20,7 +20,7 @@ import play.api.{Configuration, Logging}
 
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.time.format.DateTimeParseException
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
 
 class ConfigHelper @Inject()(config: Configuration)
@@ -41,10 +41,10 @@ class ConfigHelper @Inject()(config: Configuration)
   def changeTimeToUtc(dateTime: String): LocalDateTime = {
     //todo: remove the following two logger after Ver-2569
     logger.info(s"\nVer-2569 dateTime in config $dateTime\n")
-    val dateTimeInBst = LocalDateTime.parse(dateTime, ISO_LOCAL_DATE_TIME)
-      .atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
+    val dateTimeInBst: ZonedDateTime = LocalDateTime.parse(dateTime, ISO_LOCAL_DATE_TIME)
+      .atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London"))
     logger.info(s"\nVer-2569 dateTimeInBst $dateTimeInBst\n")
-    dateTimeInBst
+    LocalDateTime.ofInstant(dateTimeInBst.toInstant, ZoneOffset.UTC)
   }
 
   protected def getStringList(key: String): Option[Seq[String]] = config.getOptional[Seq[String]](key)
