@@ -24,7 +24,7 @@ import uk.gov.hmrc.identityverificationquestions.models.p60Service
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-import java.time.{Duration, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.{Duration, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 class AppConfigSpec extends UnitSpec with LogCapturing {
 
@@ -335,9 +335,9 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
       "microservice.services.p60Service.identifier.required.1" -> "utr"
     )
 
-    val testStartTime =
+    val testStartTime: ZonedDateTime =
       LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London"))
-    val testEndTime =
+    val testEndTime: ZonedDateTime =
       LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London"))
     val testOutage: Outage = Outage(LocalDateTime.ofInstant(testStartTime.toInstant, ZoneOffset.UTC), LocalDateTime.ofInstant(testEndTime.toInstant, ZoneOffset.UTC)) //time in UTC
 
