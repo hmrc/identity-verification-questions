@@ -27,7 +27,8 @@ import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContribut
 import uk.gov.hmrc.identityverificationquestions.models.{P60, PassportQuestion, Payslip, Question, QuestionResponse, QuestionWithAnswers, SCPEmailQuestion}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
-import java.time.LocalDateTime
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneServerPerSuite {
   "POST /questions" should {
@@ -111,7 +112,7 @@ class QuestionControllerOutageISpec extends BaseISpec with LogCapturing {
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions should not contain paymentToDateQuestion
         questionResponse.get.questions should not contain employeeNIContributionsQuestion
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
+        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between ${toBTZ(datePast)} and ${toBTZ(dateFuture)}") shouldBe 1
       }
     }
   }
@@ -137,7 +138,7 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions.nonEmpty shouldBe true
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
+        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between ${toBTZ(datePast)} and ${toBTZ(dateFuture)}") shouldBe 1
       }
     }
 
@@ -177,7 +178,7 @@ class QuestionControllerAfterOutageISpec extends BaseISpec with LogCapturing {
         val questionResponse = Json.parse(response.body).validate[QuestionResponse]
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions.nonEmpty shouldBe true
-        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between $datePast and $dateFuture") shouldBe 1
+        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between ${toBTZ(datePast)} and ${toBTZ(dateFuture)}") shouldBe 1
       }
     }
   }
