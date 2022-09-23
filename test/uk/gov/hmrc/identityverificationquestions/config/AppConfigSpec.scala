@@ -24,7 +24,7 @@ import uk.gov.hmrc.identityverificationquestions.models.p60Service
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-import java.time.{Duration, LocalDateTime, ZoneId}
+import java.time.{Duration, LocalDateTime, ZoneId, ZoneOffset}
 
 class AppConfigSpec extends UnitSpec with LogCapturing {
 
@@ -94,7 +94,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 6
-          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T20:00 and 2020-08-08T22:00") shouldBe 1
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
@@ -124,7 +124,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 6
-          infoLogs.count(_.getMessage == "Scheduled p60Service outage startDate: 2020-08-08T23:00 must be earlier than endDate: 2020-08-08T21:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage startDate: 2020-08-08T22:00 must be earlier than endDate: 2020-08-08T20:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
@@ -199,7 +199,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 6
-          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T20:00 and 2020-08-08T22:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
@@ -214,7 +214,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 6
-          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T20:00 and 2020-08-08T22:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service are [nino, utr]") shouldBe 1
         }
       }
@@ -229,7 +229,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
 
           val infoLogs = logs.filter(_.getLevel == Level.INFO)
           infoLogs.size shouldBe 6
-          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T21:00 and 2020-08-08T23:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
+          infoLogs.count(_.getMessage == "Scheduled p60Service outage between 2020-08-08T20:00 and 2020-08-08T22:00") shouldBe 1 //VER-2569 fail in local but good for Jenkins
           infoLogs.count(_.getMessage == "Required identifiers for p60Service not specified") shouldBe 1
         }
       }
@@ -335,11 +335,11 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
       "microservice.services.p60Service.identifier.required.1" -> "utr"
     )
 
-    val testStartTime: LocalDateTime =
-      LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
-    val testEndTime: LocalDateTime =
-      LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
-    val testOutage: Outage = Outage(testStartTime, testEndTime) //time in UTC
+    val testStartTime =
+      LocalDateTime.parse("2020-08-08T21:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London"))
+    val testEndTime =
+      LocalDateTime.parse("2020-08-08T23:00:00.000", ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("Europe/London")).withZoneSameInstant(ZoneId.of("Europe/London"))
+    val testOutage: Outage = Outage(LocalDateTime.ofInstant(testStartTime.toInstant, ZoneOffset.UTC), LocalDateTime.ofInstant(testEndTime.toInstant, ZoneOffset.UTC)) //time in UTC
 
     val testIdentifiers = List ("nino", "utr")
 
