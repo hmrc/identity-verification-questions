@@ -36,7 +36,6 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDisp
 
   lazy val payslipMonths: Int = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
 
-
   override type Record = Payment
 
   override def serviceName: ServiceName = payslipService

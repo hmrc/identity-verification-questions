@@ -21,7 +21,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.AnswerCheck
-import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.services.AnswerVerificationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -30,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class AnswerController @Inject()(answersVerificationService: AnswerVerificationService,
-                                 questionMongoRepository: QuestionMongoRepository, appConfig: AppConfig)
+                                 appConfig: AppConfig)
                                 (implicit cc: ControllerComponents, ec: ExecutionContext)
   extends BackendController(cc)
     with Logging {
