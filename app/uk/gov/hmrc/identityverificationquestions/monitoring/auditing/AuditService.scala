@@ -42,7 +42,8 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
         auditType = "CircuitBreakerUnhealthyService",
         detail = Map("unavailableServiceName" -> s"$unavailableServiceName",
           "nino" -> identifiers.nino.fold("n/a")(nino => nino.value),
-          "satur" -> identifiers.sautr.fold("n/a")(sautr => sautr.value)),
+          "satur" -> identifiers.sautr.fold("n/a")(sautr => sautr.value),
+          "payeRef" -> identifiers.payeRef.fold("n/a")(payeRef => payeRef.value)),
         tags = tags
       )
     )

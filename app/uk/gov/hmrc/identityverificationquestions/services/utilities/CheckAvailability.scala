@@ -34,6 +34,7 @@ trait CheckAvailability {
          case "nino" => selection.nino.isDefined // TODO move to Selection?
          case "utr" => selection.sautr.isDefined
          case "dob" => selection.dob.isDefined
+         case "payeRef" => selection.payeRef.isDefined
          case _ => false
       }
    }

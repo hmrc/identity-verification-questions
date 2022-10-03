@@ -19,12 +19,13 @@ package uk.gov.hmrc.identityverificationquestions.services
 import Utils.UnitSpec
 import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.{Nino, SaUtr}
+import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
+import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
@@ -40,6 +41,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
       (mockP60Service.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockPayslipService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockEmpRefService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
       result.questions shouldBe Seq.empty[QuestionWithAnswers]
@@ -63,13 +65,15 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     val mockP60Service: P60Service = mock[P60Service]
     val mockSAService: SAService = mock[SAService]
     val mockPayslipService: PayslipService = mock[PayslipService]
+    val mockEmpRefService: EmpRefService = mock[EmpRefService]
 
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
-    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService)
+    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService, mockEmpRefService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")
-    val selection: Selection = Selection(Some(ninoIdentifier), Some(saUtrIdentifier), Some(dobIdentifier))
+    val empRefIdentifier: EmpRef = EmpRef("711", "4887762099")
+    val selection: Selection = Selection(Some(ninoIdentifier), Some(saUtrIdentifier), Some(dobIdentifier), Some(empRefIdentifier))
 
     case class TestRecord(value: BigDecimal)
   }

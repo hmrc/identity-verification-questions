@@ -31,8 +31,12 @@ More evidence sources will be added in due course.
 Include a POST JSON body containing a set of identifiers for the questions such as:
 ```
     { 
-      "nino":"AA000000A",
-      "sautr": "1234567890"  
+      "nino":"AA000003D",
+      "sautr": "1234567890",
+      "payeRef": {
+        "taxOfficeNumber" : "123",
+        "taxOfficeReference" : "4887762099"
+      }
     }
 ```
 You must supply *at least one* identifier, and you can only supply one *of each type of identifier*.
@@ -41,6 +45,8 @@ Different identifier types support different **evidence sources** for question d
 * **nino** - Must be a valid NINO (with suffix) according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Nino.scala
 
 * **sautr** - Must be a valid SaUtr according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/SaUtr.scala
+
+* **payeRef** - Must be a valid payeRef according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/EmpRef.scala
 
 ## Authorised Callers
 
