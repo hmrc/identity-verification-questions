@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.identityverificationquestions.sources
+package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import Utils.UnitSpec
 import org.joda.time.DateTime
@@ -26,13 +26,12 @@ import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.{AmountO
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
-import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefAnswerConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EmpRefConnectorSpec extends UnitSpec {
+class EmpRefAnswerConnectorSpec extends UnitSpec {
 
   "checkPayeResult" should {
     "return Score Correct if AmountOfPayment is right, and DateOfPayment is within payeeAmountOfDaysLeewayForPaymentDate(4)" in new Setup {

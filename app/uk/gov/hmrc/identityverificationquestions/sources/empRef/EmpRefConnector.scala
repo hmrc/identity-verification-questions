@@ -46,11 +46,6 @@ class EmpRefConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppCo
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      def lastTwoYearsOfPayments(payments: List[PayePayment]): PayePaymentsDetails =
-        PayePaymentsDetails(Some(payments.filter( payment =>
-          LocalDate.parse(payment.paymentDate)
-            .isAfter(LocalDate.now().minusYears(2)))))
-
       http.GET[PayePaymentsDetails](url, headers = headers)(implicitly, hc, ec).map { allPayePaymentsDetails =>
         val lastTwoYearsPayments = allPayePaymentsDetails.payments.getOrElse(List()) match {
           case Nil => PayePaymentsDetails(None)
@@ -72,4 +67,9 @@ class EmpRefConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppCo
       Future.successful(Seq.empty[PayePaymentsDetails])
     }
   }
+
+  def lastTwoYearsOfPayments(payments: List[PayePayment]): PayePaymentsDetails =
+    PayePaymentsDetails(Some(payments.filter( payment =>
+      LocalDate.parse(payment.paymentDate)
+        .isAfter(LocalDate.now().minusYears(2)))))
 }
