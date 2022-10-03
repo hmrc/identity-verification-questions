@@ -18,6 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.DateOfPayment
 import uk.gov.hmrc.identityverificationquestions.models._
@@ -30,10 +31,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 
 @Singleton
-class EmpRefAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService)(implicit ec: ExecutionContext)
+class EmpRefAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService, appConfig: AppConfig)(implicit ec: ExecutionContext)
   extends MongoAnswerConnector(questionRepo, auditService) {
 
-  val payeeAmountOfDaysLeewayForPaymentDate: Int = 4
+  val payeeAmountOfDaysLeewayForPaymentDate: Int = appConfig.payeeAmountOfDaysLeewayForPaymentDate
 
   override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId) map {
@@ -45,10 +46,10 @@ class EmpRefAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, aud
     }
   }
 
-  def checkPayeResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails)(implicit request: Request[_]): Score = {
+  def checkPayeResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score = {
     questionDataCaches
-      .flatMap(qdc => qdc.questions.filter(_.questionKey == answerDetails.questionKey)
-        .flatMap(_.answers))
+      .flatMap{ qdc =>
+        qdc.questions.filter(_.questionKey == answerDetails.questionKey).flatMap(_.answers)}
       .count{ answer =>
         if (answerDetails.questionKey.equals(DateOfPayment)) {
           (LocalDate.parse(answer).minusDays(payeeAmountOfDaysLeewayForPaymentDate).isBefore(LocalDate.parse(answerDetails.answer.toString))

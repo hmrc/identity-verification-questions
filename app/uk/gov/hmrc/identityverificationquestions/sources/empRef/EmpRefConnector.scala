@@ -18,11 +18,11 @@ package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import play.api.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpResponse, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
-import uk.gov.hmrc.identityverificationquestions.models.{PayePayment, PayePaymentsDetails, Selection, ServiceName, desPayeService}
+import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYearBuilder
 
 import java.time.LocalDate
