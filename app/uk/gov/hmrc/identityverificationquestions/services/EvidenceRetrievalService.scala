@@ -23,6 +23,7 @@ import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
+import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
@@ -36,12 +37,15 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          p60Service: P60Service,
                                          saService: SAService,
                                          payslipService: PayslipService,
+                                         ntcService: NtcService,
                                          empRefService: EmpRefService)
                                         (implicit ec: ExecutionContext) {
 
   def callAllEvidenceSources(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
 
-    val services: Seq[QuestionService] = Seq(p60Service, saService, payslipService, empRefService)
+    val services: Seq[QuestionService] =
+      if (appConfig.ntcIsEnabled) Seq(p60Service, saService, payslipService, empRefService, ntcService)
+      else Seq(p60Service, saService, payslipService, empRefService)
 
     for {
       questionWithAnswers <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)

@@ -59,6 +59,11 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   def hodConfiguration(serviceName: ServiceName): Either[HodConfigMissing, HodConf] = getHodConfItem(serviceName.toString)
 
   def serviceBaseUrl(serviceName: ServiceName): String = servicesConfig.baseUrl(serviceName.toString)
+  def serviceBaseUrl(serviceName: String): String = servicesConfig.baseUrl(serviceName)
+
+  def ntcIsEnabled: Boolean = servicesConfig.getBoolean("microservice.services.taxCreditService.isEnabled")
+  def ntcUseStub: Boolean = servicesConfig.getBoolean("microservice.services.taxCreditService.useStub")
+  def ntcPaymentMonths: Int = getIntOrDefault("microservice.services.taxCreditService.paymentMonths", 3)
 
   def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
 

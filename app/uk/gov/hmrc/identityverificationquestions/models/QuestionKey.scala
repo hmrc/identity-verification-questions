@@ -41,7 +41,9 @@ object QuestionKey {
     SelfAssessment.SelfAssessedIncomeFromPensionsQuestion,
     SelfAssessment.SelfAssessedPaymentQuestion,
     PayeRefQuestion.DateOfPayment,
-    PayeRefQuestion.AmountOfPayment
+    PayeRefQuestion.AmountOfPayment,
+    TaxCredits.Amount,
+    TaxCredits.BankAccount
   )
 
   val mapping: Mapping[String, QuestionKey] = Mappings.mapOption[String, QuestionKey](fromString, _.name)
@@ -87,6 +89,11 @@ case object PayeRefQuestion {
   case object AmountOfPayment extends QuestionKey("paye-payment-amount", "PayeRef")
 }
 
+case object TaxCredits {
+  case object BankAccount extends QuestionKey("ita-bankaccount", "national-tax-credit")
+  case object Amount extends QuestionKey("tc-amount", "national-tax-credit")
+}
+
 sealed trait ServiceName
 case object p60Service extends ServiceName
 case object payslipService extends ServiceName
@@ -95,3 +102,4 @@ case object scpEmailService extends ServiceName
 case object dvlaService extends ServiceName
 case object selfAssessmentService extends ServiceName
 case object desPayeService extends ServiceName
+case object taxCreditService extends ServiceName
