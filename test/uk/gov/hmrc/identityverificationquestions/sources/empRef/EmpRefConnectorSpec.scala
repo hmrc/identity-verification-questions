@@ -17,23 +17,11 @@
 package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import Utils.UnitSpec
-import akka.actor.ActorSystem
-import com.typesafe.config.Config
-import org.joda.time.DateTime
-import play.api.Configuration
-import uk.gov.hmrc.domain.EmpRef
-import uk.gov.hmrc.http.hooks.HttpHook
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
+import uk.gov.hmrc.http.HttpGet
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.{AmountOfPayment, DateOfPayment}
 import uk.gov.hmrc.identityverificationquestions.models._
-import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
-import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.{LocalDate, LocalDateTime, ZoneOffset}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
 
 class EmpRefConnectorSpec extends UnitSpec {
 

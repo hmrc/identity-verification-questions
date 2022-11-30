@@ -26,6 +26,7 @@ import uk.gov.hmrc.identityverificationquestions.models.{QuestionResponse, Quest
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
+import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
@@ -42,7 +43,9 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
       (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockPayslipService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockEmpRefService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockNtcService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
+      (mockAppConfig.ntcIsEnabled _).expects().returning(true)
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
       result.questions shouldBe Seq.empty[QuestionWithAnswers]
     }
@@ -66,9 +69,10 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     val mockSAService: SAService = mock[SAService]
     val mockPayslipService: PayslipService = mock[PayslipService]
     val mockEmpRefService: EmpRefService = mock[EmpRefService]
+    val mockNtcService: NtcService = mock[NtcService]
 
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
-    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService, mockEmpRefService)
+    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService, mockNtcService, mockEmpRefService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")
