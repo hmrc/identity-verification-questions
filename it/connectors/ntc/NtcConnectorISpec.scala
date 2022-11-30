@@ -45,7 +45,8 @@ class NtcConnectorISpec extends BaseISpec {
       val connector: NtcConnector = fakeApplication.injector.instanceOf[NtcConnector]
 
       val result = await(connector.getRecords(selectionNino))
-      result.toList.head shouldBe TaxCreditPayment(new LocalDate("2022-09-20"), BigDecimal("264.16"), CTC)
+
+      result.toList.head shouldBe TaxCreditPayment(LocalDate.now().minusMonths(2).minusDays(5), BigDecimal("264.16"), CTC)
     }
   }
 }
