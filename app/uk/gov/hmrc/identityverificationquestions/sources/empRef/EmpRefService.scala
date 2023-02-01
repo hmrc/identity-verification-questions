@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.{PayePaymentsDetails, _}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
@@ -42,6 +42,8 @@ class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatc
   override def evidenceTransformer(records: Seq[PayePaymentsDetails]): Seq[QuestionWithAnswers] = {
     records match {
       case Nil => Nil
+      case answers if !answers.exists(_.payments.isDefined) => Nil
+      case answers if answers.exists(_.payments.get.isEmpty) => Nil
       case answers =>
         val dateOfPayment: Seq[QuestionWithAnswers] = {
           Seq(
