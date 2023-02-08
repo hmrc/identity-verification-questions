@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatc
   override def evidenceTransformer(records: Seq[PayePaymentsDetails]): Seq[QuestionWithAnswers] = {
     records match {
       case Nil => Nil
+      case answers if !answers.exists(_.payments.isDefined) => Nil
+      case answers if answers.exists(_.payments.get.isEmpty) => Nil
       case answers =>
         val dateOfPayment: Seq[QuestionWithAnswers] = {
           Seq(
