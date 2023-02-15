@@ -23,7 +23,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Selection
-import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{CTC, TaxCreditPayment}
+import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{CTC, TaxCreditPayment, TaxCreditRecord, WTC}
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,6 +47,15 @@ class NtcConnectorISpec extends BaseISpec {
       val result = await(connector.getRecords(selectionNino))
 
       result.toList.head shouldBe TaxCreditPayment(LocalDate.now().minusMonths(2).minusDays(5), BigDecimal("264.16"), CTC)
+      /* assert against following TaxCreditPayment record
+      {
+      subjectDate: "2022-12-09",
+      amount: -379.3,
+      taxCreditId: "WTC",
+      paymentType: "REGULAR "
+      } */
+      result.toList(2).asInstanceOf[TaxCreditPayment].amount.toString shouldBe "379.30"
+
     }
   }
 }

@@ -30,6 +30,11 @@ case object Sum extends TaxCreditId
 
 case class TaxCreditPayment(date: LocalDate, amount: BigDecimal, taxCreditId: TaxCreditId) extends TaxCreditRecord
 
+object TaxCreditPayment {
+  def apply(date: LocalDate, amount: BigDecimal, taxCreditId: TaxCreditId): TaxCreditPayment =
+    new TaxCreditPayment(date, amount.setScale(2), taxCreditId)
+}
+
 case class TaxCreditClaim(accounts: Seq[TaxCreditBankAccount], payments: Seq[TaxCreditPayment]) extends TaxCreditRecord {
   // API returns payments to the applicant as negative values
   val receivedPayments: Seq[TaxCreditPayment] = payments.collect {
