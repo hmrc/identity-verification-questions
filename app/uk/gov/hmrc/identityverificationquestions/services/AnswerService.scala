@@ -50,32 +50,29 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
     case _ => true
   }
 
-  def checkAnswers(answerCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
-    val filteredAnswers: Seq[AnswerDetails] = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
-
+  def checkAnswers(answerCheck: AnswerCheck, answer: AnswerDetails)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     // Removed isAvailable check in VER-2219
     // We don't need to check the availability of services where we cache the answer data up-front
     // For services that we call after answer submission, we will need to check availability, but not the selection
     withCircuitBreaker {
       for {
-        correctAnswers <- Future.sequence(filteredAnswers.map(answer =>
+        correctAnswers: Seq[Record] <- Future.sequence(Seq(
           connector.verifyAnswer(
             answerCheck.correlationId,
             answer,
             ivJourney = answerCheck.ivJourney //for iv calls only
+          ))
           )
-        ))
-        result = answerTransformer(correctAnswers, filteredAnswers)
+        result = answerTransformer(correctAnswers, Seq(answer))
       } yield result
     } recover {
       case e: UpstreamErrorResponse if e.statusCode == 404 => {
         logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}")
-        unknownResult(filteredAnswers)
+        unknownResult(Seq(answer))
       }
       case t: Throwable => {
         logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}")
-        unknownResult(filteredAnswers)
-      }
+        unknownResult(Seq(answer))      }
     }
   }
 }
