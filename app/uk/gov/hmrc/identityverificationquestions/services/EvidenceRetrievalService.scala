@@ -26,6 +26,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
+import uk.gov.hmrc.identityverificationquestions.sources.vat.VatReturnsService
 
 import java.time.{LocalDateTime, ZoneOffset}
 import javax.inject.{Inject, Singleton}
@@ -38,14 +39,15 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          saService: SAService,
                                          payslipService: PayslipService,
                                          ntcService: NtcService,
-                                         empRefService: EmpRefService)
+                                         empRefService: EmpRefService,
+                                         vatReturnService:VatReturnsService)
                                         (implicit ec: ExecutionContext) {
 
   def callAllEvidenceSources(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
 
     val services: Seq[QuestionService] =
-      if (appConfig.ntcIsEnabled) Seq(p60Service, saService, payslipService, empRefService, ntcService)
-      else Seq(p60Service, saService, payslipService, empRefService)
+      if (appConfig.ntcIsEnabled) Seq(p60Service, saService, payslipService, empRefService, ntcService, vatReturnService)
+      else Seq(p60Service, saService, payslipService, empRefService, vatReturnService)
 
     for {
       questionWithAnswers <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)
