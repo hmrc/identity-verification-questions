@@ -55,6 +55,7 @@ class VatReturnsConnector @Inject()(val http: CoreGet)(implicit val appConfig: A
      * 21YA 2021 annual return
      * * */
 
+      //TODO We would need to update this periodKey
     val periodKey = "22YA"
     val queryParams: Seq[(String, String)] = Seq("period-key" -> periodKey)
 

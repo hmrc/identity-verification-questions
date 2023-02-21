@@ -37,10 +37,7 @@ class VatReturnsAnswerConnector @Inject()(questionRepo: QuestionMongoRepository,
 
 
   override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
-//    val answerCheck = AnswerCheck(correlationId = correlationId, answers = Seq(answer), ivJourney = None)
-//    val filteredAnswers: Seq[AnswerDetails] = answerCheck.answers.filter(a => supportedQuestions.contains(a.questionKey))
-
-   questionRepo.findAnswers(correlationId) map {
+    questionRepo.findAnswers(correlationId) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
       case questionDataCaches =>
         val result = checkVatResult(questionDataCaches, answer)
@@ -54,7 +51,7 @@ class VatReturnsAnswerConnector @Inject()(questionRepo: QuestionMongoRepository,
       .flatMap{ qdc =>
         qdc.questions.filter(_.questionKey == answerDetails.questionKey).flatMap(_.answers)}
       .count{ answer =>
-        BigDecimal(answer).setScale(0, RoundingMode.HALF_UP).toString() == BigDecimal(answerDetails.answer.toString).setScale(0, RoundingMode.HALF_UP).toString()
+        BigDecimal(answer).setScale(0, RoundingMode.HALF_DOWN).toString() == BigDecimal(answerDetails.answer.toString).setScale(0, RoundingMode.HALF_DOWN).toString()
         }
       } match {
       case 0 => Incorrect
