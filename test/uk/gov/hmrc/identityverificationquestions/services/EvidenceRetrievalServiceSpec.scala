@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.services
 import Utils.UnitSpec
 import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr}
+import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr, Vrn}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionResponse, QuestionWithAnswers, Selection}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
+import uk.gov.hmrc.identityverificationquestions.sources.vat.VatReturnsService
 
 import java.time.{Duration, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,6 +45,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
       (mockPayslipService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockEmpRefService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockNtcService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockVatReturnService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
       (mockAppConfig.ntcIsEnabled _).expects().returning(true)
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
@@ -70,14 +72,16 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     val mockPayslipService: PayslipService = mock[PayslipService]
     val mockEmpRefService: EmpRefService = mock[EmpRefService]
     val mockNtcService: NtcService = mock[NtcService]
+    val mockVatReturnService: VatReturnsService = mock[VatReturnsService]
 
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
-    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService, mockNtcService, mockEmpRefService)
+    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService, mockNtcService, mockEmpRefService, mockVatReturnService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")
     val empRefIdentifier: EmpRef = EmpRef("711", "4887762099")
-    val selection: Selection = Selection(Some(ninoIdentifier), Some(saUtrIdentifier), Some(dobIdentifier), Some(empRefIdentifier))
+    val vatReturnIdentifier: Vrn = Vrn("123456789")
+    val selection: Selection = Selection(Some(ninoIdentifier), Some(saUtrIdentifier), Some(dobIdentifier), Some(empRefIdentifier), Some(vatReturnIdentifier))
 
     case class TestRecord(value: BigDecimal)
   }

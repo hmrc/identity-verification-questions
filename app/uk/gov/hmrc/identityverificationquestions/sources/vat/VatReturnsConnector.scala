@@ -28,10 +28,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VatReturnsConnector @Inject()(val http: CoreGet,  servicesConfig: ServicesConfig)(implicit val appConfig: AppConfig) extends QuestionConnector[VatReturnSubmission]
+class VatReturnsConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[VatReturnSubmission]
   with HodConnectorConfig with Logging {
-  lazy val baseUrl: String = servicesConfig.baseUrl("vatService")
 
+  lazy val baseUrl: String = appConfig.serviceBaseUrl("vatService")
 
   override def getRecords(selection: Selection)(
     implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[VatReturnSubmission]] = {
@@ -58,9 +58,7 @@ class VatReturnsConnector @Inject()(val http: CoreGet,  servicesConfig: Services
     val periodKey = "22YA"
     val queryParams: Seq[(String, String)] = Seq("period-key" -> periodKey)
 
-      println(s"#####\n###### url is ${url}###\nheaders are ${headers}###\n##")
     http.GET[VatReturnSubmission](url, queryParams, headers = headers).map { response =>
-      println("######## response:" + response)
       Seq(response)
     }
       .recover {

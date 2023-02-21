@@ -40,7 +40,7 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          payslipService: PayslipService,
                                          ntcService: NtcService,
                                          empRefService: EmpRefService,
-                                         vatReturnService:VatReturnsService)
+                                         vatReturnService: VatReturnsService)
                                         (implicit ec: ExecutionContext) {
 
   def callAllEvidenceSources(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {

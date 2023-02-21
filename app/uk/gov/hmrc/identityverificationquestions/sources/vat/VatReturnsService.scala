@@ -40,7 +40,7 @@ class VatReturnsService @Inject()(vatReturnsConnector: VatReturnsConnector, val 
 
   override def evidenceTransformer(records: Seq[VatReturnSubmission]): Seq[QuestionWithAnswers] = {
     records.flatMap{ vatData =>
-      if (vatData.totalValuePurchasesExVAT > 0 || vatData.totalValueSalesExVAT > 0){
+      if (vatData.totalValuePurchasesExVAT > 0 && vatData.totalValueSalesExVAT > 0){
         Seq(
           QuestionWithAnswers(ValueOfSalesAmount, Seq(vatData.totalValueSalesExVAT.toString())),
           QuestionWithAnswers(ValueOfPurchasesAmount, Seq(vatData.totalValuePurchasesExVAT.toString()))
