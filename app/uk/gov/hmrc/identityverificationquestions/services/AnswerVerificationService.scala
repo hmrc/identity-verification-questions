@@ -24,6 +24,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefAnswerServ
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcAnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipAnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAAnswerService
+import uk.gov.hmrc.identityverificationquestions.sources.vat.VatReturnsAnswerService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,9 +34,10 @@ class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
                                           saAnswerService: SAAnswerService,
                                           payslipAnswerService: PayslipAnswerService,
                                           ntcAnswerService: NtcAnswerService,
-                                          empRefAnswerService: EmpRefAnswerService)(implicit ec: ExecutionContext) {
+                                          empRefAnswerService: EmpRefAnswerService,
+                                          vatReturnsAnswerService: VatReturnsAnswerService)(implicit ec: ExecutionContext) {
 
-  val answerServices = Seq(p60AnswerService, saAnswerService, payslipAnswerService, empRefAnswerService, ntcAnswerService)
+  val answerServices = Seq(p60AnswerService, saAnswerService, payslipAnswerService, empRefAnswerService, ntcAnswerService, vatReturnsAnswerService)
 
   private def getQuestionService(questionKey: QuestionKey): AnswerService = {
     answerServices.filter(_.supportedQuestions.contains(questionKey)) match {
@@ -48,7 +50,7 @@ class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
   def checkAnswers(answerToCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     for {
       seqSeqQuestionResult <- Future.sequence(answerToCheck.answers.map { answer =>
-        getQuestionService(answer.questionKey).checkAnswers(answerToCheck)
+        getQuestionService(answer.questionKey).checkAnswers(answerToCheck, answer)
       })
       result = seqSeqQuestionResult.flatten
     } yield result

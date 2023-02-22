@@ -50,7 +50,7 @@ class AnswerControllerISpec extends BaseISpec {
       }
 
       "correct identifier not passed" in new SetUp {
-        await(identityverificationquestions.store(questionDataCache(correlationId, Selection(Some(ninoIdentifier), Some(utrIdentifier), None, None))))
+        await(identityverificationquestions.store(questionDataCache(correlationId, Selection(Some(ninoIdentifier), Some(utrIdentifier), None, None, None))))
         val response: WSResponse = await(resourceRequest(journeyPath).post(Json.toJson(incorrectIdentifierCheck)))
         response.status shouldBe OK
         response.json.validate[List[QuestionResult]] shouldBe JsSuccess(List(questionResultIncorrect))
