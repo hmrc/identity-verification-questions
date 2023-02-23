@@ -28,7 +28,6 @@ class HodConnectorConfigSpec extends UnitSpec {
     "return headerCarrier with DES headers" when {
       "valid hodConfig returned from AppConfig for service" in new Setup {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Right(HodConf("authToken", "envHeader")))
-        (mockAppConfig.originatorId _).expects().returning("DA_PTA")
 
         testHodConfig.publicHeadersForDES shouldBe hcForDES
       }
@@ -75,10 +74,6 @@ class HodConnectorConfigSpec extends UnitSpec {
   trait TestData {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val hcForDES: HeaderCarrier =
-      hc.copy(
-        authorization = Some(Authorization(s"Bearer authToken")),
-        extraHeaders = Seq("Originator-Id" -> "DA_PTA", "Authorization" -> "Bearer authToken", "Environment" -> "envHeader")
-      )
+    val hcForDES: HeaderCarrier = hc.copy(authorization = Some(Authorization(s"Bearer authToken")), extraHeaders = Seq("Environment" -> "envHeader"))
   }
 }

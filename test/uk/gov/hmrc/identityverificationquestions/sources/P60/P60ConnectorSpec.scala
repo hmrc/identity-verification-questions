@@ -40,7 +40,6 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
       "valid identifiers provided" in new Setup {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(*).returning(Right(HodConf("authToken", "envHeader")))
         (mockAppConfig.serviceBaseUrl(_: ServiceName)).expects(*).returning("http://localhost:8080")
-        (mockAppConfig.originatorId _).expects().returning("DA_PTA")
 
         val expectedResponse = Seq(paymentOne, paymentTwo, paymentFour)
 
