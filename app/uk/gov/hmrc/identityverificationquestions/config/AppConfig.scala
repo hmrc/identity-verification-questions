@@ -26,22 +26,22 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends ConfigHelper(config) {
 
-  lazy val authBaseUrl: String = servicesConfig.baseUrl("auth")
-  lazy val basProxyBaseUrl: String = servicesConfig.baseUrl("bas-proxy")
-  lazy val identityVerificationBaseUrl: String = servicesConfig.baseUrl("identity-verification")
+  lazy val authBaseUrl: String                   = servicesConfig.baseUrl("auth")
+  lazy val basProxyBaseUrl: String               = servicesConfig.baseUrl("bas-proxy")
+  lazy val identityVerificationBaseUrl: String   = servicesConfig.baseUrl("identity-verification")
 
   lazy val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  lazy val graphiteHost: String = config.get[String]("microservice.metrics.graphite.host")
+  lazy val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 
   def allowedUserAgentList: Seq[String] = getStringList("allowedUserAgentList").getOrElse(Seq.empty[String])
 
   def p60NewQuestionEnabled: Boolean = config.get[Boolean]("p60.newquestions.enabled")
 
-  /** CircuitBreaker Config
+  /**  CircuitBreaker Config
    *
-   * circuitBreakerNumberOfCallsToTrigger:    number of failed calls within unstablePeriodDurationInMs to trigger the breaker
-   * circuitBreakerUnavailableDurationInSec:  period of time before the service gets enabled back
-   * circuitBreakerUnstableDurationInSec:     period of time before the breaker goes back to normal
+   *   circuitBreakerNumberOfCallsToTrigger:    number of failed calls within unstablePeriodDurationInMs to trigger the breaker
+   *   circuitBreakerUnavailableDurationInSec:  period of time before the service gets enabled back
+   *   circuitBreakerUnstableDurationInSec:     period of time before the breaker goes back to normal
    */
   lazy val circuitBreakerNumberOfCallsToTrigger: Int = getIntOrDefault("circuit.breaker.numberOfCallsToTrigger", 20)
   lazy val circuitBreakerUnavailableDurationInSec: Int = getIntOrDefault("circuit.breaker.unavailablePeriodDurationInSec", 60)
@@ -49,10 +49,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def serviceCbNumberOfCallsToTrigger(serviceName: ServiceName): Option[Int] =
     config.getOptional[Int](s"microservice.services.${serviceName.toString}.circuitBreaker.numberOfCallsToTrigger")
-
   def serviceCbUnavailableDurationInSec(serviceName: ServiceName): Option[Int] =
     config.getOptional[Int](s"microservice.services.${serviceName.toString}.circuitBreaker.unavailableDurationInSec")
-
   def serviceCbUnstableDurationInSec(serviceName: ServiceName): Option[Int] =
     config.getOptional[Int](s"microservice.services.${serviceName.toString}.circuitBreaker.unstableDurationInSec")
 
@@ -61,13 +59,10 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   def hodConfiguration(serviceName: ServiceName): Either[HodConfigMissing, HodConf] = getHodConfItem(serviceName.toString)
 
   def serviceBaseUrl(serviceName: ServiceName): String = servicesConfig.baseUrl(serviceName.toString)
-
   def serviceBaseUrl(serviceName: String): String = servicesConfig.baseUrl(serviceName)
 
   def ntcIsEnabled: Boolean = servicesConfig.getBoolean("microservice.services.taxCreditService.isEnabled")
-
   def ntcUseStub: Boolean = servicesConfig.getBoolean("microservice.services.taxCreditService.useStub")
-
   def ntcPaymentMonths: Int = getIntOrDefault("microservice.services.taxCreditService.paymentMonths", 3)
 
   def bufferInMonthsForService(serviceName: ServiceName): Int = config.get[Int](s"microservice.services.${serviceName.toString}.bufferInMonths")
@@ -90,10 +85,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   lazy val saPaymentTolerancePastDays: Int = getIntOrThrowError("sa.payment.tolerance.past.days")
 
   private def getIntOrThrowError(key: String): Int = config.getOptional[Int](key).getOrElse(configNotFoundError(key))
-
   def configNotFoundError(key: String) = throw new RuntimeException(s"Could not find configuration key '$key'")
 
   lazy val payeeAmountOfDaysLeewayForPaymentDate: Int = getIntOrDefault("microservice.services.desPayeService.payeeAmountOfDaysLeewayForPaymentDate", 4)
-
-  def originatorId: String = config.get[String]("microservice.services.desPayeService.originator-id")
 }
