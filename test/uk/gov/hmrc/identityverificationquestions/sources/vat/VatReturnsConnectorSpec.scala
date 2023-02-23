@@ -30,6 +30,7 @@ class VatReturnsConnectorSpec extends UnitSpec {
     "return the VatReturnSubmission records" in new Setup {
       (mockAppConfig.hodConfiguration(_:ServiceName)).expects(*).returning(Right(HodConf("theLocalDevToken","localDev")))
       (mockAppConfig.serviceBaseUrl(_:String)).expects("vatService").returning("http://localhost:7780")
+      (mockAppConfig.originatorId _).expects().returning("DA_PTA")
       (httpClientMock.GET[VatReturnSubmission](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
         (_: HttpReads[VatReturnSubmission], _: HeaderCarrier, _: ExecutionContext))
         .expects(s"http://localhost:7780/vat/returns/vrn/${validVrn.vrn}", *, *, *, *, *)
