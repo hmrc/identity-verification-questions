@@ -1,8 +1,5 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
-import uk.gov.hmrc.ServiceManagerPlugin.serviceManagerSettings
-import uk.gov.hmrc._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
@@ -44,11 +41,4 @@ lazy val microservice = Project(appName, file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers ++= Seq(
     Resolver.jcenterRepo
-  ))
-  .settings(serviceManagerSettings: _*)
-  .settings(itDependenciesList := List(
-    ExternalService("IV_TEST_DATA"),
-    ExternalService("SI_HOD_PROXY"),
-    ExternalService("BUSINESS_VERIFICATION_STUB"),
-    ExternalService("DATASTREAM")
   ))
