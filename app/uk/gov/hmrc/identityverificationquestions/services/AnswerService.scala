@@ -61,18 +61,17 @@ abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends Us
             answerCheck.correlationId,
             answer,
             ivJourney = answerCheck.ivJourney //for iv calls only
-          ))
           )
+        ))
         result = answerTransformer(correctAnswers, Seq(answer))
       } yield result
     } recover {
-      case e: UpstreamErrorResponse if e.statusCode == 404 => {
+      case e: UpstreamErrorResponse if e.statusCode == 404 =>
         logger.warn(s"$serviceName, no answers returned for selection, correlationId: ${answerCheck.correlationId}")
         unknownResult(Seq(answer))
-      }
-      case t: Throwable => {
+      case t: Throwable =>
         logger.error(s"$serviceName, threw exception $t, correlationId: ${answerCheck.correlationId}")
-        unknownResult(Seq(answer))      }
+        unknownResult(Seq(answer))
     }
   }
 }

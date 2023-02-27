@@ -20,9 +20,10 @@ import com.google.common.io.BaseEncoding
 import play.api.Logger
 import play.api.mvc.{Request, RequestHeader}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, _}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
+
 import javax.inject.Inject
 import play.api.libs.json.Json
 
@@ -70,7 +71,13 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
 
     val givenAnswer = answerDetails.answer.toString
 
-    val validAnswers: String = questionData.questions.filter(_.questionKey == questionKey).head.answers.mkString(",")
+    val answersList: Seq[QuestionWithAnswers] =
+      questionData.questions.filter(_.questionKey == questionKey)
+
+    val validAnswers: String = {
+      if (answersList.nonEmpty) answersList.head.answers.mkString(",")
+      else s"No Answers Available for the user correlationId: ${questionData.correlationId}. ie, the user has enrolled but has no payments details"
+    }
 
     val correlationId = questionData.correlationId
     val outCome: String = if (score.equals(Correct)) "Success" else "Failure"

@@ -36,8 +36,6 @@ class EmpRefAnswerConnectorSpec extends UnitSpec {
   "checkPayeResult" should {
     "return Score Correct if AmountOfPayment is right, and DateOfPayment is within payeeAmountOfDaysLeewayForPaymentDate(4)" in new Setup {
 
-      val correlationId: CorrelationId = CorrelationId()
-      val selection: Selection = Selection(EmpRef("123", "1234567"))
       val questionSeq: Seq[QuestionWithAnswers] = Seq(QuestionWithAnswers(DateOfPayment, List("2022-01-31")), QuestionWithAnswers(AmountOfPayment, List("2000")))
 
       val questionDataCache: QuestionDataCache =
@@ -60,11 +58,30 @@ class EmpRefAnswerConnectorSpec extends UnitSpec {
       empRefAnswerConnector.checkPayeResult(Seq(questionDataCache), answerDetails5) shouldBe Incorrect
     }
 
+    "return Score Incorrect if No Answers Available for the userie, the user has enrolled but has no payments details" in new Setup {
+
+      val questionSeq: Seq[QuestionWithAnswers] =
+        Seq(QuestionWithAnswers(DateOfPayment, List.empty[String]), QuestionWithAnswers(AmountOfPayment, List.empty[String]))
+
+      val questionDataCache: QuestionDataCache =
+        QuestionDataCache(
+          correlationId,
+          selection,
+          questionSeq,
+          LocalDateTime.now(ZoneOffset.UTC) plusMinutes 1)
+
+      val answerDetails: AnswerDetails =  AnswerDetails(DateOfPayment, SimpleAnswer("2022-01-29"))
+      empRefAnswerConnector.checkPayeResult(Seq(questionDataCache), answerDetails) shouldBe Incorrect
+    }
+
   }
 
   trait Setup {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    val correlationId: CorrelationId = CorrelationId()
+    val selection: Selection = Selection(EmpRef("123", "1234567"))
 
     val mockQuestionMongoRepository: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
     val mockAuditService: AuditService = mock[AuditService]
