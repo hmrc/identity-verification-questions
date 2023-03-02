@@ -46,7 +46,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
           .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree, paymentFive)))
         (mockAppConfig.bufferInMonthsForService(_ :ServiceName)).expects(service.serviceName).returning(2).atLeastOnce()
 
-        service.questions(selectionNino).futureValue shouldBe Seq(
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq(
           paymentToDateQuestion, employeeNIContributionsQuestion, earningsAbovePTQuestion, statutoryMaternityPayQuestion,
           statutorySharedParentalPayQuestion, statutoryAdoptionPayQuestion, studentLoanDeductionsQuestion, postgraduateLoanDeductionsQuestion
         )
@@ -56,7 +56,7 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
         (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
         (mockAppConfig.bufferInMonthsForService(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
-        service.questions(selectionNino).futureValue shouldBe Seq(paymentToDateQuestion2, employeeNIContributionsQuestion2)
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq(paymentToDateQuestion2, employeeNIContributionsQuestion2)
       }
     }
 
@@ -65,20 +65,20 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
         (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
         (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
-        service.questions(selectionNoNino).futureValue shouldBe Seq()
+        service.questions(selectionNoNino, corrId).futureValue shouldBe Seq()
       }
 
       "P60Connector returns an empty sequence of Payment's" in new WithStubbing {
         (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
 
-        service.questions(selectionNino).futureValue shouldBe Seq()
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
 
       "P60Connector returns an insufficient Payment's" in new WithStubbing {
         (mockP60Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentSix)))
         (mockAppConfig.bufferInMonthsForService(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
-        service.questions(selectionNino).futureValue shouldBe Seq()
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
     }
   }

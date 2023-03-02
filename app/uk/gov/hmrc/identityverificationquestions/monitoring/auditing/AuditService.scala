@@ -23,9 +23,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
-import javax.inject.Inject
-import play.api.libs.json.Json
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 

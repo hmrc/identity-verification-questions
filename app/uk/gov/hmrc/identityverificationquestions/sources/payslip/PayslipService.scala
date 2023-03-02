@@ -21,7 +21,7 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.{IncomeTax, NationalInsurance}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, ServiceName, payslipService}
+import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, ServiceName, payslipService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
@@ -42,7 +42,7 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDisp
 
   override def connector: QuestionConnector[Payment] = payslipConnector
 
-  override def evidenceTransformer(records: Seq[Payment]): Seq[QuestionWithAnswers] = {
+  override def evidenceTransformer(records: Seq[Payment], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
     def additionalInfoMap = Map("months" -> payslipMonths.toString)
 
     val payslipQuestions: Seq[QuestionWithAnswers] = {

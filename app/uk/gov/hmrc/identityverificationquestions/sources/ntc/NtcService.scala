@@ -46,7 +46,7 @@ class NtcService @Inject()(ntcConnector: NtcConnector, val eventDispatcher: Even
 
   def positiveAmount(amout : BigDecimal): Boolean = amout > 0
 
-  override def evidenceTransformer(records: Seq[TaxCreditRecord]): Seq[QuestionWithAnswers] = {
+  override def evidenceTransformer(records: Seq[TaxCreditRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
     val taxCreditQuestions: Seq[(QuestionKey, String)] = records.flatMap {
       case TaxCreditClaim(accounts, payments) if payments.filter(pay => meetsDate(pay.date)).filter(pay => positiveAmount(pay.amount)).seq.nonEmpty =>
         accounts flatMap {

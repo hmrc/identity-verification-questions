@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr, Vrn}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionResponse, QuestionWithAnswers, Selection}
+import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
@@ -40,12 +40,12 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
 
   "calling callAllEvidenceSources" should {
     "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
-      (mockP60Service.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockSAService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockPayslipService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockEmpRefService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockNtcService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockVatReturnService.questions(_: Selection)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*, *,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockP60Service.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockSAService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockPayslipService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockEmpRefService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockNtcService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockVatReturnService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
       (mockAppConfig.ntcIsEnabled _).expects().returning(true)
       val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue

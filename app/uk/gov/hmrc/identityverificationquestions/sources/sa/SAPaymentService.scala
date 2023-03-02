@@ -47,7 +47,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
 
   val allowedPaymentTypes = List("PYT", "TFO")
 
-  override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
+  override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
         selection.sautr match {
@@ -56,7 +56,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
               _ <- Future(logger.info(s"VER-858:  Retrieve SA UTR($saUtr)"))
               payments <- getRecordsFromSaUtr(saUtr)
               _ = logger.info(s"VER-858:  Retrieve SA UTR($saUtr) response : ${payments.mkString(",")}")
-              questions = evidenceTransformer(payments)
+              questions = evidenceTransformer(payments, corrId)
               _ = logger.info(s"VER-858: Retrieve SA UTR($saUtr) questions : ${questions.map(_.questionKey).mkString(",")}")
             } yield questions
           case _ => Future.successful(Seq())
@@ -77,7 +77,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
     }
   }
 
-  override def evidenceTransformer(records: Seq[SAPaymentReturn]): Seq[QuestionWithAnswers]=
+  override def evidenceTransformer(records: Seq[SAPaymentReturn], corrId: CorrelationId): Seq[QuestionWithAnswers]=
     records.map { paymentReturn =>
     val paymentWindowStartDate = currentDate.minusYears(appConfig.saPaymentWindowYears)
     val recentPositivePayments = paymentReturn.payments.filter { individualPayment =>

@@ -46,8 +46,8 @@ class EmpRefConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppCo
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[PayePaymentsDetails](url, headers = headers)(implicitly, hc, ec).map { allPayePaymentsDetails =>
-        val lastTwoYearsPayments = allPayePaymentsDetails.payments.getOrElse(List()) match {
+      http.GET[PayePaymentsDetails](url, headers = headers)(implicitly, desHeaders, ec).map { allPayePaymentsDetails =>
+        val lastTwoYearsPayments: PayePaymentsDetails = allPayePaymentsDetails.payments.getOrElse(List()) match {
           case Nil => PayePaymentsDetails(None)
           case payments => lastTwoYearsOfPayments(payments)
         }

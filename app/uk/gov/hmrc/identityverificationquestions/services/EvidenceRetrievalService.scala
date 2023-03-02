@@ -49,9 +49,10 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
       if (appConfig.ntcIsEnabled) Seq(p60Service, saService, payslipService, empRefService, ntcService, vatReturnService)
       else Seq(p60Service, saService, payslipService, empRefService, vatReturnService)
 
+    val corrId: CorrelationId = CorrelationId()
+
     for {
-      questionWithAnswers <- Future.sequence(services.map(_.questions(selection))).map(_.flatten)
-      corrId = CorrelationId()
+      questionWithAnswers <- Future.sequence(services.map(_.questions(selection, corrId))).map(_.flatten)
       _ <- {
         mongoRepo.store(QuestionDataCache(
           correlationId = corrId,

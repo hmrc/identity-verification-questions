@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, ServiceName, selfAssessmentService}
+import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, ServiceName, selfAssessmentService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
@@ -47,7 +47,7 @@ class SAPensionService @Inject() (
 
   override def serviceName: ServiceName = selfAssessmentService
 
-  override def evidenceTransformer(records: Seq[SAReturn]): Seq[QuestionWithAnswers] =
+  override def evidenceTransformer(records: Seq[SAReturn], corrId: CorrelationId): Seq[QuestionWithAnswers] =
     records.flatMap(correctAnswers(_)) match {
       case Nil => Nil
       case answers => Seq(QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, answers, returnsToAdditionalInfo(records)))

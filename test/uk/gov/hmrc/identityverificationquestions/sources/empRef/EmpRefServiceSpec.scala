@@ -36,7 +36,7 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
       "there is no PayePaymentsDetails records" in new Setup {
         val records: Seq[PayePaymentsDetails] = Seq.empty
         val expectedResult: Seq[QuestionWithAnswers] = Nil
-        service.evidenceTransformer(records) shouldBe expectedResult
+        service.evidenceTransformer(records, corrId) shouldBe expectedResult
       }
     }
 
@@ -44,7 +44,7 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
       "there is are PayePaymentsDetails records, but there is no payments" in new Setup {
         val records: Seq[PayePaymentsDetails] = Seq(PayePaymentsDetails(None))
         val expectedResult: Seq[QuestionWithAnswers] = Nil
-        service.evidenceTransformer(records) shouldBe expectedResult
+        service.evidenceTransformer(records, corrId) shouldBe expectedResult
       }
     }
 
@@ -52,7 +52,7 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
       "there is are PayePaymentsDetails records, but there is no payments case two" in new Setup {
         val records: Seq[PayePaymentsDetails] = Seq(PayePaymentsDetails(Some(List.empty[PayePayment])))
         val expectedResult: Seq[QuestionWithAnswers] = Nil
-        service.evidenceTransformer(records) shouldBe expectedResult
+        service.evidenceTransformer(records, corrId) shouldBe expectedResult
       }
     }
 
@@ -61,7 +61,7 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
         val testDate: String = LocalDate.now().toString
         val records: Seq[PayePaymentsDetails] = Seq(PayePaymentsDetails(Some(List(PayePayment(PayePaymentAmount(11.11, "GB"), testDate)))))
         val expectedResult: Seq[QuestionWithAnswers] = Seq(QuestionWithAnswers(DateOfPayment, List(testDate)), QuestionWithAnswers(AmountOfPayment, List("11.11")))
-        service.evidenceTransformer(records) shouldBe expectedResult
+        service.evidenceTransformer(records, corrId) shouldBe expectedResult
       }
     }
   }

@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.sources
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection}
+import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,9 +30,9 @@ trait QuestionServiceMeoMinimumNumberOfQuestions extends QuestionService {
 
   lazy val minimumNumber = appConfig.minimumMeoQuestionCount(serviceName.toString)
 
-  override def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] =
+  override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] =
     for {
-      foundQuestions <- super.questions(selection)
+      foundQuestions <- super.questions(selection, corrId)
       questionsToReturn = if (foundQuestions.size >= minimumNumber) foundQuestions else Seq()
     } yield questionsToReturn
 }
