@@ -94,8 +94,31 @@ https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?spaceKey=VER&t
 
 Each **questionKey** represents a particular **data point** from an evidence source which can be posed as a question to the user.
 
-The **info** object gives extra metadata about the question context.  It will be different depending on the question key.
-For a description of the info object data for each question, see scaladoc in:
+It will be different depending on the question key.
+
+| Question Key                            | Description              |
+|-----------------------------------------|--------------------------|
+|  sa-income-from-pensions                | Income from pensions     |
+|  sa-payment-details                     | Payment details          |
+|  rti-payslip-income-tax                 | Tax deducted             |
+|  rti-payslip-national-insurance         | NI amount                |
+|  paye-date-of-payment                   | Payment date             |
+|  paye-payment-amount                    | Payment amount           |
+|  ita-bankaccount                        | Bank account             |
+|  tc-amount                              | Tax credit amount        |
+|  rti-p60-payment-for-year               | Total for year           |
+|  rti-p60-employee-ni-contributions      | Employee's contribution  |
+|  rti-p60-statutory-adoption-pay         | Adoption Pay             |
+|  rti-p60-earnings-above-pt              | Earnings above the PT    |
+|  rti-p60-statutory-maternity-pay        | Maternity Pay            |
+|  rti-p60-postgraduate-loan-deductions   | Postgraduate Loans       |
+|  rti-p60-statutory-shared-parental-pay  | Shared Parental Pay      |
+|  rti-p60-student-loan-deductions        | Student Loans            |
+
+
+For more description of the info object data for each question, see confluence page or scaladoc in:
+
+https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=425951833
 
 https://github.com/hmrc/identity-verification-questions/blob/main/app/uk/gov/hmrc/identityverificationquestions/models/QuestionKey.scala
 
