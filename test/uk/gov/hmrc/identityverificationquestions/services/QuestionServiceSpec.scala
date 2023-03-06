@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, Outage}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.CheckAvailability
@@ -75,7 +75,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[Seq[TestRecord]] = badRequestResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
+            service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
             errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: origin, selection: XXXX0000D,XXXX5678"
@@ -87,7 +87,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[Seq[TestRecord]] = internalServerErrorResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
+            service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
             errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream5xxResponse: internal server error, origin: origin, selection: XXXX0000D,XXXX5678"
@@ -103,7 +103,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           (service3.auditService.sendCircuitBreakerEvent(_: Selection, _: String)(_: HeaderCarrier, _: ExecutionContext))
             .expects(Selection(ninoIdentifier,saUtrIdentifier),"p60Service",*,*)
 
-          service3.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
+          service3.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
         }
       }
 
@@ -114,7 +114,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe Seq()
+            service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             logs.size shouldBe 0
           }
         }
@@ -125,7 +125,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
 
           withCaptureOfLoggingFrom[QuestionServiceSpec] { logs =>
-            service.questions(Selection(saUtrIdentifier)).futureValue shouldBe Seq()
+            service.questions(Selection(saUtrIdentifier), corrId).futureValue shouldBe Seq()
             logs.size shouldBe 0
           }
         }
@@ -136,7 +136,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
           (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
           override def connectorResult: Future[Seq[TestRecord]] = testRecordResult
-          service.questions(Selection(ninoIdentifier, saUtrIdentifier)).futureValue shouldBe List(QuestionWithAnswers(PaymentToDate,List(TestRecord(1).toString)))
+          service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe List(QuestionWithAnswers(PaymentToDate,List(TestRecord(1).toString)))
         }
       }
     }
@@ -147,7 +147,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         val services = Seq(service, service2)
         val selection: Selection = Selection(ninoIdentifier, saUtrIdentifier)
 
-        Future.sequence(services.map(_.questions(selection))).map(_.flatten).futureValue shouldBe Seq()
+        Future.sequence(services.map(_.questions(selection, corrId))).map(_.flatten).futureValue shouldBe Seq()
       }
     }
   }
@@ -175,14 +175,14 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     lazy val service: TestService {
       type Record = TestRecord
     } = new TestService {
-      override val serviceName = p60Service
+      override val serviceName: ServiceName = p60Service
       override type Record = TestRecord
 
       override def connector: QuestionConnector[TestRecord] = self.connector
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -192,14 +192,14 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     lazy val service2: TestService {
       type Record = TestRecord
     } = new TestService {
-      override val serviceName = p60Service
+      override val serviceName: ServiceName = p60Service
       override type Record = TestRecord
 
       override def connector: QuestionConnector[TestRecord] = self.connector
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -209,14 +209,14 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     lazy val service3: TestService {
       type Record = TestRecord
     } = new TestService {
-      override val serviceName = p60Service
+      override val serviceName: ServiceName = p60Service
       override type Record = TestRecord
 
       override def connector: QuestionConnector[TestRecord] = connector2
 
       override protected def circuitBreakerConfig: CircuitBreakerConfig = CircuitBreakerConfig("p60Service", 2, 1000, 1000)
 
-      override def evidenceTransformer(records: Seq[TestRecord]): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
+      override def evidenceTransformer(records: Seq[TestRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]

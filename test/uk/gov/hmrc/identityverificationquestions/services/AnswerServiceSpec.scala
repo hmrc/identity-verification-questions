@@ -76,7 +76,7 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
             service.checkAnswers(AnswerCheck(correlationId, Seq(paymentToDateAnswer, EmployeeNIContributionsAnswer), None),paymentToDateAnswer).futureValue shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe s"p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}"
+            errorLogs.head.getMessage shouldBe s"p60Service, when check answers threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, correlationId: ${correlationId.id}"
           }
         }
 

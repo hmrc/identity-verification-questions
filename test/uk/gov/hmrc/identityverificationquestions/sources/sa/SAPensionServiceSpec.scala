@@ -25,7 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
-import uk.gov.hmrc.identityverificationquestions.models.{Selection, selfAssessmentService}
+import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, selfAssessmentService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
@@ -47,9 +47,9 @@ class SAPensionServiceSpec extends UnitSpec {
       service shouldBe a [QuestionService]
       service.serviceName shouldBe selfAssessmentService
 
-      val maybeQuestionThatWillBeGenerated = service.evidenceTransformer(testRecords)
+      val maybeQuestionThatWillBeGenerated: Seq[QuestionWithAnswers] = service.evidenceTransformer(testRecords, corrId)
 
-      val questionThatWillBeGenerated = maybeQuestionThatWillBeGenerated.head
+      val questionThatWillBeGenerated: QuestionWithAnswers = maybeQuestionThatWillBeGenerated.head
 
       questionThatWillBeGenerated.questionKey shouldBe SelfAssessedIncomeFromPensionsQuestion
       questionThatWillBeGenerated.answers shouldBe List("15.51", "14.71", "25.51", "24.71")
@@ -68,15 +68,15 @@ class SAPensionServiceSpec extends UnitSpec {
       service shouldBe a [QuestionService]
       service.serviceName shouldBe selfAssessmentService
 
-      val testRecordsWithMissingData = testRecords.collect {
+      val testRecordsWithMissingData: Seq[SAReturn] = testRecords.collect {
         case saReturn@SAReturn(TaxYear(2018), records) =>
           val zerorecords = records.map(_.copy(incomeFromPensions = BigDecimal(0)))
           saReturn.copy(returns = zerorecords)
         case other => other
       }
-      val maybeQuestionThatWillBeGenerated = service.evidenceTransformer(testRecordsWithMissingData)
+      val maybeQuestionThatWillBeGenerated: Seq[QuestionWithAnswers] = service.evidenceTransformer(testRecordsWithMissingData, corrId)
 
-      val questionThatWillBeGenerated = maybeQuestionThatWillBeGenerated.head
+      val questionThatWillBeGenerated: QuestionWithAnswers = maybeQuestionThatWillBeGenerated.head
 
       questionThatWillBeGenerated.questionKey shouldBe SelfAssessedIncomeFromPensionsQuestion
       questionThatWillBeGenerated.answers shouldBe List("15.51", "14.71")
@@ -96,7 +96,7 @@ class SAPensionServiceSpec extends UnitSpec {
       (mockConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
         .expects(selection, *, *).returning(Future.successful(testRecords))
 
-      val actual = service.questions(selection).futureValue
+      val actual: Seq[QuestionWithAnswers] = service.questions(selection, corrId).futureValue
 
       actual.size shouldBe 1
     }
@@ -116,7 +116,7 @@ class SAPensionServiceSpec extends UnitSpec {
       (mockConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
         .expects(selection, *, *).returning(Future.successful(zeroRecords))
 
-      val actual = service.questions(selection).futureValue
+      val actual: Seq[QuestionWithAnswers] = service.questions(selection, corrId).futureValue
 
       actual.size shouldBe 0
     }
@@ -130,18 +130,18 @@ class SAPensionServiceSpec extends UnitSpec {
       "hods.circuit.breaker.unstablePeriodDurationInSec" -> 30,
       "microservice.services.selfAssessmentPensionService.minimumMeoQuestions" -> 1
     ) ++ additionalConfig
-    val config = Configuration.from(configData)
+    val config: Configuration = Configuration.from(configData)
     val servicesConfig = new ServicesConfig(config)
     implicit val appConfig : AppConfig = new AppConfig(config, servicesConfig)
 
     implicit val request : Request[_] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val fixedDate = DateTime.parse("2020-06-01")
+    val fixedDate: DateTime = DateTime.parse("2020-06-01")
 
-    protected val mockConnector = mock[SAPensionsConnector]
-    protected val mockEventDispatcher = mock[EventDispatcher]
-    protected val mockAuditService = mock[AuditService]
+    protected val mockConnector: SAPensionsConnector = mock[SAPensionsConnector]
+    protected val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
+    protected val mockAuditService: AuditService = mock[AuditService]
 
     val testRecords : Seq[SAReturn] = Seq(
       SAReturn(
@@ -160,8 +160,8 @@ class SAPensionServiceSpec extends UnitSpec {
       )
     )
 
-    val selection = Selection(Nino("AA000003D"))
-    val service = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService) {
+    val selection: Selection = Selection(Nino("AA000003D"))
+    val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService) {
       override def currentDate: DateTime = fixedDate
     }
   }

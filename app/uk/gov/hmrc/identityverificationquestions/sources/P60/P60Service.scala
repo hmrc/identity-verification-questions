@@ -42,7 +42,7 @@ class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: Even
 
   override def connector: QuestionConnector[Payment] = p60Connector
 
-  override def evidenceTransformer(records: Seq[Payment]): Seq[QuestionWithAnswers] = {
+  override def evidenceTransformer(records: Seq[Payment], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
 
     def taxYears = SortedSet(currentTaxYear.previous, currentTaxYearWithBuffer.previous)
     def additionalInfoMap = Map("currentTaxYear" -> taxYears.last.display) ++

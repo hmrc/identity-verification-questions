@@ -21,7 +21,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.{UnhealthyServiceException, UsingCircuitBreaker}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
-import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName}
+import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, Selection, ServiceName}
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 
@@ -41,7 +41,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def isAvailableForRequestedSelection(selection: Selection): Boolean
 
-  def evidenceTransformer(records: Seq[Record]): Seq[QuestionWithAnswers]
+  def evidenceTransformer(records: Seq[Record], corrId: CorrelationId): Seq[QuestionWithAnswers]
 
   /** All the HODs return 404s for an unknown Nino, so these
    *  should never trigger the circuit breaker. The only exception
@@ -57,11 +57,11 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     case _ => true
   }
 
-  def questions(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
+  def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
-        connector.getRecords(selection).map(evidenceTransformer)
+        connector.getRecords(selection).map(records => evidenceTransformer(records, corrId))
       } recover {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)

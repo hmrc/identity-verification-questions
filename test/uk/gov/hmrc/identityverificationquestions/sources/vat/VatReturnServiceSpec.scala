@@ -32,20 +32,20 @@ class VatReturnServiceSpec extends UnitSpec {
   "evidenceTransformer" should {
     "return Empty Sequence" when {
       "there is a VatReturnSubmission record but totalValueSalesExVAT is less then 0" in new Setup {
-        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(-1),BigDecimal(500.50))) shouldBe Seq()
+        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(-1),BigDecimal(500.50)), corrId) shouldBe Seq()
       }
 
       "there is a VatReturnSubmission record but totalValuePurchasesExVAT is less then 0" in new Setup {
-        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(1000), BigDecimal(-1))) shouldBe Seq()
+        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(1000), BigDecimal(-1)), corrId) shouldBe Seq()
       }
 
       "there is a VatReturnSubmission record but totalValueSalesExVAT and totalValuePurchasesExVAT is less then 0" in new Setup {
-        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(-1), BigDecimal(-1))) shouldBe Seq()
+        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(-1), BigDecimal(-1)), corrId) shouldBe Seq()
       }
     }
     "return the data" when{
       "there is a VatReturnSubmission when totalValueSalesExVAT and totalValuePurchasesExVAT is greater then 0" in new Setup {
-        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(1000), BigDecimal(500.50))) shouldBe List(QuestionWithAnswers(ValueOfSalesAmount, Seq(BigDecimal(1000).toString()), Map()), QuestionWithAnswers(ValueOfPurchasesAmount, Seq(BigDecimal(500.50).toString()),Map()))
+        service.evidenceTransformer(vatReturnSubmissionData(BigDecimal(1000), BigDecimal(500.50)), corrId) shouldBe List(QuestionWithAnswers(ValueOfSalesAmount, Seq(BigDecimal(1000).toString()), Map()), QuestionWithAnswers(ValueOfPurchasesAmount, Seq(BigDecimal(500.50).toString()),Map()))
 
       }
     }

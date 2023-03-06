@@ -22,7 +22,7 @@ import uk.gov.hmrc.identityverificationquestions.models.Vat.{ValueOfPurchasesAmo
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
-import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
+import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
 import javax.inject.{Inject, Singleton}
@@ -38,7 +38,7 @@ class VatReturnsService @Inject()(vatReturnsConnector: VatReturnsConnector, val 
 
   override def connector: QuestionConnector[VatReturnSubmission] = vatReturnsConnector
 
-  override def evidenceTransformer(records: Seq[VatReturnSubmission]): Seq[QuestionWithAnswers] = {
+  override def evidenceTransformer(records: Seq[VatReturnSubmission], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
     records.flatMap{ vatData =>
       if (vatData.totalValuePurchasesExVAT > 0 && vatData.totalValueSalesExVAT > 0){
         Seq(

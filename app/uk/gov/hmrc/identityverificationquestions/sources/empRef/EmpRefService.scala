@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
+import play.api.Logging
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models._
@@ -29,7 +30,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig)
   extends QuestionServiceMeoMinimumNumberOfQuestions
-    with CheckAvailability with CircuitBreakerConfiguration with TaxYearBuilder with PenceAnswerConvertor {
+    with CheckAvailability with CircuitBreakerConfiguration with TaxYearBuilder with PenceAnswerConvertor with Logging {
 
   lazy val payslipMonths: Int = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
 
@@ -39,11 +40,18 @@ class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatc
 
   override def connector: QuestionConnector[PayePaymentsDetails] = empRefConnector
 
-  override def evidenceTransformer(records: Seq[PayePaymentsDetails]): Seq[QuestionWithAnswers] = {
+  override def evidenceTransformer(records: Seq[PayePaymentsDetails], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
+    logger.warn(s"$serviceName, payments details for correlationId: $corrId, $records")
     records match {
       case Nil => Nil
-      case answers if !answers.exists(_.payments.isDefined) => Nil
-      case answers if answers.exists(_.payments.get.isEmpty) => Nil
+      case answers if answers.exists(_.payments.isEmpty) =>
+        //todo remove this logger when VER-3022 has done
+        logger.warn(s"$serviceName, debug paye details line 48, for correlationId: $corrId")
+        Nil
+      case answers if answers.exists(_.payments.get.isEmpty) =>
+        //todo remove this logger when VER-3022 has done
+        logger.warn(s"$serviceName, debug paye details line 53, for correlationId: $corrId")
+        Nil
       case answers =>
         val dateOfPayment: Seq[QuestionWithAnswers] = {
           Seq(

@@ -46,7 +46,7 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
         (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo)))
         (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
-      service.questions(selectionNino).futureValue shouldBe Seq(
+      service.questions(selectionNino, corrId).futureValue shouldBe Seq(
           incomeTaxQuestion, nationalInsuranceQuestion
         )
       }
@@ -57,19 +57,19 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
         (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
         (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
-        service.questions(selectionNoNino).futureValue shouldBe Seq()
+        service.questions(selectionNoNino, corrId).futureValue shouldBe Seq()
       }
 
       "PayslipConnector returns an empty sequence of Payment's" in new WithStubbing {
         (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
 
-        service.questions(selectionNino).futureValue shouldBe Seq()
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
       "PayslipConnector returns an insufficient Payment's" in new WithStubbing {
         (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentThree)))
         (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
-        service.questions(selectionNino).futureValue shouldBe Seq()
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
     }
   }

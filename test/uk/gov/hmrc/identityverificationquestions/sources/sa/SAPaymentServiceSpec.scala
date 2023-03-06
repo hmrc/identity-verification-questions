@@ -48,7 +48,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     "obtain the correct questions" in new Setup {
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(testRecords))
 
-      private val actual = service.questions(testJourney).futureValue
+      private val actual = service.questions(testJourney, corrId).futureValue
 
       actual.size shouldBe 1
 
@@ -67,7 +67,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(testRecords))
 
-      private val actual = service.questions(testJourney).futureValue
+      private val actual = service.questions(testJourney, corrId).futureValue
 
       actual.size shouldBe 1
 
@@ -90,7 +90,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(updatedRecords))
 
-      private val actual = service.questions(testJourney).futureValue
+      private val actual = service.questions(testJourney, corrId).futureValue
 
       actual.size shouldBe 1
 
@@ -113,7 +113,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(updatedRecords))
 
-      private val actual = service.questions(testJourney).futureValue
+      private val actual = service.questions(testJourney, corrId).futureValue
 
       actual.size shouldBe 1
 
@@ -134,7 +134,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(zeroRecords))
 
-      val actual: Seq[QuestionWithAnswers] = service.questions(testJourney).futureValue
+      val actual: Seq[QuestionWithAnswers] = service.questions(testJourney, corrId).futureValue
 
       actual.size shouldBe 0
     }
@@ -143,7 +143,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
       (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *)
         .returning(Future.failed(new NotFoundException("not found")))
 
-      service.questions(testJourney).futureValue shouldBe Seq()
+      service.questions(testJourney, corrId).futureValue shouldBe Seq()
     }
 
     "is disabled now" in new Setup {
@@ -152,7 +152,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
         "microservice.services.SelfAssessmentPaymentService.disabled.end" -> (LocalDateTime.now().plusDays(10).toString("yyyy-MM-dd") + "T00:00:00.000")
       )
 
-      service.questions(testJourney).futureValue shouldBe Seq()
+      service.questions(testJourney, corrId).futureValue shouldBe Seq()
     }
 
     "is disabled for disallowed origin" in new Setup {
@@ -160,7 +160,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
         "microservice.services.SelfAssessmentPaymentService.disabled.origin.0" -> "tcs"
       )
 
-      service.questions(testJourney).futureValue shouldBe Seq()
+      service.questions(testJourney, corrId).futureValue shouldBe Seq()
     }
   }
 
