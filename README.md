@@ -5,9 +5,11 @@ Backend service to provide question data and answer processing by unique user id
 
 This service extracts, refactors and replaces the question handling behaviour that is currently part of the https://github.com/hmrc/identity-verification making it available to other services.  This will promote re-use of IV behaviour across the platform and provide consistent verification standards.
 
-Currently, this service only provides questions from the P60 and self assessment (SA) evidence sources.  Other sources are currently being moved from identity-verification backend to here.
+Currently, this service only provides questions from the VAT, P60 and self assessment (SA) evidence sources. Other sources are currently being moved from identity-verification backend to here.
 
 ## Evidence Sources
+
+* VAT - requires VAT; uses DES API (#1351) to query data for the **totalValueSalesExVAT** and  **totalValuePurchasesExVAT**
 
 * P60 - requires NINO; uses RTI DES API (#1001) to query data for the **current tax year**
 
@@ -31,6 +33,7 @@ More evidence sources will be added in due course.
 Include a POST JSON body containing a set of identifiers for the questions such as:
 ```
     { 
+      "vrn": "123456789",
       "nino":"AA000003D",
       "sautr": "1234567890",
       "payeRef": {
@@ -41,6 +44,8 @@ Include a POST JSON body containing a set of identifiers for the questions such 
 ```
 You must supply *at least one* identifier, and you can only supply one *of each type of identifier*.
 Different identifier types support different **evidence sources** for question data.  Currently the **only** supported identifiers are:
+
+* **vrn** - Must be a valid VAT (with suffix) according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Vrn.scala
 
 * **nino** - Must be a valid NINO (with suffix) according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Nino.scala
 
@@ -114,6 +119,8 @@ It will be different depending on the question key.
 |  rti-p60-postgraduate-loan-deductions   | Postgraduate Loans       |
 |  rti-p60-statutory-shared-parental-pay  | Shared Parental Pay      |
 |  rti-p60-student-loan-deductions        | Student Loans            |
+|  value-of-sales-amount                  | Total Value Sales ExVAT  |
+|  value-of-purchases-amount              | Total Value Purchases ExVAT |
 
 
 For more description of the info object data for each question, see confluence page or scaladoc in:
@@ -140,6 +147,24 @@ Send a json body containing the previous correlation id and identifier selection
         {
           "questionKey": "rti-p60-employee-ni-contributions",
           "answer": "250.00"
+        }
+      ]
+}
+```
+```
+    {
+      "correlationId": "66d89bcf-847e-446e-b0e9-348591d118d3",
+      "selection": {
+        "vrn": "123456789"
+      },
+      "answers":[
+        {
+          "questionKey": "value-of-sales-amount",
+          "answer": "5000.00"
+        },
+        {
+          "questionKey": "value-of-purchases-amount",
+          "answer": "2500.00"
         }
       ]
 }
