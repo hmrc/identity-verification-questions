@@ -9,7 +9,7 @@ Currently, this service only provides questions from the VAT, P60 and self asses
 
 ## Evidence Sources
 
-* VAT - requires VAT; uses DES API (#1351) to query data for the **totalValueSalesExVAT** and  **totalValuePurchasesExVAT**
+* VRN - requires VAT; uses DES API (#1351) to query data for the **totalValueSalesExVAT** and  **totalValuePurchasesExVAT**
 
 * P60 - requires NINO; uses RTI DES API (#1001) to query data for the **current tax year**
 
@@ -45,7 +45,7 @@ Include a POST JSON body containing a set of identifiers for the questions such 
 You must supply *at least one* identifier, and you can only supply one *of each type of identifier*.
 Different identifier types support different **evidence sources** for question data.  Currently the **only** supported identifiers are:
 
-* **vrn** - Must be a valid VAT (with suffix) according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Vrn.scala
+* **vrn** - Must be a valid VAT Registration Number according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Vrn.scala
 
 * **nino** - Must be a valid NINO (with suffix) according to https://github.com/hmrc/domain/blob/main/src/main/scala/uk/gov/hmrc/domain/Nino.scala
 
