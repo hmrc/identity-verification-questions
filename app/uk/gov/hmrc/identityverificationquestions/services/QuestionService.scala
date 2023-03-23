@@ -66,10 +66,10 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
-          logger.error(s"$serviceName is Unavailable, UnhealthyServiceException raised.")
+          logger.error(s"$serviceName threw UnhealthyServiceException, origin: $origin")
           Seq()
         case t: Throwable =>
-          logger.error(s"$serviceName, threw exception $t, origin: $origin, selection: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+          logger.error(s"$serviceName threw Exception, origin: $origin; detail: $t")
           Seq()
       }
     } else {

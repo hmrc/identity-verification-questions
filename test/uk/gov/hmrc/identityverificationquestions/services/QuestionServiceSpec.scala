@@ -78,7 +78,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request, origin: origin, selection: XXXX0000D,XXXX5678"
+            errorLogs.head.getMessage shouldBe "p60Service threw Exception, origin: origin; detail: uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request"
           }
         }
 
@@ -90,7 +90,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service, threw exception uk.gov.hmrc.http.Upstream5xxResponse: internal server error, origin: origin, selection: XXXX0000D,XXXX5678"
+            errorLogs.head.getMessage shouldBe "p60Service threw Exception, origin: origin; detail: uk.gov.hmrc.http.Upstream5xxResponse: internal server error"
           }
         }
 
