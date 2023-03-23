@@ -73,7 +73,7 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions should not contain paymentToDateQuestion
         questionResponse.get.questions should not contain employeeNIContributionsQuestion
-        logs.filter(_.getLevel == Level.ERROR).count(_.getMessage.contains("p60Service, threw exception uk.gov.hmrc.http.Upstream5xxResponse")) shouldBe 1
+        logs.filter(_.getLevel == Level.ERROR).count(_.getMessage.contains("p60Service threw Exception, origin: identity-verification; detail: uk.gov.hmrc.http.Upstream5xxResponse")) shouldBe 1
       }
     }
 

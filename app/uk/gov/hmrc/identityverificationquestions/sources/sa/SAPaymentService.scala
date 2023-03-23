@@ -48,6 +48,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
   val allowedPaymentTypes = List("PYT", "TFO")
 
   override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
+    val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
         selection.sautr match {
@@ -65,11 +66,11 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
         case u: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
-          logger.error(s"Unexpected response from $serviceName", u)
+          logger.error(s"$serviceName threw UnhealthyServiceException, origin: $origin")
           Seq()
         case _: NotFoundException => Seq()
         case t: Throwable =>
-          logger.error(s"Unexpected response from $serviceName", t)
+          logger.error(s"$serviceName threw Exception, origin: $origin; detail: $t")
           Seq()
       }
     } else {
