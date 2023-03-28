@@ -24,11 +24,10 @@ import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-abstract class AnswerService @Inject()(implicit ec: ExecutionContext) extends UsingCircuitBreaker
+abstract class AnswerService (implicit ec: ExecutionContext) extends UsingCircuitBreaker
   with Logging {
   type Record
 

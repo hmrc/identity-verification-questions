@@ -199,7 +199,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
       SAPayment(BigDecimal(15.51), Some(fixedDate.minusYears(3)), Some("PYT"))
     )))
 
-    val service: SAPaymentService = new SAPaymentService(mockConnector, mockEventDispatcher, mockAuditService)(appConfig) {
+    val service: SAPaymentService = new SAPaymentService(mockConnector, mockEventDispatcher, mockAuditService, appConfig) {
       override def currentDate: LocalDate = fixedDate
     }
 

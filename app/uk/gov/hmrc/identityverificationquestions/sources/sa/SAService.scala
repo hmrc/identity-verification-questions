@@ -34,7 +34,7 @@ class SAService @Inject() (
     val saPensionService: SAPensionService,
     val saPaymentService: SAPaymentService,
     val eventDispatcher: EventDispatcher,
-    override implicit val auditService: AuditService) extends QuestionService
+    val auditService: AuditService) extends QuestionService
     with CheckAvailability
     with CircuitBreakerConfiguration {
 

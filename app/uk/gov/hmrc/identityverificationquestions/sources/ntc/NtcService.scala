@@ -29,7 +29,7 @@ import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvaila
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class NtcService @Inject()(ntcConnector: NtcConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig)
+class NtcService @Inject()(ntcConnector: NtcConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(val appConfig: AppConfig)
   extends QuestionService with CheckAvailability with CircuitBreakerConfiguration {
 
   lazy val paymentMonths: Int = appConfig.ntcPaymentMonths

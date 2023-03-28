@@ -24,12 +24,13 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.identityverificationquestions.models.taxcredit._
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, taxCreditService}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NtcConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[TaxCreditRecord]
+class NtcConnector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[TaxCreditRecord]
   with HodConnectorConfig with Logging with NtcJsonFormats {
 
   def serviceName: ServiceName = taxCreditService
@@ -57,10 +58,12 @@ class NtcConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
     val desHeaders: HeaderCarrier = headersForDES
     val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-    selection.nino.fold(Future.successful(Seq.empty[TaxCreditRecord])) { nino =>
-      http.GET[TaxCreditClaim](s"$baseUrl/national-tax-credits/citizens/${nino.value}/verification-data", headers = headers)(
-        implicitly[HttpReads[TaxCreditClaim]], hc, ec
-      ).map(selectRecords)
+    metricsService.timeToGetResponseWithMetrics[Seq[TaxCreditRecord]](metricsService.ntcConnectorTimer.time()) {
+      selection.nino.fold(Future.successful(Seq.empty[TaxCreditRecord])) { nino =>
+        http.GET[TaxCreditClaim](s"$baseUrl/national-tax-credits/citizens/${nino.value}/verification-data", headers = headers)(
+          implicitly[HttpReads[TaxCreditClaim]], hc, ec
+        ).map(selectRecords)
+      }
     }
 
   }

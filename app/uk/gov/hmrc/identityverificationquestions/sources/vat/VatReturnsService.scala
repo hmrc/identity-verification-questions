@@ -28,9 +28,11 @@ import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinim
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class VatReturnsService @Inject()(vatReturnsConnector: VatReturnsConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig)
-  extends QuestionServiceMeoMinimumNumberOfQuestions
-    with CheckAvailability with CircuitBreakerConfiguration with PenceAnswerConvertor {
+class VatReturnsService @Inject()(vatReturnsConnector: VatReturnsConnector,
+                                  val eventDispatcher: EventDispatcher,
+                                  val auditService: AuditService,
+                                  val appConfig: AppConfig)
+  extends QuestionServiceMeoMinimumNumberOfQuestions with CheckAvailability with CircuitBreakerConfiguration with PenceAnswerConvertor {
 
   override type Record = VatReturnSubmission
 

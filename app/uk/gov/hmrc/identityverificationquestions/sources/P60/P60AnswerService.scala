@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class P60AnswerService @Inject()(p60AnswerConnector: P60AnswerConnector, as: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext)
+class P60AnswerService @Inject()(p60AnswerConnector: P60AnswerConnector, as: AuditService)(implicit val appConfig: AppConfig, ec: ExecutionContext)
   extends AnswerService with CheckAvailability with CircuitBreakerConfiguration {
 
   override type Record = QuestionResult

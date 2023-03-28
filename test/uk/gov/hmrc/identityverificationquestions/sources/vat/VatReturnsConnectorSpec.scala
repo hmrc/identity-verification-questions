@@ -21,6 +21,7 @@ import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpGet, HttpReads}
 import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, HodConf}
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, VatReturnSubmission}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,8 +43,9 @@ class VatReturnsConnectorSpec extends UnitSpec {
 
   trait Setup {
     val httpClientMock: HttpGet = mock[HttpGet]
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    val vatReturnsConnector: VatReturnsConnector = new VatReturnsConnector(httpClientMock)
+    val mockAppConfig: AppConfig = mock[AppConfig]
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    val vatReturnsConnector: VatReturnsConnector = new VatReturnsConnector(httpClientMock, mockAppConfig, metricsService)
 
     implicit val hc: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer ")), extraHeaders = Seq("Environment" -> ""))
     implicit val ec: ExecutionContext = ExecutionContext.Implicits.global

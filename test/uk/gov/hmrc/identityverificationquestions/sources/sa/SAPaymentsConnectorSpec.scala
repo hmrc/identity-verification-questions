@@ -21,6 +21,7 @@ import org.joda.time.LocalDate
 import play.api.Configuration
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -92,6 +93,7 @@ class SAPaymentsConnectorSpec extends UnitSpec {
 
     val mockedBaseUrl = "https://sa-adapter:443"
     val mockHttpClient: HttpClient = mock[HttpClient]
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     lazy val additionalConfig: Map[String, Any] = Map.empty
     private lazy val configData: Map[String, Any] = Map(
       "microservice.services.self-assessment.protocol" -> "https",
@@ -104,6 +106,6 @@ class SAPaymentsConnectorSpec extends UnitSpec {
     val TEST_SAUTR = "123456789"
     val SAUTR: SaUtr = SaUtr(TEST_SAUTR)
 
-    val connector = new SAPaymentsConnector(mockHttpClient, servicesConfig)
+    val connector = new SAPaymentsConnector(mockHttpClient, servicesConfig, metricsService)
   }
 }

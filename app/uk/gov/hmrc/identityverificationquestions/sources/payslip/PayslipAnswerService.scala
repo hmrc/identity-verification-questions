@@ -28,7 +28,7 @@ import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvaila
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class PayslipAnswerService @Inject()(payslipAnswerConnector: PayslipAnswerConnector, as: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext)
+class PayslipAnswerService @Inject()(payslipAnswerConnector: PayslipAnswerConnector, as: AuditService)(implicit val appConfig: AppConfig, ec: ExecutionContext)
   extends AnswerService with CheckAvailability with CircuitBreakerConfiguration {
 
   override type Record = QuestionResult

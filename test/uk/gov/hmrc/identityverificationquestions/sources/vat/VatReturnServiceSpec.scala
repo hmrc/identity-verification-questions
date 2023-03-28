@@ -52,11 +52,11 @@ class VatReturnServiceSpec extends UnitSpec {
   }
 
   trait Setup {
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    val mockAppConfig: AppConfig = mock[AppConfig]
     val mockVatReturnsConnector: VatReturnsConnector = mock[VatReturnsConnector]
     val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: VatReturnsService = new VatReturnsService(mockVatReturnsConnector, mockEventDispatcher, mockAuditService)
+    val service: VatReturnsService = new VatReturnsService(mockVatReturnsConnector, mockEventDispatcher, mockAuditService, mockAppConfig)
     def vatReturnSubmissionData(totalValueSalesExVAT: BigDecimal, totalValuePurchasesExVAT: BigDecimal): Seq[VatReturnSubmission] =
       Seq(VatReturnSubmission("22YA", BigDecimal("1000"), BigDecimal("1000"), BigDecimal("1000"), BigDecimal("1000"), BigDecimal("1000"), totalValueSalesExVAT, totalValuePurchasesExVAT, BigDecimal("1000"), BigDecimal("1000")))
   }

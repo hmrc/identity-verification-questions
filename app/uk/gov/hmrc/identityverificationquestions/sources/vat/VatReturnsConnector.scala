@@ -22,13 +22,13 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, VatReturnSubmission, vatService}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VatReturnsConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[VatReturnSubmission]
+class VatReturnsConnector @Inject()(val http: CoreGet, val appConfig: AppConfig, metricsService: MetricsService) extends QuestionConnector[VatReturnSubmission]
   with HodConnectorConfig with Logging {
 
   lazy val baseUrl: String = appConfig.serviceBaseUrl("vatService")
@@ -36,11 +36,10 @@ class VatReturnsConnector @Inject()(val http: CoreGet)(implicit val appConfig: A
   override def getRecords(selection: Selection)(
     implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[VatReturnSubmission]] = {
 
-
     val desHeaders: HeaderCarrier = headersForDES
     val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-    def getUserVatReturnDetails(vrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, appConfig: AppConfig): Future[Seq[VatReturnSubmission]] = {
+    def getUserVatReturnDetails(vrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[VatReturnSubmission]] = {
     val url = s"$baseUrl/vat/returns/vrn/$vrn"
 
     /** *
@@ -59,10 +58,10 @@ class VatReturnsConnector @Inject()(val http: CoreGet)(implicit val appConfig: A
     val periodKey = "22YA"
     val queryParams: Seq[(String, String)] = Seq("period-key" -> periodKey)
 
-    http.GET[VatReturnSubmission](url, queryParams, headers = headers).map { response =>
-      Seq(response)
-    }
-      .recover {
+    metricsService.timeToGetResponseWithMetrics[Seq[VatReturnSubmission]](metricsService.vatConnectorTimer.time()) {
+      http.GET[VatReturnSubmission](url, queryParams, headers = headers).map { response =>
+        Seq(response)
+      }.recover {
         case e: BadRequestException =>
           logger.warn(s"MTD VAT Returns 400, ${e.message}")
           Seq()
@@ -73,6 +72,7 @@ class VatReturnsConnector @Inject()(val http: CoreGet)(implicit val appConfig: A
           logger.error(s"MTD VAT Returns exception: ${e.message}")
           Seq()
       }
+    }
   }
 
     selection.vrn.map { vrn =>

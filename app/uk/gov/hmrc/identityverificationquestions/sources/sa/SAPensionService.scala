@@ -32,7 +32,7 @@ class SAPensionService @Inject() (
     val appConfig: AppConfig,
     connector : SAPensionsConnector,
     val eventDispatcher: EventDispatcher,
-    override implicit val auditService: AuditService) extends QuestionServiceMeoMinimumNumberOfQuestions
+    val auditService: AuditService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
 

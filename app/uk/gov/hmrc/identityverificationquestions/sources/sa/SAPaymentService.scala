@@ -33,9 +33,10 @@ import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvaila
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispatcher: EventDispatcher, override implicit val auditService: AuditService)(
-  implicit val appConfig: AppConfig
-) extends QuestionServiceMeoMinimumNumberOfQuestions
+class SAPaymentService @Inject()(connector: SAPaymentsConnector,
+                                 val eventDispatcher: EventDispatcher,
+                                 val auditService: AuditService,
+                                 val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
 

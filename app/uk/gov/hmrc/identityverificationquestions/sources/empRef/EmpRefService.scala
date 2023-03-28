@@ -28,7 +28,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinim
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig)
+class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService, val appConfig: AppConfig)
   extends QuestionServiceMeoMinimumNumberOfQuestions
     with CheckAvailability with CircuitBreakerConfiguration with TaxYearBuilder with PenceAnswerConvertor with Logging {
 

@@ -28,7 +28,10 @@ import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvaila
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
 @Singleton
-class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
+class PayslipService @Inject()(payslipConnector: PayslipConnector,
+                               val eventDispatcher: EventDispatcher,
+                               val auditService: AuditService,
+                               val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration
   with TaxYearBuilder

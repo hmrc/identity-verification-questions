@@ -30,11 +30,12 @@ import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinim
 import scala.collection.SortedSet
 
 @Singleton
-class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
-  with CheckAvailability
-  with CircuitBreakerConfiguration
-  with TaxYearBuilder
-  with PenceAnswerConvertor {
+class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService, val appConfig: AppConfig)
+  extends QuestionServiceMeoMinimumNumberOfQuestions
+    with CheckAvailability
+    with CircuitBreakerConfiguration
+    with TaxYearBuilder
+    with PenceAnswerConvertor {
 
   override type Record = Payment
 

@@ -67,11 +67,11 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait Setup {
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    val mockAppConfig: AppConfig = mock[AppConfig]
     val mockEmpRefConnector: EmpRefConnector = mock[EmpRefConnector]
     val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: EmpRefService = new EmpRefService(mockEmpRefConnector, mockEventDispatcher, mockAuditService)
+    val service: EmpRefService = new EmpRefService(mockEmpRefConnector, mockEventDispatcher, mockAuditService, mockAppConfig)
   }
 
 }

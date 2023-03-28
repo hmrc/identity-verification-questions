@@ -75,12 +75,12 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait Setup extends TestDate {
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    val mockAppConfig: AppConfig = mock[AppConfig]
     val mockPayslipConnector: PayslipConnector = mock[PayslipConnector]
     val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: PayslipService = new PayslipService(mockPayslipConnector, mockEventDispatcher, mockAuditService) {
+    val service: PayslipService = new PayslipService(mockPayslipConnector, mockEventDispatcher, mockAuditService, mockAppConfig) {
       override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
   }

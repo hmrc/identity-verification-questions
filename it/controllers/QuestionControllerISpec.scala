@@ -24,16 +24,14 @@ import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
-import uk.gov.hmrc.identityverificationquestions.models.{P60, PassportQuestion, Payslip, Question, QuestionResponse, QuestionWithAnswers, SCPEmailQuestion}
-import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
+import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.LocalDateTime
 
 class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneServerPerSuite {
   "POST /questions" should {
     "return 200 if provided with valid json" in new Setup {
-      val questionRepository = app.injector.instanceOf[QuestionMongoRepository]
       rtiProxyReturnOk(rtiResponseJson)
       ivReturnOk
       basGatewayStub
@@ -46,21 +44,6 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       questions.map(_.questionKey.evidenceOption).contains("P60") shouldBe true
       questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
     }
-
-//    "return 200 and a sequence of non p60 question if provided with valid json but P60 returns not found" in new Setup {
-//      p60ProxyReturnNotFound
-//      ivReturnOk
-//      basGatewayStub
-//      withCaptureOfLoggingFrom[P60Service] { logs =>
-//        val response = await(resourceRequest(questionRoute).post(validQuestionRequest))
-//        response.status shouldBe 200
-//        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-//        questionResponse.isSuccess shouldBe true
-//        questionResponse.get.questions should not contain paymentToDateQuestion
-//        questionResponse.get.questions should not contain employeeNIContributionsQuestion
-//        logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"p60Service, no records returned for selection, origin: lost-credentials, identifiers: AA000000A") shouldBe 1
-//      }
-//    }
 
     "return 200 and an empty sequence of question if provided with valid json but P60 returns error" in new Setup {
       p60ProxyReturnError
@@ -141,20 +124,6 @@ class QuestionControllerBeforeOutageISpec extends BaseISpec with LogCapturing {
         logs.filter(_.getLevel == Level.INFO).count(_.getMessage == s"Scheduled p60Service outage between ${toBTZ(datePast)} and ${toBTZ(dateFuture)}") shouldBe 1
       }
     }
-
-    //ver-1281: Passport disabled for now
-//    "return 200 and sequence of questions inc Passport" when {
-//      "outage window is in future and identifiers includes DOB" in new Setup {
-//        p60ProxyReturnOk(p60ResponseJson)
-//        ivReturnOk
-//        basGatewayStub
-//        val response = await(resourceRequest(questionRoute).post(validQuestionRequestNinoDob))
-//        response.status shouldBe 200
-//        val questionResponse = Json.parse(response.body).validate[QuestionResponse]
-//        questionResponse.isSuccess shouldBe true
-//        questionResponse.get.questions should contain(passportQuestion)
-//      }
-//    }
   }
 }
 
