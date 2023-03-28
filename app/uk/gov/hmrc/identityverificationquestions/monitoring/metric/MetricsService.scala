@@ -25,13 +25,13 @@ import scala.concurrent.Future
 
 class MetricsService @Inject()(metrics: Metrics) {
 
-  lazy val payeConnectorTimer: Timer = metrics.defaultRegistry.timer("pay-as-you-earn-emp-connector-response-time")
-  lazy val ntcConnectorTimer: Timer = metrics.defaultRegistry.timer("national-tax-credits-connector-response-time")
-  lazy val p60ConnectorTimer: Timer = metrics.defaultRegistry.timer("p60-rti-connector-response-time")
-  lazy val payslipConnectorTimer: Timer = metrics.defaultRegistry.timer("payslip-rti-connector-response-time")
-  lazy val saPaymentConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-payment-connector-response-time")
-  lazy val saPensionsConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-pensions-connector-response-time")
-  lazy val vatConnectorTimer: Timer = metrics.defaultRegistry.timer("vat-connector-response-time")
+  lazy val payeConnectorTimer: Timer = metrics.defaultRegistry.timer("pay-as-you-earn-emp-connector-response-timer")
+  lazy val ntcConnectorTimer: Timer = metrics.defaultRegistry.timer("national-tax-credits-connector-response-timer")
+  lazy val p60ConnectorTimer: Timer = metrics.defaultRegistry.timer("p60-rti-connector-response-timer")
+  lazy val payslipConnectorTimer: Timer = metrics.defaultRegistry.timer("payslip-rti-connector-response-timer")
+  lazy val saPaymentConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-payment-connector-response-timer")
+  lazy val saPensionsConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-pensions-connector-response-timer")
+  lazy val vatConnectorTimer: Timer = metrics.defaultRegistry.timer("vat-connector-response-timer")
 
   def timeToGetResponseWithMetrics[T](timer: Timer.Context)(f: => Future[T]): Future[T] = {
     f map { data =>
