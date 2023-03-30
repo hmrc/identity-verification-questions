@@ -24,13 +24,18 @@ import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
 import scala.collection.SortedSet
 
 @Singleton
-class P60Service @Inject()(p60Connector: P60Connector, val eventDispatcher: EventDispatcher, val auditService: AuditService, val appConfig: AppConfig)
+class P60Service @Inject()(p60Connector: P60Connector,
+                           val eventDispatcher: EventDispatcher,
+                           val auditService: AuditService,
+                           val appConfig: AppConfig,
+                           val metricsService: MetricsService)
   extends QuestionServiceMeoMinimumNumberOfQuestions
     with CheckAvailability
     with CircuitBreakerConfiguration

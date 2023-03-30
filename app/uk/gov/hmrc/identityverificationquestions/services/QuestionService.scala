@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, Selection, ServiceName}
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{Broken, Good, MetricsService, Unhealthy}
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,6 +44,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def evidenceTransformer(records: Seq[Record], corrId: CorrelationId): Seq[QuestionWithAnswers]
 
+  def metricsService: MetricsService
   /** All the HODs return 404s for an unknown Nino, so these
    *  should never trigger the circuit breaker. The only exception
    *  is the passport API, which always returns 200 SOAP responses
@@ -61,14 +63,19 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {
-        connector.getRecords(selection).map(records => evidenceTransformer(records, corrId))
+        connector.getRecords(selection).map{ records =>
+          metricsService.setHealthState(serviceName.toString, Good)
+          evidenceTransformer(records, corrId)
+        }
       } recover {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
+          metricsService.setHealthState(serviceName.toString, Unhealthy)
           logger.error(s"$serviceName threw UnhealthyServiceException, origin: $origin")
           Seq()
         case t: Throwable =>
+          metricsService.setHealthState(serviceName.toString, Broken)
           logger.error(s"$serviceName threw Exception, origin: $origin; detail: $t")
           Seq()
       }

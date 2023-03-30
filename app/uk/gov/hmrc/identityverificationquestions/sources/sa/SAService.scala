@@ -23,6 +23,7 @@ import uk.gov.hmrc.identityverificationquestions.connectors
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
@@ -34,7 +35,8 @@ class SAService @Inject() (
     val saPensionService: SAPensionService,
     val saPaymentService: SAPaymentService,
     val eventDispatcher: EventDispatcher,
-    val auditService: AuditService) extends QuestionService
+    val auditService: AuditService,
+    val metricsService: MetricsService) extends QuestionService
     with CheckAvailability
     with CircuitBreakerConfiguration {
 

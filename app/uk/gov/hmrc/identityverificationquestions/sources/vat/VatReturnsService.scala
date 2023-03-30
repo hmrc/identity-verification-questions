@@ -22,6 +22,7 @@ import uk.gov.hmrc.identityverificationquestions.models.Vat.{ValueOfPurchasesAmo
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
@@ -31,7 +32,8 @@ import javax.inject.{Inject, Singleton}
 class VatReturnsService @Inject()(vatReturnsConnector: VatReturnsConnector,
                                   val eventDispatcher: EventDispatcher,
                                   val auditService: AuditService,
-                                  val appConfig: AppConfig)
+                                  val appConfig: AppConfig,
+                                  val metricsService: MetricsService)
   extends QuestionServiceMeoMinimumNumberOfQuestions with CheckAvailability with CircuitBreakerConfiguration with PenceAnswerConvertor {
 
   override type Record = VatReturnSubmission

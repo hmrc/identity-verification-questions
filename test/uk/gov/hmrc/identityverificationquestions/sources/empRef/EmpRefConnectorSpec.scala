@@ -45,7 +45,7 @@ class EmpRefConnectorSpec extends UnitSpec {
 
   trait Setup {
     val mockHttpGet: HttpGet = mock[HttpGet]
-    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    val metricsService: MetricsService = mock[MetricsService]
     val mockAppConfig: AppConfig = mock[AppConfig]
     val empRefConnector = new EmpRefConnector(mockHttpGet, metricsService, mockAppConfig)
   }

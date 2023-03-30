@@ -27,6 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, p60Service}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -89,7 +90,8 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
     val mockP60Connector: P60Connector = mock[P60Connector]
     val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: P60Service = new P60Service(mockP60Connector, mockEventDispatcher, mockAuditService, mockAppConfig) {
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    val service: P60Service = new P60Service(mockP60Connector, mockEventDispatcher, mockAuditService, mockAppConfig, metricsService) {
       override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
   }

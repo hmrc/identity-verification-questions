@@ -22,6 +22,7 @@ import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.{AmountO
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import java.time.LocalDate
 
@@ -71,7 +72,8 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
     val mockEmpRefConnector: EmpRefConnector = mock[EmpRefConnector]
     val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: EmpRefService = new EmpRefService(mockEmpRefConnector, mockEventDispatcher, mockAuditService, mockAppConfig)
+    val metricsService: MetricsService = mock[MetricsService]
+    val service: EmpRefService = new EmpRefService(mockEmpRefConnector, mockEventDispatcher, mockAuditService, mockAppConfig, metricsService)
   }
 
 }

@@ -27,6 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
@@ -36,7 +37,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class SAPaymentService @Inject()(connector: SAPaymentsConnector,
                                  val eventDispatcher: EventDispatcher,
                                  val auditService: AuditService,
-                                 val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
+                                 val appConfig: AppConfig,
+                                 val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
 

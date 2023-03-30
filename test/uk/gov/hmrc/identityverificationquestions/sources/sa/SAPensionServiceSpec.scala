@@ -28,6 +28,7 @@ import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAsses
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, selfAssessmentService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -159,9 +160,9 @@ class SAPensionServiceSpec extends UnitSpec {
         )
       )
     )
-
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     val selection: Selection = Selection(Nino("AA000003D"))
-    val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService) {
+    val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService, metricsService) {
       override def currentDate: DateTime = fixedDate
     }
   }

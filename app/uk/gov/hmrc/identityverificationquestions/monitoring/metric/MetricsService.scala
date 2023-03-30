@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.identityverificationquestions.monitoring.metric
 
-import com.codahale.metrics.Timer
+import com.codahale.metrics.{Gauge, MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MetricsService @Inject()(metrics: Metrics) {
+class MetricsService @Inject()(val metrics: Metrics) {
 
-  lazy val payeConnectorTimer: Timer = metrics.defaultRegistry.timer("pay-as-you-earn-emp-connector-response-timer")
-  lazy val ntcConnectorTimer: Timer = metrics.defaultRegistry.timer("national-tax-credits-connector-response-timer")
-  lazy val p60ConnectorTimer: Timer = metrics.defaultRegistry.timer("p60-rti-connector-response-timer")
-  lazy val payslipConnectorTimer: Timer = metrics.defaultRegistry.timer("payslip-rti-connector-response-timer")
-  lazy val saPaymentConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-payment-connector-response-timer")
-  lazy val saPensionsConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-pensions-connector-response-timer")
-  lazy val vatConnectorTimer: Timer = metrics.defaultRegistry.timer("vat-connector-response-timer")
+  def payeConnectorTimer: Timer = metrics.defaultRegistry.timer("pay-as-you-earn-emp-connector-response-timer")
+  def ntcConnectorTimer: Timer = metrics.defaultRegistry.timer("national-tax-credits-connector-response-timer")
+  def p60ConnectorTimer: Timer = metrics.defaultRegistry.timer("p60-rti-connector-response-timer")
+  def payslipConnectorTimer: Timer = metrics.defaultRegistry.timer("payslip-rti-connector-response-timer")
+  def saPaymentConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-payment-connector-response-timer")
+  def saPensionsConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-pensions-connector-response-timer")
+  def vatConnectorTimer: Timer = metrics.defaultRegistry.timer("vat-connector-response-timer")
 
   def timeToGetResponseWithMetrics[T](timer: Timer.Context)(f: => Future[T]): Future[T] = {
     f map { data =>
@@ -43,5 +43,26 @@ class MetricsService @Inject()(metrics: Metrics) {
         throw e
     }
   }
+
+  def healthySupplier(): MetricRegistry.MetricSupplier[Gauge[_]] = () => new HealthyGauge
+
+  def setHealthState(serviceName: String, healthState: HealthState): Unit =
+    metrics.defaultRegistry.gauge(s"$serviceName-health-state", healthySupplier()).asInstanceOf[HealthyGauge].set(healthState)
+
 }
 
+trait HealthState
+object Good extends HealthState {
+  override def toString: String = "Good"
+}
+object Broken extends HealthState {
+  override def toString: String = "Broken"
+}
+object Unhealthy extends HealthState {
+  override def toString: String = "Unhealthy"
+}
+class HealthyGauge extends Gauge[HealthState] {
+  var healthyState: HealthState = Good
+  def getValue: HealthState = healthyState
+  def set(v: HealthState): Unit = healthyState = v
+}
