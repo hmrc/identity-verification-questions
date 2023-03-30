@@ -182,7 +182,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     val servicesConfig = new ServicesConfig(config)
     implicit val appConfig: AppConfig = new AppConfig(config, servicesConfig)
 
-    val metricsService: MetricsService = mock[MetricsService]
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     implicit val request: Request[_] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
