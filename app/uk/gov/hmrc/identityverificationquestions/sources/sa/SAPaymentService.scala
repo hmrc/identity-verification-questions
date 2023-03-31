@@ -27,15 +27,18 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{Broken, Good, MetricsService, Unhealthy}
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispatcher: EventDispatcher, override implicit val auditService: AuditService)(
-  implicit val appConfig: AppConfig
-) extends QuestionServiceMeoMinimumNumberOfQuestions
+class SAPaymentService @Inject()(connector: SAPaymentsConnector,
+                                 val eventDispatcher: EventDispatcher,
+                                 val auditService: AuditService,
+                                 val appConfig: AppConfig,
+                                 val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
 
@@ -59,17 +62,26 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector, val eventDispat
               _ = logger.info(s"VER-858:  Retrieve SA UTR($saUtr) response : ${payments.mkString(",")}")
               questions = evidenceTransformer(payments, corrId)
               _ = logger.info(s"VER-858: Retrieve SA UTR($saUtr) questions : ${questions.map(_.questionKey).mkString(",")}")
-            } yield questions
-          case _ => Future.successful(Seq())
+            } yield {
+              metricsService.setHealthState(serviceName.toString, Good)
+              questions
+            }
+          case _ =>
+            metricsService.setHealthState(serviceName.toString, Good)
+            Future.successful(Seq())
         }
       } recover {
-        case u: UnhealthyServiceException =>
+        case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
           eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           logger.error(s"$serviceName threw UnhealthyServiceException, origin: $origin")
+          metricsService.setHealthState(serviceName.toString, Unhealthy)
           Seq()
-        case _: NotFoundException => Seq()
+        case _: NotFoundException =>
+          metricsService.setHealthState(serviceName.toString, Good)
+          Seq()
         case t: Throwable =>
+          metricsService.setHealthState(serviceName.toString, Broken)
           logger.error(s"$serviceName threw Exception, origin: $origin; detail: $t")
           Seq()
       }

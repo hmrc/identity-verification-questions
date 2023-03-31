@@ -22,6 +22,7 @@ import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -64,7 +65,7 @@ class SAPensionsConnectorSpec extends UnitSpec {
         .expects(expectedUrl, *, *, *, *, *)
         .returning(Future.failed(new RuntimeException(errorMessage)))
 
-      val ex = intercept[RuntimeException] {
+      val ex: RuntimeException = intercept[RuntimeException] {
         connector.getReturns(testNino, testYear, testYear).futureValue
       }
 
@@ -94,23 +95,25 @@ class SAPensionsConnectorSpec extends UnitSpec {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockedBaseUrl  = "https://sa-adapter:443"
-    val mockHttpClient = mock[HttpClient]
+    val mockHttpClient: HttpClient = mock[HttpClient]
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+
     lazy val additionalConfig: Map[String, Any] = Map.empty
     private lazy val configData: Map[String, Any] = Map(
       "microservice.services.self-assessment.protocol" -> "https",
       "microservice.services.self-assessment.host" -> "sa-adapter",
       "microservice.services.self-assessment.port" -> "443"
     ) ++ additionalConfig
-    val config = Configuration.from(configData)
+    val config: Configuration = Configuration.from(configData)
     val servicesConfig = new ServicesConfig(config)
     implicit val appConfig : AppConfig = new AppConfig(config, servicesConfig)
 
-    val testNino = Nino("AA000003D")
+    val testNino: Nino = Nino("AA000003D")
     val testYear = 2019
 
-    val fixedDate = DateTime.parse("2020-06-01")
+    val fixedDate: DateTime = DateTime.parse("2020-06-01")
 
-    val connector = new SAPensionsConnector(mockHttpClient, servicesConfig, appConfig) {
+    val connector: SAPensionsConnector = new SAPensionsConnector(mockHttpClient, servicesConfig, appConfig, metricsService) {
       override def currentDate: DateTime = fixedDate
     }
   }

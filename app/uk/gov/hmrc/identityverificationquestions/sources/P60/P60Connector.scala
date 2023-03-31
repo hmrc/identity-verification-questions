@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.P60
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -26,12 +25,14 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.identityverificationquestions.models.payment.{Employment, Payment}
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{TaxYear, TaxYearBuilder}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
+class P60Connector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
   with HodConnectorConfig
   with TaxYearBuilder
   with Logging {
@@ -48,11 +49,13 @@ class P60Connector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfi
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
-        case e: UpstreamErrorResponse if e.statusCode == 404 =>
-          logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-          Future.successful(Seq())
-        case _: NotFoundException => Future.successful(Seq())
+      metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.p60ConnectorTimer.time()) {
+        http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+          case e: UpstreamErrorResponse if e.statusCode == 404 =>
+            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+            Future.successful(Seq())
+          case _: NotFoundException => Future.successful(Seq())
+        }
       }
     }
 

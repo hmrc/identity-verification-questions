@@ -26,12 +26,13 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.identityverificationquestions.models.payment.{Employment, Payment}
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, payslipService}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{TaxYear, TaxYearBuilder}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[Payment]
+class PayslipConnector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
     with HodConnectorConfig
     with TaxYearBuilder
     with Logging {
@@ -61,11 +62,13 @@ class PayslipConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppC
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
-        case e: UpstreamErrorResponse if e.statusCode == 404 =>
-          logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-          Future.successful(Seq())
-        case _: NotFoundException => Future.successful(Seq())
+      metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.payslipConnectorTimer.time()) {
+        http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+          case e: UpstreamErrorResponse if e.statusCode == 404 =>
+            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+            Future.successful(Seq())
+          case _: NotFoundException => Future.successful(Seq())
+        }
       }
     }
 

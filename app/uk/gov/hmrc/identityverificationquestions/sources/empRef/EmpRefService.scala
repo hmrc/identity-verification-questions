@@ -22,13 +22,18 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class EmpRefService @Inject()(empRefConnector: EmpRefConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig)
+class EmpRefService @Inject()(empRefConnector: EmpRefConnector,
+                              val eventDispatcher: EventDispatcher,
+                              val auditService: AuditService,
+                              val appConfig: AppConfig,
+                              val metricsService: MetricsService)
   extends QuestionServiceMeoMinimumNumberOfQuestions
     with CheckAvailability with CircuitBreakerConfiguration with TaxYearBuilder with PenceAnswerConvertor with Logging {
 

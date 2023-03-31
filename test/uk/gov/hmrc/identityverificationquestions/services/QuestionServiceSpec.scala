@@ -28,6 +28,7 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.CheckAvailability
 
@@ -160,6 +161,8 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("user-agent" -> "origin")
 
+    val testMetricsService: MetricsService = app.injector.instanceOf[MetricsService]
+
     def connectorResult: Future[Seq[TestRecord]] = illegalAccessResult
 
     def connector: QuestionConnector[TestRecord] = new QuestionConnector[TestRecord] {
@@ -187,6 +190,8 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
+
+      override def metricsService: MetricsService = testMetricsService
     }
 
     lazy val service2: TestService {
@@ -204,6 +209,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
+      override def metricsService: MetricsService = testMetricsService
     }
 
     lazy val service3: TestService {
@@ -221,6 +227,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val appConfig: AppConfig = mockAppConfig
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
+      override def metricsService: MetricsService = testMetricsService
     }
   }
 

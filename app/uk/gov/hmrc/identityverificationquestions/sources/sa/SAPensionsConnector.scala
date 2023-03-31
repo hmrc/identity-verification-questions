@@ -24,11 +24,12 @@ import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErro
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Selection
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig, appConfig: AppConfig)
+class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig, appConfig: AppConfig, metricsService: MetricsService)
   extends QuestionConnector[SAReturn] {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
@@ -38,16 +39,13 @@ class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
   private lazy val switchOverMonth : Int = appConfig.saYearSwitchMonth
 
 
-  def getReturns(
-    nino: Nino,
-    startYear: Int,
-    endYear: Int
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAReturn]] = {
+  def getReturns(nino: Nino, startYear: Int, endYear: Int)(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAReturn]] = {
     val url = s"$baseUrl/individuals/nino/$nino/self-assessment/income?startYear=$startYear&endYear=$endYear"
-    http.GET[Seq[SAReturn]](url).recover {
-      case e: UpstreamErrorResponse if e.statusCode == 404 => Seq()
-      case _: NotFoundException =>
-        Seq()
+    metricsService.timeToGetResponseWithMetrics[Seq[SAReturn]](metricsService.saPensionsConnectorTimer.time()) {
+      http.GET[Seq[SAReturn]](url).recover {
+        case e: UpstreamErrorResponse if e.statusCode == 404 => Seq()
+        case _: NotFoundException => Seq()
+      }
     }
   }
 

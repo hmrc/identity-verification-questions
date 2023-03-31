@@ -23,13 +23,18 @@ import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{TaxCreditBank
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class NtcService @Inject()(ntcConnector: NtcConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig)
+class NtcService @Inject()(ntcConnector: NtcConnector,
+                           val eventDispatcher: EventDispatcher,
+                           val auditService: AuditService,
+                           val appConfig: AppConfig,
+                           val metricsService: MetricsService)
   extends QuestionService with CheckAvailability with CircuitBreakerConfiguration {
 
   lazy val paymentMonths: Int = appConfig.ntcPaymentMonths

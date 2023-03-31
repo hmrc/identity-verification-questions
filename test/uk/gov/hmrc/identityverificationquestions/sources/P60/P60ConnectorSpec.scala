@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, HodConf}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 
 import java.time.LocalDate
@@ -79,9 +80,10 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
       }
     }
 
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    val mockAppConfig: AppConfig = mock[AppConfig]
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
-    val connector: P60Connector = new P60Connector(http) {
+    val connector: P60Connector = new P60Connector(http, metricsService, mockAppConfig) {
       override def serviceName: ServiceName = p60Service
       override protected def getTaxYears = Seq(TaxYear(2020))
     }

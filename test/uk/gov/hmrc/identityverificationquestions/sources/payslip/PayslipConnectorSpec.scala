@@ -19,13 +19,13 @@ package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-
 import Utils.{LogCapturing, UnitSpec}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpGet, HttpReads, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.models.payment.{Employment, Payment}
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,16 +34,17 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
 
   trait Setup {
 
-    val httpClientMock = mock[HttpGet]
-    implicit val appConfig = app.injector.instanceOf[AppConfig]
-    val servicesConfig = app.injector.instanceOf[ServicesConfig]
+    val httpClientMock: HttpGet = mock[HttpGet]
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+    val servicesConfig: ServicesConfig = app.injector.instanceOf[ServicesConfig]
 
-    def nowMinusMonths(months: Int) = toDate("2015-04-10").minusMonths(months)
+    def nowMinusMonths(months: Int): LocalDate = toDate("2015-04-10").minusMonths(months)
     def month = "04"
 
-    def connector: PayslipConnector = new PayslipConnector(httpClientMock){
+    def connector: PayslipConnector = new PayslipConnector(httpClientMock, metricsService, appConfig){
       override def today: LocalDate = {
-        val date = s"2015-${month}-10"
+        val date = s"2015-$month-10"
         toDate(date)
       }
     }
@@ -55,12 +56,12 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
       Payment(toDate("2015-02-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
     )
 
-    implicit val hc = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer ")), extraHeaders = Seq("Environment" -> ""))
-    implicit val ec = ExecutionContext.Implicits.global
+    implicit val hc: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer ")), extraHeaders = Seq("Environment" -> ""))
+    implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
   }
 
 
-  implicit val rtiResponseReads = mock[HttpReads[Seq[Employment]]]
+  implicit val rtiResponseReads: HttpReads[Seq[Employment]] = mock[HttpReads[Seq[Employment]]]
 
   "a connector" should {
 
@@ -82,7 +83,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2015-05-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
 
-      val res = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
+      val res: Seq[Payment] = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
       res.seq.isEmpty should be(false)
       res.size should be(6)
     }
@@ -101,7 +102,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2014-12-30"), Some(BigDecimal("1200")), Some(BigDecimal("0")), Some(BigDecimal("8.00"))),
         Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
-      val res = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
+      val res: Seq[Payment] = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
       res.seq.isEmpty should be(false)
       res.size should be(3)
     }
@@ -121,7 +122,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
 
-      val res = connector.getRecords(Selection(nino= Nino("AA000003D"))).futureValue
+      val res: Seq[Payment] = connector.getRecords(Selection(nino= Nino("AA000003D"))).futureValue
       res.seq.isEmpty should be(false)
       res.size should be(4)
     }
@@ -147,13 +148,13 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
 
-      val res = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
+      val res: Seq[Payment] = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
       res.seq.isEmpty should be(false)
       res.size should be(3)
     }
 
     "filter all payments older than 3 months from one Employment" in new Setup{
-      val minus1month = Payment(
+      val minus1month: Payment = Payment(
         nowMinusMonths(1),
         Some(BigDecimal("0")),
         Some(BigDecimal("10.00")),
@@ -161,7 +162,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Some(BigDecimal("12.00"))
       )
 
-      val minus2months = Payment(
+      val minus2months: Payment = Payment(
         nowMinusMonths(2),
         Some(BigDecimal("0")),
         Some(BigDecimal("20.00")),
@@ -169,7 +170,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Some(BigDecimal("12.00"))
       )
 
-      val minus4months = Payment(
+      val minus4months: Payment = Payment(
         nowMinusMonths(4),
         Some(BigDecimal("0")),
         Some(BigDecimal("40.00")),
@@ -177,7 +178,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Some(BigDecimal("12.00"))
       )
 
-      val minus5months = Payment(
+      val minus5months: Payment = Payment(
         nowMinusMonths(5),
         Some(BigDecimal("0")),
         Some(BigDecimal("50.00")),
@@ -190,7 +191,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
     }
 
     "filter all payments older than 3 months from two Employments" in new Setup{
-      val minus1month = Payment(
+      val minus1month: Payment = Payment(
         nowMinusMonths(1),
         Some(BigDecimal("0")),
         Some(BigDecimal("10.00")),
@@ -198,7 +199,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Some(BigDecimal("12.00"))
       )
 
-      val minus2months = Payment(
+      val minus2months: Payment = Payment(
         nowMinusMonths(2),
         Some(BigDecimal("0")),
         Some(BigDecimal("20.00")),
@@ -206,7 +207,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Some(BigDecimal("12.00"))
       )
 
-      val minus4months = Payment(
+      val minus4months: Payment = Payment(
         nowMinusMonths(4),
         Some(BigDecimal("0")),
         Some(BigDecimal("40.00")),
@@ -214,7 +215,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Some(BigDecimal("12.00"))
       )
 
-      val minus5months = Payment(
+      val minus5months: Payment = Payment(
         nowMinusMonths(5),
         Some(BigDecimal("0")),
         Some(BigDecimal("50.00")),

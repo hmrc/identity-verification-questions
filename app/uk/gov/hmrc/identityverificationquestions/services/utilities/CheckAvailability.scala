@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 
 trait CheckAvailability {
 
-   implicit val appConfig: AppConfig
+   val appConfig: AppConfig
 
    def serviceName: ServiceName
 

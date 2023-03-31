@@ -20,6 +20,7 @@ import Utils.UnitSpec
 import uk.gov.hmrc.http.HttpGet
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import java.time.LocalDate
 
@@ -44,7 +45,8 @@ class EmpRefConnectorSpec extends UnitSpec {
 
   trait Setup {
     val mockHttpGet: HttpGet = mock[HttpGet]
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    val empRefConnector = new EmpRefConnector(mockHttpGet)
+    val metricsService: MetricsService = mock[MetricsService]
+    val mockAppConfig: AppConfig = mock[AppConfig]
+    val empRefConnector = new EmpRefConnector(mockHttpGet, metricsService, mockAppConfig)
   }
 }

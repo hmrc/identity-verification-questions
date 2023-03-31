@@ -22,11 +22,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models.P60.{EarningsAbovePT, EmployeeNIContributions, PaymentToDate, PostgraduateLoanDeductions, StatutoryAdoptionPay, StatutoryMaternityPay, StatutorySharedParentalPay, StudentLoanDeductions}
+import uk.gov.hmrc.identityverificationquestions.models.P60._
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, p60Service}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -84,12 +85,13 @@ class P60ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait Setup extends TestDate {
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    val mockAppConfig: AppConfig = mock[AppConfig]
     val mockP60Connector: P60Connector = mock[P60Connector]
     val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: P60Service = new P60Service(mockP60Connector, mockEventDispatcher, mockAuditService) {
+    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    val service: P60Service = new P60Service(mockP60Connector, mockEventDispatcher, mockAuditService, mockAppConfig, metricsService) {
       override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
   }

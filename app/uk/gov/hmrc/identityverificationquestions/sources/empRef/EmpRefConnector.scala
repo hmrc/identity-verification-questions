@@ -23,6 +23,7 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
 import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYearBuilder
 
 import java.time.LocalDate
@@ -30,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmpRefConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppConfig) extends QuestionConnector[PayePaymentsDetails]
+class EmpRefConnector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[PayePaymentsDetails]
     with HodConnectorConfig
     with TaxYearBuilder
     with Logging {
@@ -46,17 +47,19 @@ class EmpRefConnector @Inject()(val http: CoreGet)(implicit val appConfig: AppCo
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      http.GET[PayePaymentsDetails](url, headers = headers)(implicitly, desHeaders, ec).map { allPayePaymentsDetails =>
-        val lastTwoYearsPayments: PayePaymentsDetails = allPayePaymentsDetails.payments.getOrElse(List()) match {
-          case Nil => PayePaymentsDetails(None)
-          case payments => lastTwoYearsOfPayments(payments)
+      metricsService.timeToGetResponseWithMetrics[Seq[PayePaymentsDetails]](metricsService.payeConnectorTimer.time()) {
+        http.GET[PayePaymentsDetails](url, headers = headers)(implicitly, desHeaders, ec).map { allPayePaymentsDetails =>
+          val lastTwoYearsPayments: PayePaymentsDetails = allPayePaymentsDetails.payments.getOrElse(List()) match {
+            case Nil => PayePaymentsDetails(None)
+            case payments => lastTwoYearsOfPayments(payments)
+          }
+          Seq(lastTwoYearsPayments)
+        }.recoverWith {
+          case e: UpstreamErrorResponse if e.statusCode == 404 =>
+            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+            Future.successful(Seq())
+          case _: NotFoundException => Future.successful(Seq())
         }
-        Seq(lastTwoYearsPayments)
-      }.recoverWith {
-        case e: UpstreamErrorResponse if e.statusCode == 404 =>
-          logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
-          Future.successful(Seq())
-        case _: NotFoundException => Future.successful(Seq())
       }
     }
 

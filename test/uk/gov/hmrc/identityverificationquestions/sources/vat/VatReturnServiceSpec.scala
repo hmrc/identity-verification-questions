@@ -22,6 +22,7 @@ import uk.gov.hmrc.identityverificationquestions.models.Vat.{ValueOfPurchasesAmo
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, VatReturnSubmission, vatService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 class VatReturnServiceSpec extends UnitSpec {
 
@@ -52,11 +53,12 @@ class VatReturnServiceSpec extends UnitSpec {
   }
 
   trait Setup {
-    implicit val mockAppConfig: AppConfig = mock[AppConfig]
+    val mockAppConfig: AppConfig = mock[AppConfig]
     val mockVatReturnsConnector: VatReturnsConnector = mock[VatReturnsConnector]
     val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
-    val service: VatReturnsService = new VatReturnsService(mockVatReturnsConnector, mockEventDispatcher, mockAuditService)
+    val metricsService: MetricsService = mock[MetricsService]
+    val service: VatReturnsService = new VatReturnsService(mockVatReturnsConnector, mockEventDispatcher, mockAuditService, mockAppConfig, metricsService)
     def vatReturnSubmissionData(totalValueSalesExVAT: BigDecimal, totalValuePurchasesExVAT: BigDecimal): Seq[VatReturnSubmission] =
       Seq(VatReturnSubmission("22YA", BigDecimal("1000"), BigDecimal("1000"), BigDecimal("1000"), BigDecimal("1000"), BigDecimal("1000"), totalValueSalesExVAT, totalValuePurchasesExVAT, BigDecimal("1000"), BigDecimal("1000")))
   }

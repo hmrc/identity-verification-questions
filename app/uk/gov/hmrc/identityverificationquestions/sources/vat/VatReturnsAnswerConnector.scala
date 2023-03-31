@@ -18,23 +18,18 @@ package uk.gov.hmrc.identityverificationquestions.sources.vat
 
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
-import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.DateOfPayment
-import uk.gov.hmrc.identityverificationquestions.models.Vat.ValueOfSalesAmount
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
-import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 
 @Singleton
-class VatReturnsAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService, appConfig: AppConfig)(implicit ec: ExecutionContext)
+class VatReturnsAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, auditService: AuditService)(implicit ec: ExecutionContext)
   extends MongoAnswerConnector(questionRepo, auditService) {
-
 
   override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId) map {

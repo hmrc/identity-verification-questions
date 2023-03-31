@@ -18,7 +18,6 @@ package uk.gov.hmrc.identityverificationquestions.sources.vat
 
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
-import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.{AmountOfPayment, DateOfPayment}
 import uk.gov.hmrc.identityverificationquestions.models.Vat.{ValueOfPurchasesAmount, ValueOfSalesAmount}
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
@@ -29,7 +28,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class VatReturnsAnswerService @Inject()(vatReturnsAnswerConnector: VatReturnsAnswerConnector, as: AuditService)(implicit override val appConfig: AppConfig, ec: ExecutionContext)
+class VatReturnsAnswerService @Inject()(vatReturnsAnswerConnector: VatReturnsAnswerConnector, as: AuditService)
+                                       (implicit val appConfig: AppConfig, ec: ExecutionContext)
   extends AnswerService with CheckAvailability with CircuitBreakerConfiguration {
 
   override type Record = QuestionResult

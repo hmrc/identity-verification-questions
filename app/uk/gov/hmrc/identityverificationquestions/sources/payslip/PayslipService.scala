@@ -24,11 +24,16 @@ import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, ServiceName, payslipService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
 @Singleton
-class PayslipService @Inject()(payslipConnector: PayslipConnector, val eventDispatcher: EventDispatcher, val auditService: AuditService)(implicit override val appConfig: AppConfig) extends QuestionServiceMeoMinimumNumberOfQuestions
+class PayslipService @Inject()(payslipConnector: PayslipConnector,
+                               val eventDispatcher: EventDispatcher,
+                               val auditService: AuditService,
+                               val appConfig: AppConfig,
+                               val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration
   with TaxYearBuilder

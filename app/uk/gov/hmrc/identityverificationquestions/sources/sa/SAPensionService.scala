@@ -23,6 +23,7 @@ import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAsses
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, ServiceName, selfAssessmentService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
@@ -32,7 +33,8 @@ class SAPensionService @Inject() (
     val appConfig: AppConfig,
     connector : SAPensionsConnector,
     val eventDispatcher: EventDispatcher,
-    override implicit val auditService: AuditService) extends QuestionServiceMeoMinimumNumberOfQuestions
+    val auditService: AuditService,
+    val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
 

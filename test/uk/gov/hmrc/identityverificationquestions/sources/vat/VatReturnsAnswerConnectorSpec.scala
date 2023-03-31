@@ -17,15 +17,12 @@
 package uk.gov.hmrc.identityverificationquestions.sources.vat
 
 import Utils.UnitSpec
-import play.api.Configuration
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.Vat.{ValueOfPurchasesAmount, ValueOfSalesAmount}
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -91,11 +88,7 @@ class VatReturnsAnswerConnectorSpec extends UnitSpec {
       val mockQuestionMongoRepository: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
       val mockAuditService: AuditService = mock[AuditService]
 
-      val config: Configuration = Configuration.from(Map())
-      val servicesConfig: ServicesConfig = new ServicesConfig(config)
-      val appConfig: AppConfig = new AppConfig(config, servicesConfig)
-
-      val vatReturnsAnswerConnector = new VatReturnsAnswerConnector(mockQuestionMongoRepository, mockAuditService, appConfig)
+      val vatReturnsAnswerConnector = new VatReturnsAnswerConnector(mockQuestionMongoRepository, mockAuditService)
 
     }
 

@@ -27,6 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.{SelfAsse
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
+import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -104,7 +105,7 @@ class SAServiceSpec extends UnitSpec {
 
     val paymentQuestion: QuestionWithAnswers = QuestionWithAnswers(SelfAssessedPaymentQuestion,  Seq("123.11"))
     val pensionQuestion: QuestionWithAnswers = QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, Seq("456.22"))
-
-    val service = new SAService(appConfig, mockSaPensionService, mockSaPaymentService, mockEventDispatcher, mockAuditService)
+    val metricsService: MetricsService = mock[MetricsService]
+    val service = new SAService(appConfig, mockSaPensionService, mockSaPaymentService, mockEventDispatcher, mockAuditService, metricsService)
   }
 }
