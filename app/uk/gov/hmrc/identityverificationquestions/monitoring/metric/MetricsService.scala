@@ -44,25 +44,15 @@ class MetricsService @Inject()(val metrics: Metrics) {
     }
   }
 
-  def healthySupplier(): MetricRegistry.MetricSupplier[Gauge[_]] = () => new HealthyGauge
-
   def setHealthState(serviceName: String, healthState: HealthState): Unit =
-    metrics.defaultRegistry.gauge(s"$serviceName-health-state", healthySupplier()).asInstanceOf[HealthyGauge].set(healthState)
+    metrics.defaultRegistry.register[HealthyGauge](s"$serviceName-health-state", new HealthyGauge(healthState))
 
 }
 
 trait HealthState
-object Good extends HealthState {
-  override def toString: String = "Good"
-}
-object Broken extends HealthState {
-  override def toString: String = "Broken"
-}
-object Unhealthy extends HealthState {
-  override def toString: String = "Unhealthy"
-}
-class HealthyGauge extends Gauge[HealthState] {
-  var healthyState: HealthState = Good
-  def getValue: HealthState = healthyState
-  def set(v: HealthState): Unit = healthyState = v
+object Good extends HealthState
+object Broken extends HealthState
+object Unhealthy extends HealthState
+class HealthyGauge(healthState: HealthState) extends MetricRegistry with Gauge[String] {
+  override def getValue: String = healthState.toString
 }
