@@ -42,11 +42,10 @@ class MetricsServiceSpec extends UnitSpec {
     }
 
     "able to set HealthState" in {
-      Good.toString shouldBe "Good"
       metricsService.setHealthState("serviceName", Good).getClass.getName shouldBe "void"
-      metricRegistry.gauge("serviceName-health-state", metricsService.healthySupplier()).getValue shouldBe Good.toString
+      metricRegistry.gauge("serviceName-health-state", metricsService.healthySupplier()).getValue shouldBe 1
       metricsService.setHealthState("serviceName", Broken).getClass.getName shouldBe "void"
-      metricRegistry.gauge("serviceName-health-state", metricsService.healthySupplier()).getValue shouldBe Broken.toString
+      metricRegistry.gauge("serviceName-health-state", metricsService.healthySupplier()).getValue shouldBe 2
     }
   }
 

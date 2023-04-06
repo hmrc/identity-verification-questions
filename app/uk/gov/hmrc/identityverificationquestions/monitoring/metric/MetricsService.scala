@@ -52,17 +52,18 @@ class MetricsService @Inject()(val metrics: Metrics) {
 }
 
 trait HealthState
-object Good extends HealthState{
-  override def toString = "Good"
-}
-object Broken extends HealthState{
-  override def toString = "Broken"
-}
-object Unhealthy extends HealthState{
-  override def toString = "Unhealthy"
-}
-class HealthyGauge() extends Gauge[String] {
-  var healthyState: String = Good.toString
-  def getValue: String = healthyState
-  def set(v: HealthState): Unit = healthyState = v.toString
+object Good extends HealthState
+object Broken extends HealthState
+object Unhealthy extends HealthState
+class HealthyGauge() extends Gauge[Int] {
+  var healthyState: Int = 1
+  override def getValue: Int = healthyState
+  def set(stateToBe: HealthState): Unit = {
+    val stateToInt = stateToBe match {
+      case Good => 1
+      case Broken => 2
+      case _ => 3
+    }
+    healthyState = stateToInt
+  }
 }
