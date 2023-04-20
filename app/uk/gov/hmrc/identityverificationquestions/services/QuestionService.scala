@@ -65,6 +65,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
       withCircuitBreaker {
         connector.getRecords(selection).map{ records =>
           metricsService.setHealthState(serviceName.toString, Good)
+          logger.info(s"VER-3304: done setHealthState ${serviceName.toString}")
           evidenceTransformer(records, corrId)
         }
       } recover {
