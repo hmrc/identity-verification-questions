@@ -60,9 +60,9 @@ class HealthyGauge() extends Gauge[Int] {
   override def getValue: Int = healthyState
   def set(stateToBe: HealthState): Unit = {
     val stateToInt = stateToBe match {
-      case Good => 1
-      case Broken => 2
-      case _ => 3
+      case Broken => 1
+      case Good => 2
+      case _ => 3 //Unstable as default
     }
     healthyState = stateToInt
   }
