@@ -17,7 +17,7 @@
 package uk.gov.hmrc.identityverificationquestions.models
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr, Vrn}
+import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr}
 
 import java.time.LocalDate
 
@@ -26,13 +26,13 @@ import java.time.LocalDate
  * A set of identifiers to retrieve questions for.
  * At least one identifier should be provided
  */
-case class Selection(nino: Option[Nino], sautr: Option[SaUtr], dob: Option[LocalDate], payeRef: Option[EmpRef], vrn: Option[Vrn]) {
+case class Selection(nino: Option[Nino], sautr: Option[SaUtr], dob: Option[LocalDate], payeRef: Option[EmpRef]) {
 
-  require(nino.isDefined || sautr.isDefined || dob.isDefined || payeRef.isDefined || vrn.isDefined, "Must supply at least one identifier")
+  require(nino.isDefined || sautr.isDefined || dob.isDefined || payeRef.isDefined , "Must supply at least one identifier")
 
   def obscureIdentifier(identifier: String): String = ("X" * 4) + identifier.drop(4) //eg AA000000D to XXXX0000D
 
-  def toList: List[String] = List(nino.map(_.nino), sautr.map(_.utr), dob.map(_.toString), payeRef.map(_.toString), vrn.map(_.toString)).flatten
+  def toList: List[String] = List(nino.map(_.nino), sautr.map(_.utr), dob.map(_.toString), payeRef.map(_.toString)).flatten
 
   override def toString: String = toList.mkString(",")
 }
@@ -41,14 +41,12 @@ object Selection {
 
   implicit val format: Format[Selection] = Json.format[Selection]
 
-  def apply(nino: Nino): Selection = Selection(Some(nino), None, None, None, None)
+  def apply(nino: Nino): Selection = Selection(Some(nino), None, None, None)
 
-  def apply(saUtr: SaUtr): Selection = Selection(None, Some(saUtr), None, None, None)
+  def apply(saUtr: SaUtr): Selection = Selection(None, Some(saUtr), None, None)
 
-  def apply(nino: Nino, saUtr: SaUtr): Selection = Selection(Some(nino), Some(saUtr), None, None, None)
+  def apply(nino: Nino, saUtr: SaUtr): Selection = Selection(Some(nino), Some(saUtr), None, None)
 
-  def apply(payeRef: EmpRef): Selection = Selection(None, None, None, Some(payeRef), None)
-
-  def apply(vrn: Vrn): Selection = Selection(None, None, None, None, Some(vrn))
+  def apply(payeRef: EmpRef): Selection = Selection(None, None, None, Some(payeRef))
 
 }

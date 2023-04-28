@@ -43,9 +43,7 @@ object QuestionKey {
     PayeRefQuestion.DateOfPayment,
     PayeRefQuestion.AmountOfPayment,
     TaxCredits.Amount,
-    TaxCredits.BankAccount,
-    Vat.ValueOfSalesAmount,
-    Vat.ValueOfPurchasesAmount
+    TaxCredits.BankAccount
   )
 
   val mapping: Mapping[String, QuestionKey] = Mappings.mapOption[String, QuestionKey](fromString, _.name)
@@ -96,16 +94,6 @@ case object TaxCredits {
   case object Amount extends QuestionKey("tc-amount", "national-tax-credit")
 }
 
-/**
- * The ValueOfSalesAmount is also known as Box 6
- *
- * The ValueOfPurchasesAmount is also known as Box 7
- **/
-case object Vat {
-  case object ValueOfSalesAmount extends QuestionKey("value-of-sales-amount", "vat")
-  case object ValueOfPurchasesAmount extends QuestionKey("value-of-purchases-amount", "vat")
-}
-
 sealed trait ServiceName
 case object p60Service extends ServiceName
 case object payslipService extends ServiceName
@@ -115,4 +103,3 @@ case object payslipService extends ServiceName
 case object selfAssessmentService extends ServiceName
 case object desPayeService extends ServiceName
 case object taxCreditService extends ServiceName
-case object vatService extends ServiceName
