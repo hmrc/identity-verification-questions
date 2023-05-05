@@ -1,0 +1,15 @@
+{
+  "scopes": [],
+  "api": {
+    "name": "identity-verification-questions",
+    "description": "Backend service to provide question data and answer processing by unique user identifier for all verification services in MDTP",
+    "context": "identity-verification-questions",
+    "versions": [
+      {
+        "version": "1.0",
+        "status": "STABLE",
+        "endpointsEnabled": true
+      }
+    ]
+  }
+}

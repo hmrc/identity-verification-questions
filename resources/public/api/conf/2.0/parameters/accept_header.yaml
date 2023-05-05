@@ -1,0 +1,12 @@
+components:
+  parameters:
+    acceptHeader:
+      name: "Accept"
+      in: header
+      schema:
+        type: string
+        enum: [
+          "application/vnd.hmrc.1.0+json",
+          "application/vnd.hmrc.1.0+xml"
+        ]
+      required: true

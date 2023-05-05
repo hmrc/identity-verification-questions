@@ -1,0 +1,187 @@
+
+openapi: "3.0.3"
+
+info:
+  version: 1.0.0
+  title: OpenAPI Example
+
+servers:
+- url: https://test-api.service.hmrc.gov.uk/test/openapi-hello
+  description: Sandbox
+- url: https://api.service.hmrc.gov.uk/test/openapi-hello
+  description: Production
+
+components:
+  responses:
+    badOrExpiredTokenResponse:
+      description: |
+        Bad or expired token.
+        This can happen if the user or HMRC revoked or expired an access token.
+        To fix, you should re-authenticate the user.
+      content:
+        application/json:
+          example:
+    forbiddenResponse:
+      description: |
+        Bad OAuth request (wrong consumer key, bad nonce, expired
+        timestamp...). Unfortunately, re-authenticating the user won't help here.
+      content:
+        application/json:
+          example:
+  parameters:
+    acceptHeader:
+      name: Accept
+      in: header
+      schema:
+        type: string
+        enum: [
+          "application/vnd.hmrc.1.0+json",
+          "application/vnd.hmrc.1.0+xml"
+        ]
+      required: true
+  securitySchemes:
+    userRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating user restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
+      flows: 
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes:
+            hello: access hello user
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes: {}
+paths:
+  /world:
+    get:
+      summary: Say hello world
+      description: |
+        A simple example for integrating with an unrestricted service.
+
+        Any request to this endpoint initiates a 'Hello World' response.
+      tags:
+      - open-api-example-microservice
+      parameters:
+      - $ref: '#/components/parameters/acceptHeader'
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: the message contents
+              example: 
+                {
+                  "message" : "Hello World"
+                }
+      security:
+      - {}
+  /application:
+    get:
+      summary: Say hello application
+      description: |
+        A simple example for integrating with an application-restricted service, using an OAuth 2.0 client_credentials grant type.
+
+        Any authorised request to this endpoint initiates a 'Hello Application' response.
+      tags:
+      - open-api-example-microservice
+      parameters:
+      - $ref: '#/components/parameters/acceptHeader'
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: the message contents
+              example:
+                {
+                  "message" : "Hello Application"
+                }
+        401:
+          description: "Unauthorised"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: the error code
+                  message:
+                    type: string
+                    description: the error description
+              example: 
+                {
+                  "code": "MISSING_CREDENTIALS",
+                  "message": "Authentication information is not provided"
+                }
+      security:
+      - applicationRestricted: []
+
+  /user:
+    get:
+      summary: Say hello user
+      description: |
+        A simple example for integrating with a user-restricted service, using an OAuth 2.0 authorization_code grant type.
+
+        Any authorised request to this endpoint initiates a 'Hello User' response.
+      tags:
+      - open-api-example-microservice
+      parameters:
+      - $ref: '#/components/parameters/acceptHeader'
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: the message contents
+              example:
+                {
+                  "message" : "Hello User"
+                }
+        401:
+          description: "Unauthorised"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: the error code
+                  message:
+                    type: string
+                    description: the error description
+              example:
+                {
+                  "code": "MISSING_CREDENTIALS",
+                  "message": "Authentication information is not provided"
+                }
+      security:
+      - userRestricted:
+        - hello
+        

@@ -7,7 +7,9 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-28"         % "0.70.0",
     "uk.gov.hmrc"             %% "domain"                     % "8.0.0-play-28",
     "com.typesafe.play"       %% "play-json-joda"             % "2.9.2",
-    "uk.gov.hmrc"             %% "reactive-circuit-breaker"   % "3.5.0"
+    "uk.gov.hmrc"             %% "reactive-circuit-breaker"   % "3.5.0",
+    "uk.gov.hmrc"             %% "customs-api-common"         % "1.57.0" withSources()
+
   )
 
   val test = Seq(

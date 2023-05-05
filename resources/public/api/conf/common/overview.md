@@ -1,0 +1,2 @@
+  This is an example API that allows software developers to test that their applications can connect with the HMRC API Platform. It also acts as a hands-on tutorial for developers to get started with HMRC APIs.
+  
