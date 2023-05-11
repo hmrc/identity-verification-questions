@@ -31,7 +31,6 @@ class MetricsService @Inject()(val metrics: Metrics) {
   def payslipConnectorTimer: Timer = metrics.defaultRegistry.timer("payslip-rti-connector-response-timer")
   def saPaymentConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-payment-connector-response-timer")
   def saPensionsConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-pensions-connector-response-timer")
-  def vatConnectorTimer: Timer = metrics.defaultRegistry.timer("vat-connector-response-timer")
 
   def timeToGetResponseWithMetrics[T](timer: Timer.Context)(f: => Future[T]): Future[T] = {
     f map { data =>
