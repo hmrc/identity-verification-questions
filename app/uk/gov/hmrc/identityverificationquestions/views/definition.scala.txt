@@ -1,3 +1,6 @@
+@import play.api.libs.json.Json
+@()
+
 {
   "scopes": [],
   "api": {

@@ -3,7 +3,7 @@ openapi: "3.0.3"
 
 info:
   version: 1.0.0
-  title: OpenAPI Example
+  title: identity-verification-questions
 
 servers:
 - url: https://test-api.service.hmrc.gov.uk/test/openapi-hello
