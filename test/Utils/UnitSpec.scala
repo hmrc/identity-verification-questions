@@ -21,7 +21,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.OptionValues
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -31,12 +30,13 @@ import play.api.mvc.Result
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, ResultExtractors, Writeables}
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
-import uk.gov.hmrc.identityverificationquestions.models.CorrelationId
 import uk.gov.hmrc.mongo.MongoComponent
-
-import java.time.format.DateTimeFormatter
+import uk.gov.hmrc.identityverificationquestions.models.CorrelationId
 import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
+
+import org.scalatest.concurrent.ScalaFutures
+
 import scala.concurrent.Future
 
 trait UnitSpec
@@ -54,7 +54,8 @@ trait UnitSpec
     with ScalaFutures
     with GuiceOneAppPerSuite
 {
-  val dateTime: LocalDateTime = LocalDateTime.parse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")))
+
+  val dateTime: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   val dob = "1986-01-01"
   val dobIdentifier: LocalDate = LocalDate.parse(dob)
   val ninoIdentifier: Nino = Nino("AA000000D")
