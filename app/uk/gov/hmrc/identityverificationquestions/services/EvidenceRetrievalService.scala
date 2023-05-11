@@ -27,6 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,14 +57,14 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
           correlationId = corrId,
           selection = selection,
           questions = questionWithAnswers,
-          expiryDate = setExpiryDate))
+          expiryDate = setExpiryDate()))
       }
 
     } yield toResponse(corrId, questionWithAnswers)
   }
 
-  def setExpiryDate: LocalDateTime = {
-    LocalDateTime.now(ZoneOffset.UTC).plus(appConfig.questionRecordTTL)
+  def setExpiryDate(): LocalDateTime = {
+    LocalDateTime.parse(LocalDateTime.now(ZoneOffset.UTC).plus(appConfig.questionRecordTTL).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")))
   }
 
   private def toResponse(correlationId: CorrelationId, qs: Seq[QuestionWithAnswers]): QuestionResponse = {
