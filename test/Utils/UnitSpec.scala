@@ -55,6 +55,11 @@ trait UnitSpec
     with GuiceOneAppPerSuite
 {
 
+   /** we need to truncate the date here to millisecond precision because by default in Java 11
+    *  the precision is nanoseconds, and we lose this precision once data is inserted into Mongo
+    *  For tests that have Scalamock expectations on dateTime data inserted then retrieved from Mongo,
+    *  they will fail unless we truncate to millisecond precision.
+    */
   val dateTime: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   val dob = "1986-01-01"
   val dobIdentifier: LocalDate = LocalDate.parse(dob)
