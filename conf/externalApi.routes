@@ -1,0 +1,4 @@
+# microservice specific routes exposed via API Platform
+
+GET     /api/definition                                  uk.gov.hmrc.identityverificationquestions.controllers.DocumentationController.definition()
+GET     /api/conf/:version/*file                         uk.gov.hmrc.identityverificationquestions.controllers.DocumentationController.conf(version, file)

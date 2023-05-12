@@ -2,186 +2,180 @@
 openapi: "3.0.3"
 
 info:
-  version: 1.0.0
-  title: identity-verification-questions
-
+  title: Identity Verification Questions
+  description: "Identity Verification Questions is a service that confirms a user's identity and provides differing levels of authentication.\n\n### What is this API for?\nIdentity Verification Questions currently only contains one endpoint, which is used to update the outcome of a user's voice ID attempt.\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API. \nSee our [reference guide](/api-documentation/docs/reference-guide#versioning) for more on\nversioning.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response. \nSee our [reference guide](/api-documentation/docs/reference-guide#errors) for more on errors.\nYou can use the sandbox environment to\n[test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing)."
+  contact: {}
+  version: '1.0'
 servers:
-- url: https://test-api.service.hmrc.gov.uk/test/openapi-hello
-  description: Sandbox
-- url: https://api.service.hmrc.gov.uk/test/openapi-hello
-  description: Production
-
+  - url: https://api.service.hmrc.gov.uk/
+    variables: {}
+security:
+  - userRestricted:
+      - voice-biometrics
+paths:
+  /identity-verification-questions/questions:
+    post:
+      tags:
+        - identity-verification-questions
+      summary: Get questions a set of identifiers
+      description: Get questions and a correlation id for a set of identifiers.
+      operationId: Postivqquestion
+      parameters:
+        - name: callback-reference
+          in: path
+          description: The reference ID of the call, which has been both Base64-encoded and URL-encoded. The URL-decoded ID must have a maximum length of 30 characters.
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: dGhpcyBpcyBhbiBleGFtcGxlIGlk
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/IdentityVerificationVoiceBiometricsChallengeResultrequest'
+                - example:
+                    status: Y
+                    description: VB pass
+            examples:
+              success:
+                description: Successful voice biometrics verification
+                value:
+                  status: Y
+                  description: VB pass
+              successWithRetry:
+                description: Successful voice biometrics verification on the second attempt
+                value:
+                  status: Y
+                  description: VB pass
+                  failures:
+                    - key: passphrase
+                      value: 1
+              biometricsFailure:
+                description: Failed voice biometrics verification
+                value:
+                  status: G
+                  description: VB Fail Caller
+                  failures:
+                    - key: silence
+                      value: 1
+                    - key: passphrase
+                      value: 1
+                    - key: voiceprint
+                      value: 1
+              callFailure:
+                description: Failure to contact user
+                value:
+                  status: '8'
+                  description: Customer phone did not answer
+        required: true
+      responses:
+        '204':
+          description: ''
+          headers: {}
+          content: {}
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/errorResponse'
+                  - description: JSON schema validation failure
+                    example:
+                      code: INVALID_JSON_BODY
+              example:
+                code: INVALID_JSON_BODY
+        '409':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/errorResponse'
+                  - description: Business rule violation. This can occur if an attempt is made to update a result that has previously been recorded.
+                    example:
+                      code: CONFLICT
+              example:
+                code: CONFLICT
+      deprecated: false
 components:
-  responses:
-    badOrExpiredTokenResponse:
-      description: |
-        Bad or expired token.
-        This can happen if the user or HMRC revoked or expired an access token.
-        To fix, you should re-authenticate the user.
-      content:
-        application/json:
-          example:
-    forbiddenResponse:
-      description: |
-        Bad OAuth request (wrong consumer key, bad nonce, expired
-        timestamp...). Unfortunately, re-authenticating the user won't help here.
-      content:
-        application/json:
-          example:
-  parameters:
-    acceptHeader:
-      name: Accept
-      in: header
-      schema:
-        type: string
-        enum: [
-          "application/vnd.hmrc.1.0+json",
-          "application/vnd.hmrc.1.0+xml"
-        ]
-      required: true
   securitySchemes:
     userRestricted:
       type: oauth2
       description: |
         HMRC supports OAuth 2.0 for authenticating user restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
         See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
-      flows: 
+      flows:
         authorizationCode:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
           scopes:
-            hello: access hello user
-    applicationRestricted:
-      type: oauth2
-      description: |
-        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
-        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
-      flows:
-        clientCredentials:
-          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
-          scopes: {}
-paths:
-  /world:
-    get:
-      summary: Say hello world
-      description: |
-        A simple example for integrating with an unrestricted service.
-
-        Any request to this endpoint initiates a 'Hello World' response.
-      tags:
-      - open-api-example-microservice
-      parameters:
-      - $ref: '#/components/parameters/acceptHeader'
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: the message contents
-              example: 
-                {
-                  "message" : "Hello World"
-                }
-      security:
-      - {}
-  /application:
-    get:
-      summary: Say hello application
-      description: |
-        A simple example for integrating with an application-restricted service, using an OAuth 2.0 client_credentials grant type.
-
-        Any authorised request to this endpoint initiates a 'Hello Application' response.
-      tags:
-      - open-api-example-microservice
-      parameters:
-      - $ref: '#/components/parameters/acceptHeader'
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: the message contents
-              example:
-                {
-                  "message" : "Hello Application"
-                }
-        401:
-          description: "Unauthorised"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: the error code
-                  message:
-                    type: string
-                    description: the error description
-              example: 
-                {
-                  "code": "MISSING_CREDENTIALS",
-                  "message": "Authentication information is not provided"
-                }
-      security:
-      - applicationRestricted: []
-
-  /user:
-    get:
-      summary: Say hello user
-      description: |
-        A simple example for integrating with a user-restricted service, using an OAuth 2.0 authorization_code grant type.
-
-        Any authorised request to this endpoint initiates a 'Hello User' response.
-      tags:
-      - open-api-example-microservice
-      parameters:
-      - $ref: '#/components/parameters/acceptHeader'
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: the message contents
-              example:
-                {
-                  "message" : "Hello User"
-                }
-        401:
-          description: "Unauthorised"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: the error code
-                  message:
-                    type: string
-                    description: the error description
-              example:
-                {
-                  "code": "MISSING_CREDENTIALS",
-                  "message": "Authentication information is not provided"
-                }
-      security:
-      - userRestricted:
-        - hello
+            identity-verification-questions: the identity verification questions user
+  schemas:
+    errorResponse:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+    IndividualsIvOrchestrationIvSessiondataSearchrequest:
+      title: IndividualsIvOrchestrationIvSessiondataSearchrequest
+      required:
+        - journeyId
+      type: object
+      properties:
+        credId:
+          type: string
+          description: Cred id associated with the stored iv session data
+        journeyId:
+          type: string
+          description: The UUID journey id associated with the iv session data
+      description: Search the iv session data based on cred id and journey id
+    IndividualsIvOrchestrationIvSessiondataSearchresponse:
+      title: IndividualsIvOrchestrationIvSessiondataSearchresponse
+      required:
+        - confidenceLevel
+      type: object
+      properties:
+        nino:
+          type: string
+          description: The NINO associated with the cred id
+        confidenceLevel:
+          type: integer
+          description: The confidence level associated to the cred id
+          format: int32
+        loginTimes:
+          type: string
+          description: The date of the last time the user logged in
+        credentialStrength:
+          type: string
+          description: The credential strength associated to the cred id
+        postCode:
+          type: string
+          description: User's address
+        firstName:
+          type: string
+          description: The firstname of the user
+        lastName:
+          type: string
+          description: The lastname of the user
+        dateOfbirth:
+          type: string
+          description: User's birthday
+        evidencesPassedCount:
+          type: integer
+          description: The number of evidence sources from which questions were answered
+          format: int32
+      description: The iv session data found for the given search
+tags:
+  - name: identity-verification-questions
+    description: ''
         
