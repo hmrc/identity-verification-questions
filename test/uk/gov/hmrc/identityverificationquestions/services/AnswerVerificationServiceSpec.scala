@@ -28,7 +28,6 @@ import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefAnswerServ
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcAnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipAnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAAnswerService
-import uk.gov.hmrc.identityverificationquestions.sources.vat.VatReturnsAnswerService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -140,8 +139,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     val mockPayslipAnswerService: PayslipAnswerService = mock[PayslipAnswerService]
     val mockEmpRefAnswerService: EmpRefAnswerService = mock[EmpRefAnswerService]
     val mockNtcAnswerService: NtcAnswerService = mock[NtcAnswerService]
-    val mockVatReturnsAnswerService: VatReturnsAnswerService = mock[VatReturnsAnswerService]
-    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService, mockPayslipAnswerService, mockNtcAnswerService, mockEmpRefAnswerService, mockVatReturnsAnswerService)
+    val service = new AnswerVerificationService(mockP60AnswerService, mockSAAnswerService, mockPayslipAnswerService, mockNtcAnswerService, mockEmpRefAnswerService)
 
     val answerDetailsForP60: Seq[AnswerDetails] = Seq(AnswerDetails(PaymentToDate, SimpleAnswer("an answer")))
     val answerCheckForP60: AnswerCheck = AnswerCheck(corrId, answerDetailsForP60, None)
@@ -154,7 +152,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
     (mockPayslipAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
     (mockEmpRefAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockVatReturnsAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
     (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
   }
 
@@ -162,7 +159,6 @@ class AnswerVerificationServiceSpec extends UnitSpec {
     (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
     (mockPayslipAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
     (mockEmpRefAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockVatReturnsAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
     (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
   }
 }
