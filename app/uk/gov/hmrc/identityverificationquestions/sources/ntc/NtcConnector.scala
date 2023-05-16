@@ -18,7 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.ntc
 
 import play.api.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -62,7 +62,11 @@ class NtcConnector @Inject()(val http: CoreGet, metricsService: MetricsService, 
       selection.nino.fold(Future.successful(Seq.empty[TaxCreditRecord])) { nino =>
         http.GET[TaxCreditClaim](s"$baseUrl/national-tax-credits/citizens/${nino.value}/verification-data", headers = headers)(
           implicitly[HttpReads[TaxCreditClaim]], hc, ec
-        ).map(selectRecords)
+        ).map(selectRecords).recoverWith {
+          case e: UpstreamErrorResponse if e.statusCode == 404 =>
+            logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
+            Future.successful(Seq())
+        }
       }
     }
 
