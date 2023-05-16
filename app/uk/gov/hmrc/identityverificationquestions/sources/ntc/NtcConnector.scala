@@ -66,7 +66,6 @@ class NtcConnector @Inject()(val http: CoreGet, metricsService: MetricsService, 
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
             Future.successful(Seq())
-          case _: NotFoundException => Future.successful(Seq())
         }
       }
     }
