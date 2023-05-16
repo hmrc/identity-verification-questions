@@ -11,7 +11,7 @@ servers:
     variables: {}
 security:
   - userRestricted:
-      - voice-biometrics
+      - identity-verification-questions
 paths:
   /identity-verification-questions/questions:
     post:
@@ -34,8 +34,10 @@ paths:
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/IdentityVerificationVoiceBiometricsChallengeResultrequest'
+              anyOf:
+                - $ref: '#/components/schemas/questions/nino'
+                - $ref: '#/components/schemas/questions/sautr'
+                - $ref: '#/components/schemas/questions/payRef'
                 - example:
                     status: Y
                     description: VB pass
@@ -45,31 +47,6 @@ paths:
                 value:
                   status: Y
                   description: VB pass
-              successWithRetry:
-                description: Successful voice biometrics verification on the second attempt
-                value:
-                  status: Y
-                  description: VB pass
-                  failures:
-                    - key: passphrase
-                      value: 1
-              biometricsFailure:
-                description: Failed voice biometrics verification
-                value:
-                  status: G
-                  description: VB Fail Caller
-                  failures:
-                    - key: silence
-                      value: 1
-                    - key: passphrase
-                      value: 1
-                    - key: voiceprint
-                      value: 1
-              callFailure:
-                description: Failure to contact user
-                value:
-                  status: '8'
-                  description: Customer phone did not answer
         required: true
       responses:
         '200':
@@ -132,31 +109,6 @@ paths:
                 value:
                   status: Y
                   description: VB pass
-              successWithRetry:
-                description: Successful voice biometrics verification on the second attempt
-                value:
-                  status: Y
-                  description: VB pass
-                  failures:
-                    - key: passphrase
-                      value: 1
-              biometricsFailure:
-                description: Failed voice biometrics verification
-                value:
-                  status: G
-                  description: VB Fail Caller
-                  failures:
-                    - key: silence
-                      value: 1
-                    - key: passphrase
-                      value: 1
-                    - key: voiceprint
-                      value: 1
-              callFailure:
-                description: Failure to contact user
-                value:
-                  status: '8'
-                  description: Customer phone did not answer
         required: true
       responses:
         '200':
@@ -214,81 +166,89 @@ components:
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
           scopes:
             identity-verification-questions: the identity verification questions user
-schemas:
-  errorResponse:
-    title: errorResponse
-    required:
-      - code
-    type: object
-    properties:
-      code:
-        type: string
-  questions:
-    title: questions
-    type: object
-    properties:
-      nino:
-        type: string
-        description: The NINO associated with the cred id
-      sautr:
-        type: string
-        description: The sautr associated with the cred id
-      payRef:
-        type: object
-        description: This is the reference associated with the cred id that consists of the tax office number and tax office reference
-        required:
-          - taxOfficeNumber
-          - taxOfficeReference
-        properties:
-          taxOfficeNumber:
-            type: string
-          taxOfficeReference:
-            type: string
-  answers:
-    title: answers
-    required:
-      - correlationId
-      - answers
-    type: object
-    properties:
-      correlationId:
-        type: string
-        description: The correlationId associated with the stored answers ivq
-      selection:
-        type: object
-        description: The identifier to be used to select the questions/answers evidence sources that will be check
-        properties:
-          nino:
-            type: string
-            description: The NINO associated with the cred id
-          sautr:
-            type: string
-            description: The sautr associated with the cred id
-          payRef:
-            type: object
-            description: This is the reference associated with the cred id that consists of the tax office number and tax office reference
-            required:
-              - taxOfficeNumber
-              - taxOfficeReference
-            properties:
-              taxOfficeNumber:
-                type: string
-              taxOfficeReference:
-                type: string
-      answers:
-        type: object
-        description: The answers with the associated question key to be checked against the data sources
-        properties:
-          questionKey:
-            type: string
-            description: The question key relating to the question
-          answer:
-            type: string
-            description: The answer relating to the question
-      ivJourney:
-        type: object
-        description: the iv journey
-        properties:
+  schemas:
+    errorResponse:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+    questions:
+      title: questions
+      type: object
+      properties:
+        nino:
+          type: string
+          description: The NINO associated with the cred id
+        sautr:
+          type: string
+          description: The sautr associated with the cred id
+        payRef:
+          type: object
+          description: This is the reference associated with the cred id that consists of the tax office number and tax office reference
+          required:
+            - taxOfficeNumber
+            - taxOfficeReference
+          properties:
+            taxOfficeNumber:
+              type: string
+            taxOfficeReference:
+              type: string
+    answers:
+      title: answers
+      required:
+        - correlationId
+        - answers
+      type: object
+      properties:
+        correlationId:
+          type: string
+          description: The correlationId associated with the stored answers ivq
+        selection:
+          type: object
+          description: The identifier to be used to select the questions/answers evidence sources that will be check
+          properties:
+            nino:
+              type: string
+              description: The NINO associated with the cred id
+            sautr:
+              type: string
+              description: The sautr associated with the cred id
+            payRef:
+              type: object
+              description: This is the reference associated with the cred id that consists of the tax office number and tax office reference
+              required:
+                - taxOfficeNumber
+                - taxOfficeReference
+              properties:
+                taxOfficeNumber:
+                  type: string
+                taxOfficeReference:
+                  type: string
+        answers:
+          type: object
+          description: The answers with the associated question key to be checked against the data sources
+          properties:
+            questionKey:
+              type: string
+              description: The question key relating to the question
+            answer:
+              type: string
+              description: The answer relating to the question
+        ivJourney:
+          type: object
+          description: the iv journey object passed from the identity verification microservice for metrics
+          properties:
+            journeyId:
+              type: string
+            journeyType:
+              type: string
+            authProviderId:
+              type: string
+            origin:
+              type: string
 tags:
   - name: identity-verification-questions
     description: ''
