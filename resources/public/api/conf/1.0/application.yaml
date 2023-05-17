@@ -3,7 +3,7 @@ openapi: "3.0.3"
 
 info:
   title: Identity Verification Questions
-  description: "Identity Verification Questions is a service that confirms a user's identity and provides differing levels of authentication.\n\n### What is this API for?\nIdentity Verification Questions currently only contains one endpoint, which is used to update the outcome of a user's voice ID attempt.\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API. \nSee our [reference guide](/api-documentation/docs/reference-guide#versioning) for more on\nversioning.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response. \nSee our [reference guide](/api-documentation/docs/reference-guide#errors) for more on errors.\nYou can use the sandbox environment to\n[test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing)."
+  description: "Identity Verification Questions is a service that provide question data and answer processing by unique user identifier for all verification services in MDTP.\n### What is this API for?\nIdentity Verification Questions currently only contains two endpoint.\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response.\nYou can use the sandbox environment to\n[test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing)."
   contact: {}
   version: '1.0'
 servers:
@@ -17,7 +17,7 @@ paths:
     post:
       tags:
         - identity-verification-questions
-      summary: Get questions a set of identifiers
+      summary: Get questions from a set of identifiers
       description: Get questions and a correlation id for a set of identifiers.
       operationId: Postivqquestion
       parameters: []
@@ -33,10 +33,10 @@ paths:
                 description: Successful IV question response body with all the possible identifiers
                 value:
                   nino: AA000003D
-                  sautr: 1234567890
+                  sautr: "1234567890"
                   payRef:
-                    taxOfficeNumber: 123
-                    taxOfficeReference: 4887762099
+                    taxOfficeNumber: "123"
+                    taxOfficeReference: "4887762099"
         required: true
       responses:
         '200':
@@ -88,9 +88,9 @@ paths:
                       nino: AA000000A
                     answers:
                       - questionKey: rti-p60-payment-for-year
-                        answer: 100.00
+                        answer: "100.00"
                       - questionKey: rti-p60-employee-ni-contributions
-                        answer: 250.00
+                        answer: "250.00"
                 requestWithIV:
                   description: Valid IV answers request body with IV journey parameters
                   value:
@@ -99,9 +99,9 @@ paths:
                       nino: AA000000A
                     answers:
                       - questionKey: rti-p60-payment-for-year
-                        answer: 100.00
+                        answer: "100.00"
                       - questionKey: rti-p60-employee-ni-contributions
-                        answer: 250.00
+                        answer: "250.00"
 
                     ivJourney:
                         journeyId: journeyId
