@@ -149,8 +149,7 @@ components:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
-          scopes:
-            identity-verification-questions: the identity verification questions user
+
   schemas:
     questions:
       title: questions
