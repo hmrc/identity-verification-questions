@@ -20,30 +20,35 @@ paths:
       summary: Get questions a set of identifiers
       description: Get questions and a correlation id for a set of identifiers.
       operationId: Postivqquestion
-      parameters:
-        - name: callback-reference
-          in: path
-          description: The reference ID of the call, which has been both Base64-encoded and URL-encoded. The URL-decoded ID must have a maximum length of 30 characters.
-          required: true
-          style: simple
-          schema:
-            type: string
-            example: dGhpcyBpcyBhbiBleGFtcGxlIGlk
+      parameters: []
       requestBody:
         description: ''
         content:
           application/json:
             schema:
               anyOf:
-                correlationId: "d705f45e-14fd-4b99-ae7c-b1d4446d659b",
-                - $ref: '#/components/schemas/questions/sautr'
-                - $ref: '#/components/schemas/questions/payRef'
-                - example:
-                    status: Y
-                    description: VB pass
+                - $ref: '#/components/schemas/questions'
             examples:
-              response:
-                description: Successful IV question response body
+              request:
+                description: Successful IV question response body with all the possible identifiers
+                value:
+                  nino: AA000003D
+                  sautr: 1234567890
+                  payRef:
+                    taxOfficeNumber: 123
+                    taxOfficeReference: 4887762099
+        required: true
+      responses:
+        '200':
+          description: 'Returns a correlation id, along with a (possibly empty) set of questions for the identifiers given'
+          headers: {}
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/questionsResponse'
+                  - description : JSON schema validation success
+              example:
                 value:
                   correlationId: d705f45e-14fd-4b99-ae7c-b1d4446d659b
                   questions:
@@ -54,36 +59,10 @@ paths:
                     - questionKey: rti-p60-employee-ni-contributions
                       info:
                         currentTaxYear: 2021/22
-                        previousTaxYear: 2020/21
-        required: true
-      responses:
-        '200':
-          description: 'Returns a correlation id, along with a (possibly empty) set of questions for the identifiers given'
-          headers: {}
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/questions'
-                  - description : JSON schema validation success
-                    example:
-                      code: INVALID_JSON_BODY
-              example:
-                code: INVALID_JSON_BODY
-
+                        previousTaxYear: 2020/21Y
         '403':
           description: 'You are not authorized to use the question repository'
           headers: {}
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/errorResponse'
-                  - description: JSON schema validation failure
-                    example:
-                      code: INVALID_JSON_BODY
-              example:
-                code: INVALID_JSON_BODY
       deprecated: false
   /identity-verification-questions/answers:
     post:
@@ -92,29 +71,17 @@ paths:
       summary: check answers for given questions with a set of identifiers
       description: Send a correlation id and identifier selection, along with answer data for each question from the user
       operationId: Postivanswers
-      parameters:
-        - name: callback-reference
-          in: path
-          description: The reference ID of the call, which has been both Base64-encoded and URL-encoded. The URL-decoded ID must have a maximum length of 30 characters.
-          required: true
-          style: simple
-          schema:
-            type: string
-            example: dGhpcyBpcyBhbiBleGFtcGxlIGlk
+      parameters: []
       requestBody:
         description: ''
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/IdentityVerificationVoiceBiometricsChallengeResultrequest'
-                - example:
-                    status: Y
-                    description: VB pass
+              anyOf:
+                - $ref: '#/components/schemas/answers'
             examples:
-              success:
-                response:
-                  description: Successful IV answers response body
+                request:
+                  description: Valid IV answers request body
                   value:
                     correlationId: 66d89bcf-847e-446e-b0e9-348591d118d3
                     selection:
@@ -124,6 +91,23 @@ paths:
                         answer: 100.00
                       - questionKey: rti-p60-employee-ni-contributions
                         answer: 250.00
+                requestWithIV:
+                  description: Valid IV answers request body with IV journey parameters
+                  value:
+                    correlationId: 66d89bcf-847e-446e-b0e9-348591d118d3
+                    selection:
+                      nino: AA000000A
+                    answers:
+                      - questionKey: rti-p60-payment-for-year
+                        answer: 100.00
+                      - questionKey: rti-p60-employee-ni-contributions
+                        answer: 250.00
+
+                    ivJourney:
+                        journeyId: journeyId
+                        journeyType: journeyType
+                        authProviderId: authProviderId
+                        origin: origin
         required: true
       responses:
         '200':
@@ -133,38 +117,24 @@ paths:
             application/json:
               schema:
                 anyOf:
-                  - $ref: '#/components/schemas/answers'
-                  - description : JSON schema validation success
+                  - $ref: '#/components/schemas/answersResponse'
+                  - description : a valid answer response
                     example:
-                      code: INVALID_JSON_BODY
+                      - questionKey: rti-p60-payment-for-year
+                        score: incorrect
+                      - questionKey: rti-p60-employee-ni-contributions
+                        score: correct
               example:
-                code: INVALID_JSON_BODY
+                - questionKey: rti-p60-payment-for-year
+                  score: incorrect
+                - questionKey: rti-p60-employee-ni-contributions
+                  score: correct
         '403':
           description: 'You are not authorized to use the question repository'
           headers: {}
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/errorResponse'
-                  - description: JSON schema validation failure
-                    example:
-                      code: INVALID_JSON_BODY
-              example:
-                code: INVALID_JSON_BODY
         '404':
           description: 'The supplied correlation id and selection did not match any known questions'
           headers: {}
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/errorResponse'
-                  - description: JSON schema validation failure
-                    example:
-                      code: INVALID_JSON_BODY
-              example:
-                code: INVALID_JSON_BODY
       deprecated: false
 
 components:
@@ -182,14 +152,6 @@ components:
           scopes:
             identity-verification-questions: the identity verification questions user
   schemas:
-    errorResponse:
-      title: errorResponse
-      required:
-        - code
-      type: object
-      properties:
-        code:
-          type: string
     questions:
       title: questions
       type: object
@@ -211,6 +173,31 @@ components:
               type: string
             taxOfficeReference:
               type: string
+    questionsResponse:
+      title: questionsResponse
+      required:
+        - correlationId
+        - answers
+      type: object
+      properties:
+        correlationId:
+          type: string
+          description: The correlationId associated with the stored answers ivq
+        question:
+          type: object
+          description: This is an array of questionKeys and related info to it
+          properties:
+            questionKey:
+              type: string
+              description: The question key relating to the question
+            info:
+              type: object
+              description: related information to questionKey that can be asked to the user
+              properties:
+                currentTaxYear:
+                  type: string
+                previousTaxYear:
+                  type: string
     answers:
       title: answers
       required:
@@ -264,6 +251,43 @@ components:
               type: string
             origin:
               type: string
+    answersResponse:
+      title: answersResponse
+      required:
+        - questionKey
+        - score
+      type: object
+      properties:
+        questionKey:
+          type: string
+          description: The question key associated with question
+        score:
+          type: string
+          description: The result of the answers submitted, either correct or incorrect
+    questionKey:
+      title: questionKey
+      type: string
+      enum:
+        - rti-p60-payment-for-year
+        - rti-p60-employee-ni-contributions
+        - rti-p60-earnings-above-pt
+        - rti-p60-statutory-maternity-pay
+        - rti-p60-statutory-shared-parental-pay
+        - rti-p60-statutory-adoption-pay
+        - rti-p60-student-loan-deductions
+        - rti-p60-postgraduate-loan-deductions
+        - rti-payslip-income-tax
+        - rti-payslip-national-insurance
+        - passport
+        - scpEmail
+        - dvla
+        - sa-income-from-pensions
+        - sa-payment-details
+        - paye-date-of-payment
+        - paye-payment-amount
+        - ita-bankaccount
+        - tc-amount
+
 tags:
   - name: identity-verification-questions
     description: ''
