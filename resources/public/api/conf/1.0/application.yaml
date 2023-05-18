@@ -3,17 +3,19 @@ openapi: "3.0.3"
 
 info:
   title: Identity Verification Questions
-  description: "Identity Verification Questions is a service that provide question data and answer processing by unique user identifier for all verification services in MDTP.\n### What is this API for?\nIdentity Verification Questions currently only contains two endpoint.\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response.\nYou can use the sandbox environment to\n[test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing)."
+  description: "Identity Verification Questions is a service that provides question data and answers by processing the users identifier for all verification services in MDTP.\n### What is this API for?\nIdentity Verification Questions currently only contains two endpoint.\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response.\nYou can use the sandbox environment to\n[test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing)."
   contact: {}
   version: '1.0'
 servers:
+  - url: https://test-api.service.hmrc.gov.uk/
+    description: Sandbox
   - url: https://api.service.hmrc.gov.uk/
-    variables: {}
+    description: Production
 security:
   - userRestricted:
       - identity-verification-questions
 paths:
-  /identity-verification-questions/questions:
+  /individuals/identity-verification-questions/questions:
     post:
       tags:
         - identity-verification-questions
@@ -64,7 +66,7 @@ paths:
           description: 'You are not authorized to use the question repository'
           headers: {}
       deprecated: false
-  /identity-verification-questions/answers:
+  /individuals/identity-verification-questions/answers:
     post:
       tags:
         - identity-verification-questions
@@ -149,7 +151,8 @@ components:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
-
+          scopes:
+            identity-verification-questions: the identity-verification-questions user
   schemas:
     questions:
       title: questions

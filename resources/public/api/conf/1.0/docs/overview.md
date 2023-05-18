@@ -1,4 +1,4 @@
-Identity Verification Questions is a service that provide question data and answer processing by unique user identifier for all verification services in MDTP.
+Identity Verification Questions is a service that provides question data and answers by processing the users identifier for all verification services in MDTP.
 ### What is this API for?
 Identity Verification Questions currently only contains two endpoint.
 When an API changes in a way that is backwards-incompatible, we increase the version number of the API.

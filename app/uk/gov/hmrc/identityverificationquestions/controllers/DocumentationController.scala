@@ -32,16 +32,26 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
   val definitionJson: String =
     """
       |{
-      |  "scopes": [],
+      |  "scopes": [
+      |    {
+      |      "key": "identity-verification-questions",
+      |      "name": "identity-verification-questions",
+      |      "description": "This service checks if users are authorised and allowed to retrieve session data"
+      |    }
+      |  ],
       |  "api": {
       |    "name": "Identity Verification Questions",
       |    "description": "Backend service to provide question data and answer processing by unique user identifier for all verification services in MDTP",
-      |    "context": "identity-verification-questions",
+      |    "context": "individuals/identity-verification-questions",
       |    "versions": [
       |      {
       |        "version": "1.0",
       |        "status": "STABLE",
       |        "endpointsEnabled": true
+      |        "access": {
+      |              "type": "PRIVATE"
+      |             }
+      |        }
       |      }
       |    ]
       |  }
