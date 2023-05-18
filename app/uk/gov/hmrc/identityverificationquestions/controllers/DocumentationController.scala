@@ -34,7 +34,7 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
       |{
       |  "scopes": [],
       |  "api": {
-      |    "name": "identity-verification-questions",
+      |    "name": "Identity Verification Questions",
       |    "description": "Backend service to provide question data and answer processing by unique user identifier for all verification services in MDTP",
       |    "context": "identity-verification-questions",
       |    "versions": [
