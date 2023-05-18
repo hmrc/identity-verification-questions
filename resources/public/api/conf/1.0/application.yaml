@@ -1,0 +1,293 @@
+
+openapi: "3.0.3"
+
+info:
+  title: Identity Verification Questions
+  description: "Identity Verification Questions is a service that provide question data and answer processing by unique user identifier for all verification services in MDTP.\n### What is this API for?\nIdentity Verification Questions currently only contains two endpoint.\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response.\nYou can use the sandbox environment to\n[test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing)."
+  contact: {}
+  version: '1.0'
+servers:
+  - url: https://api.service.hmrc.gov.uk/
+    variables: {}
+security:
+  - userRestricted:
+      - identity-verification-questions
+paths:
+  /identity-verification-questions/questions:
+    post:
+      tags:
+        - identity-verification-questions
+      summary: Get questions from a set of identifiers
+      description: Get questions and a correlation id for a set of identifiers.
+      operationId: Postivqquestion
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/questions'
+            examples:
+              request:
+                description: Successful IV question response body with all the possible identifiers
+                value:
+                  nino: AA000003D
+                  sautr: "1234567890"
+                  payRef:
+                    taxOfficeNumber: "123"
+                    taxOfficeReference: "4887762099"
+        required: true
+      responses:
+        '200':
+          description: 'Returns a correlation id, along with a (possibly empty) set of questions for the identifiers given'
+          headers: {}
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/questionsResponse'
+                  - description : JSON schema validation success
+              example:
+                value:
+                  correlationId: d705f45e-14fd-4b99-ae7c-b1d4446d659b
+                  questions:
+                    - questionKey: rti-p60-payment-for-year
+                      info:
+                        currentTaxYear: 2021/22
+                        previousTaxYear: 2020/21
+                    - questionKey: rti-p60-employee-ni-contributions
+                      info:
+                        currentTaxYear: 2021/22
+                        previousTaxYear: 2020/21Y
+        '403':
+          description: 'You are not authorized to use the question repository'
+          headers: {}
+      deprecated: false
+  /identity-verification-questions/answers:
+    post:
+      tags:
+        - identity-verification-questions
+      summary: check answers for given questions with a set of identifiers
+      description: Send a correlation id and identifier selection, along with answer data for each question from the user
+      operationId: Postivanswers
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/answers'
+            examples:
+                request:
+                  description: Valid IV answers request body
+                  value:
+                    correlationId: 66d89bcf-847e-446e-b0e9-348591d118d3
+                    selection:
+                      nino: AA000000A
+                    answers:
+                      - questionKey: rti-p60-payment-for-year
+                        answer: "100.00"
+                      - questionKey: rti-p60-employee-ni-contributions
+                        answer: "250.00"
+                requestWithIV:
+                  description: Valid IV answers request body with IV journey parameters
+                  value:
+                    correlationId: 66d89bcf-847e-446e-b0e9-348591d118d3
+                    selection:
+                      nino: AA000000A
+                    answers:
+                      - questionKey: rti-p60-payment-for-year
+                        answer: "100.00"
+                      - questionKey: rti-p60-employee-ni-contributions
+                        answer: "250.00"
+
+                    ivJourney:
+                        journeyId: journeyId
+                        journeyType: journeyType
+                        authProviderId: authProviderId
+                        origin: origin
+        required: true
+      responses:
+        '200':
+          description: 'The outcome of the answer check, indicating a correct or incorrect response'
+          headers: {}
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/answersResponse'
+                  - description : a valid answer response
+                    example:
+                      - questionKey: rti-p60-payment-for-year
+                        score: incorrect
+                      - questionKey: rti-p60-employee-ni-contributions
+                        score: correct
+              example:
+                - questionKey: rti-p60-payment-for-year
+                  score: incorrect
+                - questionKey: rti-p60-employee-ni-contributions
+                  score: correct
+        '403':
+          description: 'You are not authorized to use the question repository'
+          headers: {}
+        '404':
+          description: 'The supplied correlation id and selection did not match any known questions'
+          headers: {}
+      deprecated: false
+
+components:
+  securitySchemes:
+    userRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating user restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+
+  schemas:
+    questions:
+      title: questions
+      type: object
+      properties:
+        nino:
+          type: string
+          description: The NINO associated with the cred id
+        sautr:
+          type: string
+          description: The sautr associated with the cred id
+        payRef:
+          type: object
+          description: This is the reference associated with the cred id that consists of the tax office number and tax office reference
+          required:
+            - taxOfficeNumber
+            - taxOfficeReference
+          properties:
+            taxOfficeNumber:
+              type: string
+            taxOfficeReference:
+              type: string
+    questionsResponse:
+      title: questionsResponse
+      required:
+        - correlationId
+        - answers
+      type: object
+      properties:
+        correlationId:
+          type: string
+          description: The correlationId associated with the stored answers ivq
+        question:
+          type: object
+          description: This is an array of questionKeys and related info to it
+          properties:
+            questionKey:
+              type: string
+              description: The question key relating to the question
+            info:
+              type: object
+              description: related information to questionKey that can be asked to the user
+              properties:
+                currentTaxYear:
+                  type: string
+                previousTaxYear:
+                  type: string
+    answers:
+      title: answers
+      required:
+        - correlationId
+        - answers
+      type: object
+      properties:
+        correlationId:
+          type: string
+          description: The correlationId associated with the stored answers ivq
+        selection:
+          type: object
+          description: The identifier to be used to select the questions/answers evidence sources that will be check
+          properties:
+            nino:
+              type: string
+              description: The NINO associated with the cred id
+            sautr:
+              type: string
+              description: The sautr associated with the cred id
+            payRef:
+              type: object
+              description: This is the reference associated with the cred id that consists of the tax office number and tax office reference
+              required:
+                - taxOfficeNumber
+                - taxOfficeReference
+              properties:
+                taxOfficeNumber:
+                  type: string
+                taxOfficeReference:
+                  type: string
+        answers:
+          type: object
+          description: The answers with the associated question key to be checked against the data sources
+          properties:
+            questionKey:
+              type: string
+              description: The question key relating to the question
+            answer:
+              type: string
+              description: The answer relating to the question
+        ivJourney:
+          type: object
+          description: the iv journey object passed from the identity verification microservice for metrics
+          properties:
+            journeyId:
+              type: string
+            journeyType:
+              type: string
+            authProviderId:
+              type: string
+            origin:
+              type: string
+    answersResponse:
+      title: answersResponse
+      required:
+        - questionKey
+        - score
+      type: object
+      properties:
+        questionKey:
+          type: string
+          description: The question key associated with question
+        score:
+          type: string
+          description: The result of the answers submitted, either correct or incorrect
+    questionKey:
+      title: questionKey
+      type: string
+      enum:
+        - rti-p60-payment-for-year
+        - rti-p60-employee-ni-contributions
+        - rti-p60-earnings-above-pt
+        - rti-p60-statutory-maternity-pay
+        - rti-p60-statutory-shared-parental-pay
+        - rti-p60-statutory-adoption-pay
+        - rti-p60-student-loan-deductions
+        - rti-p60-postgraduate-loan-deductions
+        - rti-payslip-income-tax
+        - rti-payslip-national-insurance
+        - passport
+        - scpEmail
+        - dvla
+        - sa-income-from-pensions
+        - sa-payment-details
+        - paye-date-of-payment
+        - paye-payment-amount
+        - ita-bankaccount
+        - tc-amount
+
+tags:
+  - name: identity-verification-questions
+    description: ''
+        

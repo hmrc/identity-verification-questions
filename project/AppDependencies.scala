@@ -8,6 +8,7 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "domain"                     % "8.0.0-play-28",
     "com.typesafe.play"       %% "play-json-joda"             % "2.9.2",
     "uk.gov.hmrc"             %% "reactive-circuit-breaker"   % "3.5.0"
+
   )
 
   val test = Seq(
