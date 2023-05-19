@@ -46,7 +46,12 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
       (mockNtcService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
       (mockAppConfig.ntcIsEnabled _).expects().returning(true)
-      val result: QuestionResponse = service.callAllEvidenceSources(selection).futureValue
+      (mockP60Service.isUserAllowed(_:String)).expects(userAgent).returning(true)
+      (mockPayslipService.isUserAllowed(_:String)).expects(userAgent).returning(true)
+      (mockSAService.isUserAllowed(_:String)).expects(userAgent).returning(true)
+      (mockEmpRefService.isUserAllowed(_:String)).expects(userAgent).returning(true)
+      (mockNtcService.isUserAllowed(_:String)).expects(userAgent).returning(true)
+      val result: QuestionResponse = service.callAllEvidenceSources(selection, userAgent).futureValue
       result.questions shouldBe Seq.empty[QuestionWithAnswers]
     }
   }
@@ -78,6 +83,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")
     val empRefIdentifier: EmpRef = EmpRef("711", "4887762099")
     val selection: Selection = Selection(Some(ninoIdentifier), Some(saUtrIdentifier), Some(dobIdentifier), Some(empRefIdentifier))
+    val userAgent: String = "identity-verification"
 
     case class TestRecord(value: BigDecimal)
   }

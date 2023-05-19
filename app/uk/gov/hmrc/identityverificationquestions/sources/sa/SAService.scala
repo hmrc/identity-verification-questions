@@ -59,4 +59,6 @@ class SAService @Inject() (
   override def connector: connectors.QuestionConnector[SelfAssessmentReturn] = ???
 
   override def evidenceTransformer(records: Seq[SelfAssessmentReturn], corrId: CorrelationId): Seq[QuestionWithAnswers] = ???
+
+  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForSA
 }

@@ -43,6 +43,8 @@ class EmpRefService @Inject()(empRefConnector: EmpRefConnector,
 
   override def serviceName: ServiceName = desPayeService
 
+  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForPaye
+
   override def connector: QuestionConnector[PayePaymentsDetails] = empRefConnector
 
   override def evidenceTransformer(records: Seq[PayePaymentsDetails], corrId: CorrelationId): Seq[QuestionWithAnswers] = {

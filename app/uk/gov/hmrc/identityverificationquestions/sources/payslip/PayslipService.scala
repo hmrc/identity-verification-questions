@@ -47,6 +47,8 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector,
 
   override def connector: QuestionConnector[Payment] = payslipConnector
 
+  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForPayslip
+
   override def evidenceTransformer(records: Seq[Payment], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
     def additionalInfoMap = Map("months" -> payslipMonths.toString)
 
@@ -64,4 +66,5 @@ class PayslipService @Inject()(payslipConnector: PayslipConnector,
 
     payslipQuestions
   }
+
 }
