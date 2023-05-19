@@ -15,7 +15,7 @@ security:
   - userRestricted:
       - identity-verification-questions
 paths:
-  /individuals/identity-verification-questions/questions:
+  /individuals/verification/identity-verification-questions/questions:
     post:
       tags:
         - identity-verification-questions
@@ -66,7 +66,7 @@ paths:
           description: 'You are not authorized to use the question repository'
           headers: {}
       deprecated: false
-  /individuals/identity-verification-questions/answers:
+  /individuals/verification/identity-verification-questions/answers:
     post:
       tags:
         - identity-verification-questions

@@ -36,7 +36,7 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
       |  "api": {
       |    "name": "Identity Verification Questions",
       |    "description": "Backend service to provide question data and answer processing by unique user identifier for all verification services in MDTP",
-      |    "context": "individuals/identity-verification-questions",
+      |    "context": "individuals/verification",
       |    "versions": [
       |      {
       |        "version": "1.0",
@@ -45,7 +45,6 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
       |        "access": {
       |              "type": "PRIVATE"
       |             }
-      |        }
       |      }
       |    ]
       |  }
