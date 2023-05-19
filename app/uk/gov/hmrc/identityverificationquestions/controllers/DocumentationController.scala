@@ -36,7 +36,7 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
       |    {
       |      "key": "identity-verification-questions",
       |      "name": "identity-verification-questions",
-      |      "description": "This service checks if users are authorised and allowed to retrieve session data"
+      |      "description": "This service checks if users are authorised and allowed to use identity verification questions"
       |    }
       |  ],
       |  "api": {
