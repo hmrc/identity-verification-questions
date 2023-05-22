@@ -21,7 +21,6 @@ import Utils.testData.AppConfigTestData
 import play.api.Configuration
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.{ServiceName, p60Service}
-import uk.gov.hmrc.identityverificationquestions.services.utilities.{TaxYear, TaxYearBuilder}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.LocalDate

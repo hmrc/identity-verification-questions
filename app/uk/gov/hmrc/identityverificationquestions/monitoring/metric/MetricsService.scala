@@ -20,10 +20,9 @@ import com.codahale.metrics.{Gauge, MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class MetricsService @Inject()(val metrics: Metrics) {
+class MetricsService @Inject()(val metrics: Metrics)(implicit executionContext: ExecutionContext) {
 
   def payeConnectorTimer: Timer = metrics.defaultRegistry.timer("pay-as-you-earn-emp-connector-response-timer")
   def ntcConnectorTimer: Timer = metrics.defaultRegistry.timer("national-tax-credits-connector-response-timer")
