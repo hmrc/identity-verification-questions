@@ -35,7 +35,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def allowedUserAgentList: Seq[String] = getStringList("allowedUserAgentList").getOrElse(Seq.empty[String])
 
-  def deniedUserAgentListForP60: Seq[String] = getStringList("deniedUserAgentListForPaye").getOrElse(Seq.empty[String])
+  def deniedUserAgentListForP60: Seq[String] = getStringList("deniedUserAgentListForP60").getOrElse(Seq.empty[String])
   def deniedUserAgentListForSA: Seq[String] = getStringList("deniedUserAgentListForSA").getOrElse(Seq.empty[String])
   def deniedUserAgentListForPayslip: Seq[String] = getStringList("deniedUserAgentListForPayslip").getOrElse(Seq.empty[String])
   def deniedUserAgentListForNtc: Seq[String] = getStringList("deniedUserAgentListForNtc").getOrElse(Seq.empty[String])
