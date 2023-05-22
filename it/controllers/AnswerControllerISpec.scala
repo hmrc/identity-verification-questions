@@ -21,7 +21,7 @@ import play.api.libs.json.{JsString, JsSuccess, Json}
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, AnswerDetails, Correct, CorrelationId, Incorrect, QuestionDataCache, QuestionResult, QuestionWithAnswers, Selection, SimpleAnswer, Unknown}
+import uk.gov.hmrc.identityverificationquestions.models._
 
 import java.time.{LocalDateTime, ZoneOffset}
 

@@ -20,6 +20,7 @@ import Utils.UnitSpec
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MetricsServiceSpec extends UnitSpec {

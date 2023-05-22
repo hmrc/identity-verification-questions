@@ -45,7 +45,7 @@ class SAAnswerConnector @Inject()(appConfig: AppConfig, questionRepo: QuestionMo
     val offset: Int = appConfig.saAnswerOffset
     val intAnswer: BigInt = BigInt(answerDetails.answer.toString)
     questionDataCaches.flatMap(qdc => qdc.questions.filter(_.questionKey == answerDetails.questionKey)
-      .flatMap(_.answers)).map(BigDecimal(_)).map(_.toBigInt()).count(a => a - offset <= intAnswer && a + offset >= intAnswer) match {
+      .flatMap(_.answers)).map(BigDecimal(_)).map(_.toBigInt).count(a => a - offset <= intAnswer && a + offset >= intAnswer) match {
       case 0 => Incorrect
       case _ => Correct
     }
