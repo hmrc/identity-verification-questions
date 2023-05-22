@@ -32,7 +32,7 @@ class SAPaymentsConnectorSpec extends UnitSpec {
   "sa payments connector" should {
     "return an existing self assessment payments returns" in new Setup {
       val expectedData = List(SAPayment(BigDecimal(1550), Some(LocalDate.now()), Some("PYT")))
-      val expectedResult = List(SAPaymentReturn(expectedData.to[Vector]))
+      val expectedResult = List(SAPaymentReturn(expectedData))
 
       val expectedUrl = s"$mockedBaseUrl/individuals/self-assessment/payments/utr/$TEST_SAUTR"
 
@@ -46,7 +46,7 @@ class SAPaymentsConnectorSpec extends UnitSpec {
 
     "return an existing self assessment payment returns using SaUtr" in new Setup {
       val expectedData = List(SAPayment(BigDecimal(1550), Some(LocalDate.now()), Some("PYT")))
-      val expectedResult = List(SAPaymentReturn(expectedData.to[Vector]))
+      val expectedResult = List(SAPaymentReturn(expectedData))
 
       val expectedUrl = s"$mockedBaseUrl/individuals/self-assessment/payments/utr/$TEST_SAUTR"
 

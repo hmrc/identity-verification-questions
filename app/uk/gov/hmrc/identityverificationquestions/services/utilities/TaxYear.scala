@@ -16,11 +16,6 @@
 
 package uk.gov.hmrc.identityverificationquestions.services.utilities
 
-import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models.ServiceName
-
-import java.time.LocalDate
-
 case class TaxYear(startYear: Int) extends Ordered[TaxYear] {
 
   def finishYear = startYear + 1
@@ -42,38 +37,3 @@ case class TaxYear(startYear: Int) extends Ordered[TaxYear] {
 
   override def compare(that: TaxYear): Int = startYear.compare(that.startYear)
 }
-
-trait TaxYearBuilder {
-
-  implicit val appConfig: AppConfig
-
-  def serviceName: ServiceName
-
-  val startingDayForTaxYear = 6
-  val startingMonthForTaxYear = 4
-
-  def today: LocalDate = LocalDate.now
-
-  def currentYear = today.getYear
-
-  def startOfTheTaxYear = LocalDate.of(currentYear, startingMonthForTaxYear, startingDayForTaxYear)
-
-  /**
-   *
-   * @param bufferInMonths the number of months after the start of current tax year while we still look at the old one
-   * @return the current tax year - deferred a bit.
-   */
-  def currentTaxYearWithBuffer(bufferInMonths: Int) =
-    currentTaxYear(startOfTheTaxYear.plusMonths(bufferInMonths))
-
-  def currentTaxYearWithBuffer =
-    currentTaxYear(startOfTheTaxYear.plusMonths(appConfig.bufferInMonthsForService(serviceName)))
-
-  private def currentTaxYear(logicalStartOfYear: LocalDate): TaxYear = TaxYear(
-    if (today isBefore logicalStartOfYear) currentYear - 1
-    else currentYear
-  )
-
-  def currentTaxYear: TaxYear = currentTaxYear(startOfTheTaxYear)
-}
-
