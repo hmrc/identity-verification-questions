@@ -45,7 +45,7 @@ class NtcService @Inject()(ntcConnector: NtcConnector,
 
   override def connector: QuestionConnector[TaxCreditRecord] = ntcConnector
 
-  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForNtc
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForNtc
 
   def last4digits(str: String): String = str takeRight 4
 
@@ -77,4 +77,5 @@ class NtcService @Inject()(ntcConnector: NtcConnector,
     }.toSeq
 
   }
+
 }

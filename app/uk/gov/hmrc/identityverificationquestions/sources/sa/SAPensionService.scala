@@ -40,7 +40,7 @@ class SAPensionService @Inject() (
 
   override def connector: QuestionConnector[SAReturn] = connector
 
-  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForSA
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForSA
 
   type Record = SAReturn
 

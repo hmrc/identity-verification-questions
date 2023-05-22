@@ -48,7 +48,7 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector,
 
   override def connector: QuestionConnector[SAPaymentReturn] = connector
 
-  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForSA
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForSA
 
   override def serviceName: ServiceName = selfAssessmentService
 

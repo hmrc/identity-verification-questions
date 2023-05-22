@@ -48,7 +48,7 @@ class P60Service @Inject()(p60Connector: P60Connector,
 
   override def connector: QuestionConnector[Payment] = p60Connector
 
-  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForP60
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForP60
 
   override def evidenceTransformer(records: Seq[Payment], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
 

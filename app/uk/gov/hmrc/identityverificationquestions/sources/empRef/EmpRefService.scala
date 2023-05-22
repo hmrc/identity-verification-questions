@@ -43,7 +43,7 @@ class EmpRefService @Inject()(empRefConnector: EmpRefConnector,
 
   override def serviceName: ServiceName = desPayeService
 
-  override def allowedUserAgentList: Seq[String] = appConfig.allowedUserAgentListForPaye
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForPaye
 
   override def connector: QuestionConnector[PayePaymentsDetails] = empRefConnector
 

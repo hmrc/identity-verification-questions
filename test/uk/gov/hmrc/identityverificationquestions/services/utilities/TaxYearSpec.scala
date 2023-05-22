@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.identityverificationquestions.services.Utilities
+package uk.gov.hmrc.identityverificationquestions.services.utilities
 
 import Utils.UnitSpec
 import Utils.testData.AppConfigTestData
