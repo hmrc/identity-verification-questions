@@ -13,7 +13,7 @@ servers:
     description: Production
 security:
   - userRestricted:
-      - identity-verification-questions
+      - read:verification
 paths:
   /individuals/verification/identity-verification-questions/questions:
     post:
@@ -152,7 +152,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
           scopes:
-            identity-verification-questions: the identity-verification-questions user
+            read:verification: the read verification services user
   schemas:
     questions:
       title: questions
