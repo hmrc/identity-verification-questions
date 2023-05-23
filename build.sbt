@@ -30,6 +30,7 @@ lazy val microservice = Project(appName, file("."))
     scalaVersion                     := "2.13.8",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.it
   )
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "resources")
   .settings(Compile / console / scalacOptions --= Seq("-deprecation", "-Xfatal-warnings", "-Xlint"))
   .settings(routesImport ++= Seq("models._"))
