@@ -42,6 +42,12 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
 
   def isAvailableForRequestedSelection(selection: Selection): Boolean
 
+  def deniedUserAgentList: Seq[String]
+
+  def isUserAllowed(userAgent: String): Boolean = {
+    !deniedUserAgentList.contains(userAgent)
+  }
+
   def evidenceTransformer(records: Seq[Record], corrId: CorrelationId): Seq[QuestionWithAnswers]
 
   def metricsService: MetricsService

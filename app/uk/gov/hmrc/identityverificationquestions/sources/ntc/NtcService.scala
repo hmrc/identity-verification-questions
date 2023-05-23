@@ -45,6 +45,8 @@ class NtcService @Inject()(ntcConnector: NtcConnector,
 
   override def connector: QuestionConnector[TaxCreditRecord] = ntcConnector
 
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForNtc
+
   def last4digits(str: String): String = str takeRight 4
 
   def meetsDate(date: LocalDate): Boolean =  LocalDate.now.minusMonths(paymentMonths).isBefore(date)
@@ -75,4 +77,5 @@ class NtcService @Inject()(ntcConnector: NtcConnector,
     }.toSeq
 
   }
+
 }

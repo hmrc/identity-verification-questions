@@ -46,6 +46,10 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector,
 
   def currentDate: LocalDate = LocalDate.now()
 
+  override def connector: QuestionConnector[SAPaymentReturn] = connector
+
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForSA
+
   override def serviceName: ServiceName = selfAssessmentService
 
   val allowedPaymentTypes = List("PYT", "TFO")
@@ -114,7 +118,5 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector,
   private def getRecordsFromSaUtr(saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[SAPaymentReturn]] = {
     connector.getReturns(saUtr)
   }
-
-  override def connector: QuestionConnector[SAPaymentReturn] = connector
 
 }

@@ -41,7 +41,7 @@ class QuestionController @Inject()(evidenceRetrievalService: EvidenceRetrievalSe
     
     if (userAllowed) {
       withJsonBody[Selection] { selection =>
-        evidenceRetrievalService.callAllEvidenceSources(selection) map toOKResponse[QuestionResponse]
+        evidenceRetrievalService.callAllEvidenceSources(selection, userAgent.getOrElse("")) map toOKResponse[QuestionResponse]
       }
     } else {
       logger.warn(s"Unauthorised client called question repository, User-Agent is: $userAgent")

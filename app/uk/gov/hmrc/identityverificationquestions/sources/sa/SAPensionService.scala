@@ -40,6 +40,8 @@ class SAPensionService @Inject() (
 
   override def connector: QuestionConnector[SAReturn] = connector
 
+  override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForSA
+
   type Record = SAReturn
 
   def currentDate: DateTime = DateTime.now()
@@ -79,4 +81,5 @@ class SAPensionService @Inject() (
       case _ => Seq()
     }
   }
+
 }

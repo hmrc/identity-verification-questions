@@ -69,6 +69,22 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
     }
 
+    "isUserAllowed" should {
+      "return true" when {
+        "The user-agent is not on the denied list for p60" in new Setup {
+          (mockAppConfig.deniedUserAgentListForP60 _).expects().returning(Seq("identity-verification"))
+          service.isUserAllowed("lost-credentials") shouldBe (true)
+        }
+      }
+
+      "return false" when {
+        "The user-agent is on the denied list for p60" in new Setup {
+          (mockAppConfig.deniedUserAgentListForP60 _).expects().returning(Seq("identity-verification"))
+          service.isUserAllowed("identity-verification") shouldBe (false)
+        }
+      }
+    }
+
     "getQuestions" should {
       "return empty list if service is available" when {
         "connector throws error" in new Setup {
@@ -192,6 +208,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val auditService: AuditService = mock[AuditService]
 
       override def metricsService: MetricsService = testMetricsService
+      override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForP60
     }
 
     lazy val service2: TestService {
@@ -210,6 +227,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
       override def metricsService: MetricsService = testMetricsService
+      override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForP60
     }
 
     lazy val service3: TestService {
@@ -228,6 +246,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
       override def metricsService: MetricsService = testMetricsService
+      override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForP60
     }
   }
 

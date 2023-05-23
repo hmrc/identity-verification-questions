@@ -41,7 +41,7 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          empRefService: EmpRefService)
                                         (implicit ec: ExecutionContext) {
 
-  def callAllEvidenceSources(selection: Selection)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
+  def callAllEvidenceSources(selection: Selection, userAgent: String)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
 
     val services: Seq[QuestionService] =
       if (appConfig.ntcIsEnabled) Seq(p60Service, saService, payslipService, empRefService, ntcService)
@@ -50,7 +50,7 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
     val corrId: CorrelationId = CorrelationId()
 
     for {
-      questionWithAnswers <- Future.sequence(services.map(_.questions(selection, corrId))).map(_.flatten)
+      questionWithAnswers <- Future.sequence(services.filter(_.isUserAllowed(userAgent)).map(_.questions(selection, corrId))).map(_.flatten)
       _ <- {
         mongoRepo.store(QuestionDataCache(
           correlationId = corrId,
