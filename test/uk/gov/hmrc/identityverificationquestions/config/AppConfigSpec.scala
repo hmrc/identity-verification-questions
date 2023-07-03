@@ -31,7 +31,7 @@ class AppConfigSpec extends UnitSpec with LogCapturing {
   "AppConfig" should {
 
     "return allowedUserAgentList" in new Setup {
-      app.injector.instanceOf[AppConfig].allowedUserAgentList.toList shouldBe List("identity-verification", "lost-credentials", "lost-credentials-frontend", "nino-identity-verification")
+      app.injector.instanceOf[AppConfig].allowedUserAgentList.toList shouldBe List("identity-verification", "lost-credentials", "lost-credentials-frontend", "nino-identity-verification", "govuk-one-login")
     }
 
     "return the url for authBaseUrl" in new Setup {
