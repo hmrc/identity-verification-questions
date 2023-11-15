@@ -137,7 +137,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       }
       "failed matching as StudentLoanDeductions input includes pence" in {
         val correctQDC: QuestionDataCache =
-          QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(StudentLoanDeductions, Seq("200.22", "800"))), dateTime)
+          QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(StudentLoanDeductions, Seq("200.22", "800.00"))), dateTime)
 
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
@@ -147,7 +147,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       }
       "failed matching as PostgraduateLoanDeductions input includes pence" in {
         val correctQDC: QuestionDataCache =
-          QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PostgraduateLoanDeductions, Seq("200.22", "300"))), dateTime)
+          QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PostgraduateLoanDeductions, Seq("200.22", "300.00"))), dateTime)
 
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
