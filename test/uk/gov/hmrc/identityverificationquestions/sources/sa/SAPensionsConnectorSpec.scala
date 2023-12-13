@@ -72,7 +72,7 @@ class SAPensionsConnectorSpec extends UnitSpec {
       ex.getCause.getMessage shouldBe errorMessage
     }
 
-    "if we are before the switch over date then take the start year as 2 years ago and the end year is last year" in new Setup {
+    "if we are before the switch over date then take the start year as 3 calendar years ago and the end year as 2 calendar years ago" in new Setup {
       override lazy val additionalConfig: Map[String, Any] = Map(
         "sa.switch.day" -> 1,
         "sa.switch.month" -> 8
@@ -80,7 +80,7 @@ class SAPensionsConnectorSpec extends UnitSpec {
       connector.determinePeriod shouldBe ((2017, 2018))
     }
 
-    "if we are after the switch over date then take the start year as 1 year ago and the end year is this year" in new Setup {
+    "if we are after the switch over date then take the start year as 2 calendar years ago and the end year as last calendar year" in new Setup {
       override lazy val additionalConfig: Map[String, Any] = Map(
         "sa.switch.day" -> 1,
         "sa.switch.month" -> 3
@@ -88,6 +88,13 @@ class SAPensionsConnectorSpec extends UnitSpec {
       connector.determinePeriod shouldBe ((2018, 2019))
     }
 
+    "if we are on the switch over date then take the start year as 2 calendar years ago and the end year as last calendar year" in new Setup {
+      override lazy val additionalConfig: Map[String, Any] = Map(
+        "sa.switch.day" -> 1,
+        "sa.switch.month" -> 6
+      )
+      connector.determinePeriod shouldBe ((2018, 2019))
+    }
   }
 
   trait Setup {
