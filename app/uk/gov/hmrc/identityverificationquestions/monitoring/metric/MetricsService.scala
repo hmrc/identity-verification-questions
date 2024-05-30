@@ -17,7 +17,7 @@
 package uk.gov.hmrc.identityverificationquestions.monitoring.metric
 
 import com.codahale.metrics.{Gauge, MetricRegistry, Timer}
-import com.kenshoo.play.metrics.Metrics
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

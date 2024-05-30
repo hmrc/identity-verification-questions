@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package iUtils
+package test.iUtils
 
 import com.github.tomakehurst.wiremock.client.WireMock.{get, notFound, okJson, serverError, stubFor, urlEqualTo, urlMatching}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import iUtils.TestData.SCPEmailTestData
 import play.api.libs.json.{JsValue, Json}
+import test.iUtils.TestData.SCPEmailTestData
 
 trait WireMockStubs extends SCPEmailTestData {
   def rtiProxyReturnOk(payments: JsValue): StubMapping =

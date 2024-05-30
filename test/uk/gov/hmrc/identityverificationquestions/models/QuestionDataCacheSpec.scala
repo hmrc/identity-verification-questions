@@ -21,7 +21,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{Instant, ZoneOffset}
 
 class QuestionDataCacheSpec extends UnitSpec {
 
@@ -46,7 +46,7 @@ class QuestionDataCacheSpec extends UnitSpec {
             case JsObject(underlying) => underlying.get("$date") match { // BSON type
               case Some(JsObject(value)) => value.get("$numberLong") match { // BSON type
                 case Some(JsString(epochMilliString)) =>
-                  epochMilliString.toLong shouldBe dateTime.toInstant(ZoneOffset.UTC).toEpochMilli
+                  epochMilliString.toLong shouldBe dateTime.toEpochMilli
                 case Some(other) => fail(s"Found $other instead of JsString")
                 case None => fail("No valid $numberLong epoch milli value found")
               }
@@ -69,5 +69,5 @@ trait Setup {
   val selection: Selection = Selection(ninoIdentifier)
   case class TestRecord(value: BigDecimal)
   val questionList = List(QuestionWithAnswers(PaymentToDate,List(TestRecord(1).toString)))
-  val dateTime = LocalDateTime.now()
+  val dateTime = Instant.now()
 }

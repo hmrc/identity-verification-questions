@@ -51,11 +51,11 @@ class NtcService @Inject()(ntcConnector: NtcConnector,
 
   def meetsDate(date: LocalDate): Boolean =  LocalDate.now.minusMonths(paymentMonths).isBefore(date)
 
-  def positiveAmount(amout : BigDecimal): Boolean = amout > 0
+  def positiveAmount(amount : BigDecimal): Boolean = amount > 0
 
   override def evidenceTransformer(records: Seq[TaxCreditRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
     val taxCreditQuestions: Seq[(QuestionKey, String)] = records.flatMap {
-      case TaxCreditClaim(accounts, payments) if payments.filter(pay => meetsDate(pay.date)).filter(pay => positiveAmount(pay.amount)).seq.nonEmpty =>
+      case TaxCreditClaim(accounts, payments) if payments.filter(pay => meetsDate(pay.date)).exists(pay => positiveAmount(pay.amount)) =>
         accounts flatMap {
           case TaxCreditBankAccount(accountNumber, modifiedBacsAccountNumber) =>
             (accountNumber.collect { case n if n.length >= 4 => n }.toSeq ++

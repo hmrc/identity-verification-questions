@@ -14,41 +14,48 @@
  * limitations under the License.
  */
 
-package connectors.payslip
+package test.connectors.ntc
 
-import java.time.LocalDate
-
-import iUtils.BaseISpec
+import org.joda.time.LocalDate
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import test.iUtils.BaseISpec
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Selection
-import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
-import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipConnector
+import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{CTC, TaxCreditPayment}
+import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class PayslipConnectorISpec extends BaseISpec {
+class NtcConnectorISpec extends BaseISpec {
 
   def await[A](future: Future[A]): A = Await.result(future, 50.second)
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder().build()
 
-  "get payslip returns" should {
+  "get ntc returns" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val paymentDate: LocalDate = LocalDate.now().minusMonths(1).minusDays(25)
-
     "successfully obtain data for nino AA000003D" in {
       val ninoIdentifier: Nino = Nino("AA000003D")
       val selectionNino: Selection = Selection(ninoIdentifier)
 
-      val connector: PayslipConnector = fakeApplication.injector.instanceOf[PayslipConnector]
+      val connector: NtcConnector = fakeApplication.injector.instanceOf[NtcConnector]
 
       val result = await(connector.getRecords(selectionNino))
-      result.toList.head shouldBe Payment(paymentDate, Some(3000), Some(120.99), Some(155.02), Some(100.02), None, None, None, None, None, None)
+
+      result.toList.head shouldBe TaxCreditPayment(LocalDate.now().minusMonths(2).minusDays(5), BigDecimal("264.16"), CTC)
+      /* assert against following TaxCreditPayment record
+      {
+      subjectDate: "2022-12-09",
+      amount: -379.3,
+      taxCreditId: "WTC",
+      paymentType: "REGULAR "
+      } */
+      result.toList(2).asInstanceOf[TaxCreditPayment].amount.toString shouldBe "379.30"
+
     }
   }
 }

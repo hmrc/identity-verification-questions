@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package connectors.sa
+package test.connectors.sa
 
-import iUtils.BaseISpec
 import org.joda.time.LocalDate
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import test.iUtils.BaseISpec
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.sources.sa.{SAPayment, SAPaymentReturn, SAPaymentsConnector}

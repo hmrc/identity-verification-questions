@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package connectors.sa
+package test.connectors.sa
 
-import iUtils.BaseISpec
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import test.iUtils.BaseISpec
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear

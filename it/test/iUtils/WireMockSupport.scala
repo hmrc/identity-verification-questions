@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package iUtils
+package test.iUtils
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -72,7 +72,4 @@ trait WireMockSupport extends BeforeAndAfterEach with BeforeAndAfterAll {
     servicePorts ++ auditingPort
   }
 
-
-
 }
-

@@ -28,7 +28,7 @@ import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditServic
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{Duration, Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmpRefAnswerConnectorSpec extends UnitSpec {
@@ -45,7 +45,7 @@ class EmpRefAnswerConnectorSpec extends UnitSpec {
           correlationId,
           selection,
           questionSeq,
-          LocalDateTime.now(ZoneOffset.UTC) plusMinutes 1)
+          Instant.now().plus(Duration.ofMinutes(1)))
 
       val answerDetails1: AnswerDetails =  AnswerDetails(DateOfPayment, SimpleAnswer("2022-01-29"))
       val answerDetails2: AnswerDetails =  AnswerDetails(DateOfPayment, SimpleAnswer("2022-01-31"))
