@@ -17,7 +17,6 @@
 package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import Utils.UnitSpec
-import org.joda.time.DateTime
 import play.api.Configuration
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.http.HeaderCarrier
@@ -28,7 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditServic
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.{Duration, Instant, LocalDateTime, ZoneOffset}
+import java.time.{Duration, Instant}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmpRefAnswerConnectorSpec extends UnitSpec {
@@ -76,7 +75,7 @@ class EmpRefAnswerConnectorSpec extends UnitSpec {
     val servicesConfig: ServicesConfig = new ServicesConfig(config)
     val appConfig : AppConfig = new AppConfig(config, servicesConfig)
 
-    val testDate: DateTime = DateTime.parse("2020-06-01")
+    val testDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
 
     val empRefAnswerConnector = new EmpRefAnswerConnector(mockQuestionMongoRepository, mockAuditService, appConfig)
   }

@@ -17,7 +17,8 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
-import org.joda.time.{LocalDate, LocalDateTime}
+import org.joda.time.LocalDateTime
+import java.time.LocalDate
 import org.scalatest.LoneElement
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}

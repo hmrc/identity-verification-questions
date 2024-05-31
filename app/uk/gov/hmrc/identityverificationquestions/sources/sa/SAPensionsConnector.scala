@@ -17,7 +17,6 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import javax.inject.Inject
-import org.joda.time.DateTime
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
@@ -27,13 +26,14 @@ import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.{Instant, LocalDate, LocalTime, ZoneId, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig, appConfig: AppConfig, metricsService: MetricsService)
   extends QuestionConnector[SAReturn] {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
-  def currentDate: DateTime = DateTime.now()
+  def currentDate: Instant = Instant.now()
 
   private lazy val switchOverDay : Int = appConfig.saYearSwitchDay
   private lazy val switchOverMonth : Int = appConfig.saYearSwitchMonth
@@ -57,12 +57,13 @@ class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
       Future.successful(Seq())
   }
 
-  def determinePeriod = {
-    val switchDate = DateTime.parse(s"${currentDate.getYear}-$switchOverMonth-$switchOverDay")
+  def determinePeriod: (Int, Int) = {
+    val currentYear = currentDate.atZone(ZoneId.systemDefault()).getYear
+    val switchDate = ZonedDateTime.of(LocalDate.of(currentYear, switchOverMonth, switchOverDay), LocalTime.MIDNIGHT, ZoneId.systemDefault()).toInstant
     if (currentDate.isBefore(switchDate)) {
-      (currentDate.getYear - 3, currentDate.getYear - 2)
+      (currentYear - 3, currentYear - 2)
     } else {
-      (currentDate.getYear - 2, currentDate.getYear - 1)
+      (currentYear - 2, currentYear - 1)
     }
   }
 }

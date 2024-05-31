@@ -21,7 +21,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 
-import java.time.{Instant, ZoneOffset}
+import java.time.Instant
 
 class QuestionDataCacheSpec extends UnitSpec {
 

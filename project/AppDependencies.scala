@@ -9,7 +9,6 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "bootstrap-backend-play-30"  % bootstrapPlayVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
     "uk.gov.hmrc"             %% "domain-play-30"             % "9.0.0",
-    "com.typesafe.play"       %% "play-json-joda"             % "2.10.4",
     "uk.gov.hmrc"             %% "reactive-circuit-breaker"   % "4.1.0"
 
   )

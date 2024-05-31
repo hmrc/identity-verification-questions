@@ -16,7 +16,7 @@
 
 package test.connectors.sa
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import test.iUtils.BaseISpec

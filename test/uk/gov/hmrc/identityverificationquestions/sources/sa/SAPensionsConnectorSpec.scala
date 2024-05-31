@@ -17,7 +17,6 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
-import org.joda.time.DateTime
 import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
@@ -26,6 +25,7 @@ import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsServic
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -118,10 +118,10 @@ class SAPensionsConnectorSpec extends UnitSpec {
     val testNino: Nino = Nino("AA000003D")
     val testYear = 2019
 
-    val fixedDate: DateTime = DateTime.parse("2020-06-01")
+    val fixedDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
 
     val connector: SAPensionsConnector = new SAPensionsConnector(mockHttpClient, servicesConfig, appConfig, metricsService) {
-      override def currentDate: DateTime = fixedDate
+      override def currentDate: Instant = fixedDate
     }
   }
 }

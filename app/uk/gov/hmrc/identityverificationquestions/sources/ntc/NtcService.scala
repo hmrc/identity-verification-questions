@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.ntc
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{TaxCreditBankAccount, TaxCreditClaim, TaxCreditPayment, TaxCreditRecord}

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.identityverificationquestions.models.sapayment
 
 import Utils.UnitSpec
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAPayment
 
