@@ -178,10 +178,11 @@ For now,
 * for **all** SA Payments evidence source questions, a json in *single string* answer is expected. Example:
 
 ```
-{
-          "amount": 100,
-          "paymentDate": "2020-06-01"
-}       
+   "questionKey": "sa-payment-details",
+   "answer": {
+        "amount": 300,
+        "paymentDate": "2010-01-01"
+      }   
 ```
 For details of the Answer *formats* for each question see:
 
