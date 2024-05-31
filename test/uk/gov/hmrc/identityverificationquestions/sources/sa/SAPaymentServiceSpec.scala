@@ -17,8 +17,9 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
-import org.joda.time.LocalDateTime
-import java.time.LocalDate
+
+import java.time.{Instant, LocalDate, Period, ZoneId}
+import java.time.format.DateTimeFormatter
 import org.scalatest.LoneElement
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -150,9 +151,18 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
     "is disabled now" in new Setup {
       override lazy val additionalConfig: Map[String, Any] = Map(
-        "microservice.services.SelfAssessmentPaymentService.disabled.start" -> (LocalDateTime.now().minusDays(10).toString("yyyy-MM-dd") + "T00:00:00.000"),
-        "microservice.services.SelfAssessmentPaymentService.disabled.end" -> (LocalDateTime.now().plusDays(10).toString("yyyy-MM-dd") + "T00:00:00.000")
+        "microservice.services.SelfAssessmentPaymentService.disabled.start" -> (Instant.now()
+          .minus(Period.ofDays(10))
+          .atZone(ZoneId.systemDefault())
+          .toLocalDate
+          .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00.000"),
+        "microservice.services.SelfAssessmentPaymentService.disabled.end" -> (Instant.now()
+          .plus(Period.ofDays(10))
+          .atZone(ZoneId.systemDefault())
+          .toLocalDate
+          .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00.000")
       )
+
 
       service.questions(testJourney, corrId).futureValue shouldBe Seq()
     }
