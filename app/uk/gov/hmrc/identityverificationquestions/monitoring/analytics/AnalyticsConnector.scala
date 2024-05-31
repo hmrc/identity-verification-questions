@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.monitoring.analytics
 
-import akka.Done
+import org.apache.pekko.Done
 import play.api.Logging
 import play.api.libs.json.{Json, OWrites}
 import uk.gov.hmrc.http.HttpReads.Implicits._
