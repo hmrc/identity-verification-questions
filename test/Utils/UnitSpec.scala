@@ -16,7 +16,7 @@
 
 package Utils
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
