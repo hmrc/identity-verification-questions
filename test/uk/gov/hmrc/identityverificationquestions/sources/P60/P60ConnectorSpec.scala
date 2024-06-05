@@ -18,7 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.P60
 
 import Utils.testData.P60TestData
 import Utils.{LogCapturing, UnitSpec}
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import ch.qos.logback.classic.Level
 import com.typesafe.config.Config
 import uk.gov.hmrc.http.hooks.HttpHook

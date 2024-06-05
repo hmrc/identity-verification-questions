@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import org.joda.time.DateTime
+import java.time.Instant
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
@@ -44,7 +44,7 @@ class SAPensionService @Inject() (
 
   type Record = SAReturn
 
-  def currentDate: DateTime = DateTime.now()
+  def currentDate: Instant = Instant.now()
 
   private val currentYearKey = "currentTaxYear"
   private val previousYearKey = "previousTaxYear"
@@ -81,5 +81,4 @@ class SAPensionService @Inject() (
       case _ => Seq()
     }
   }
-
 }

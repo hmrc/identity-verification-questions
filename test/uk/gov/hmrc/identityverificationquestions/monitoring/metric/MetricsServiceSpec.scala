@@ -18,8 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.monitoring.metric
 
 import Utils.UnitSpec
 import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
-
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

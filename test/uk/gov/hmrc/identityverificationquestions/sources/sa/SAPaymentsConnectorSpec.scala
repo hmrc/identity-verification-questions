@@ -17,7 +17,7 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.Configuration
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}

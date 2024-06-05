@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import org.joda.time.{Days, LocalDate}
+import java.time.LocalDate
 import play.api.libs.json._
 import play.api.mvc.Request
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
@@ -26,6 +26,7 @@ import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
+import java.time.temporal.ChronoUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
@@ -73,8 +74,8 @@ class SAAnswerConnector @Inject()(appConfig: AppConfig, questionRepo: QuestionMo
 
   }
 
-  private def insidePaymentToleranceWindow(dateEntered: LocalDate, expectedDate: LocalDate): Boolean = {
-    val diff = Days.daysBetween(dateEntered, expectedDate).getDays
+  private def insidePaymentToleranceWindow(dateEntered: java.time.LocalDate, expectedDate: java.time.LocalDate): Boolean = {
+    val diff = ChronoUnit.DAYS.between(dateEntered, expectedDate).toInt
     diff >= (0 - appConfig.saPaymentTolerancePastDays) && diff <= appConfig.saPaymentToleranceFutureDays
   }
 

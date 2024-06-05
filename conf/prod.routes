@@ -2,5 +2,3 @@
 ->         /identity-verification-questions             app.Routes
 ->         /                                            externalApi.Routes
 ->         /                                            health.Routes
-
-GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics

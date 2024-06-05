@@ -14,35 +14,40 @@
  * limitations under the License.
  */
 
-package connectors.sa
+package test.connectors.payslip
 
-import iUtils.BaseISpec
+import java.time.LocalDate
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import test.iUtils.BaseISpec
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
-import uk.gov.hmrc.identityverificationquestions.sources.sa.{SAPensionsConnector, SARecord, SAReturn}
+import uk.gov.hmrc.identityverificationquestions.models.Selection
+import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
+import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipConnector
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class SAPensionsConnectorISpec extends BaseISpec {
+class PayslipConnectorISpec extends BaseISpec {
 
   def await[A](future: Future[A]): A = Await.result(future, 50.second)
+
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder().build()
 
-  "get sa returns" should {
-    "successfully obtain a return" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+  "get payslip returns" should {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val paymentDate: LocalDate = LocalDate.now().minusMonths(1).minusDays(25)
 
-      val connector : SAPensionsConnector = fakeApplication.injector.instanceOf[SAPensionsConnector]
+    "successfully obtain data for nino AA000003D" in {
+      val ninoIdentifier: Nino = Nino("AA000003D")
+      val selectionNino: Selection = Selection(ninoIdentifier)
 
-      val result: Seq[SAReturn] = await(connector.getReturns(Nino("AA000003D"), 2019, 2019))
+      val connector: PayslipConnector = fakeApplication.injector.instanceOf[PayslipConnector]
 
-      result shouldBe List(SAReturn(TaxYear(2019), List(SARecord(BigDecimal(15), BigDecimal(2019.13)))))
+      val result = await(connector.getRecords(selectionNino))
+      result.toList.head shouldBe Payment(paymentDate, Some(3000), Some(120.99), Some(155.02), Some(100.02), None, None, None, None, None, None)
     }
   }
-
 }

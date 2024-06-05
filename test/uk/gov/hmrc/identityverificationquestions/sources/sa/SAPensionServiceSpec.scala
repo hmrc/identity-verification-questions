@@ -17,7 +17,6 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
-import org.joda.time.DateTime
 import play.api.Configuration
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -33,6 +32,7 @@ import uk.gov.hmrc.identityverificationquestions.services.QuestionService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -138,7 +138,7 @@ class SAPensionServiceSpec extends UnitSpec {
     implicit val request : Request[_] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val fixedDate: DateTime = DateTime.parse("2020-06-01")
+    val fixedDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
 
     protected val mockConnector: SAPensionsConnector = mock[SAPensionsConnector]
     protected val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
@@ -163,7 +163,7 @@ class SAPensionServiceSpec extends UnitSpec {
     val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     val selection: Selection = Selection(Nino("AA000003D"))
     val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService, metricsService) {
-      override def currentDate: DateTime = fixedDate
+      override def currentDate: Instant = fixedDate
     }
   }
 }

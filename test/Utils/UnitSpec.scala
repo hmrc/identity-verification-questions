@@ -16,7 +16,7 @@
 
 package Utils
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
@@ -32,9 +32,9 @@ import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.identityverificationquestions.models.CorrelationId
-import java.time.{LocalDate, LocalDateTime}
-import java.util.UUID
 
+import java.time.{Instant, LocalDate}
+import java.util.UUID
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.Future
@@ -60,7 +60,7 @@ trait UnitSpec
     *  For tests that have Scalamock expectations on dateTime data inserted then retrieved from Mongo,
     *  they will fail unless we truncate to millisecond precision.
     */
-  val dateTime: LocalDateTime = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+  val dateTime: Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   val dob = "1986-01-01"
   val dobIdentifier: LocalDate = LocalDate.parse(dob)
   val ninoIdentifier: Nino = Nino("AA000000D")

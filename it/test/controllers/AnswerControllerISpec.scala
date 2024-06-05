@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package test.controllers
 
-import iUtils.BaseISpec
 import play.api.libs.json.{JsString, JsSuccess, Json}
 import play.api.libs.ws.WSResponse
+import test.iUtils.BaseISpec
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
 import uk.gov.hmrc.identityverificationquestions.models._
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{Duration, Instant, LocalDateTime, ZoneOffset}
 
 class AnswerControllerISpec extends BaseISpec {
 
@@ -82,7 +82,7 @@ class AnswerControllerISpec extends BaseISpec {
           correlationId,
           selection,
           questionSeq,
-          LocalDateTime.now(ZoneOffset.UTC) plusMinutes (1))
+          Instant.now().plus(Duration.ofMinutes(1)))
     }
 
   }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException

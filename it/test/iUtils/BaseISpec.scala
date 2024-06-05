@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package iUtils
+package test.iUtils
 
 import com.github.tomakehurst.wiremock.client.WireMock.{ok, post, stubFor, urlPathEqualTo}
 import org.scalatest.{BeforeAndAfterEach, OptionValues}

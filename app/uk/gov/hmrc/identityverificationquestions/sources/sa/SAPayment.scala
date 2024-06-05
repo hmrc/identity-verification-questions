@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.identityverificationquestions.models.JsonLocalDateFormats.dFormat
 
 // TODO why are we using Joda date here??
 

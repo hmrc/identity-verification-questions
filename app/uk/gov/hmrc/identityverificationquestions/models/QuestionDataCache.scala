@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.models
 
-import java.time.LocalDateTime
+import java.time.Instant
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
@@ -27,12 +27,12 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 case class QuestionDataCache(correlationId: CorrelationId,
                              selection: Selection,
                              questions: Seq[QuestionWithAnswers],
-                             expiryDate: LocalDateTime)
+                             expiryDate: Instant)
 
 object QuestionDataCache{
 
   // this is required to support proper TTL expiry
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
   implicit val format: Format[QuestionDataCache] = Json.format[QuestionDataCache]
 }

@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.identityverificationquestions.models.taxcredit
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.http.controllers.JsPathEnrichment._
-import uk.gov.hmrc.identityverificationquestions.models.JsonLocalDateFormats.dFormat
 
 
 trait NtcJsonFormats {

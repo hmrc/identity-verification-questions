@@ -30,11 +30,11 @@ import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoReposit
 import uk.gov.hmrc.identityverificationquestions.services.AnswerVerificationService
 import uk.gov.hmrc.play.bootstrap.tools.Stubs
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AnswerControllerSpec() extends UnitSpec with LogCapturing {
+class AnswerControllerSpec extends UnitSpec with LogCapturing {
 
   "POST /answers" should {
     "return 200 with a valid json body" when {
@@ -74,6 +74,6 @@ class AnswerControllerSpec() extends UnitSpec with LogCapturing {
     val correlationId: CorrelationId = CorrelationId()
     val ninoIdentifier: Nino = Nino("AA000000A")
     val answerCheck: AnswerCheck = AnswerCheck(correlationId, Seq(AnswerDetails(PaymentToDate, SimpleAnswer("5"))), None)
-    val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, Selection(ninoIdentifier), Seq.empty[QuestionWithAnswers], LocalDateTime.now)
+    val questionDataCache: QuestionDataCache = QuestionDataCache(correlationId, Selection(ninoIdentifier), Seq.empty[QuestionWithAnswers], Instant.now)
   }
 }

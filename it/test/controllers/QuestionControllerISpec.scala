@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package test.controllers
 
 import ch.qos.logback.classic.Level
-import iUtils.TestData.RtiTestData
-import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
+import test.iUtils.{BaseISpec, LogCapturing, WireMockStubs}
+import test.iUtils.TestData.RtiTestData
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
 import uk.gov.hmrc.identityverificationquestions.models._

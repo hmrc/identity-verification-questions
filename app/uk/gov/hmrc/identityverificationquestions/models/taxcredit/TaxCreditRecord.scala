@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.models.taxcredit
 
-import org.joda.time.LocalDate
-
+import java.time.LocalDate
 
 sealed trait TaxCreditRecord
 

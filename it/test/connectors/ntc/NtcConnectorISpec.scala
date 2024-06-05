@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package connectors.ntc
+package test.connectors.ntc
 
-import iUtils.BaseISpec
-import org.joda.time.LocalDate
+import java.time.{Instant, ZoneId, ZonedDateTime}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import test.iUtils.BaseISpec
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Selection
@@ -46,7 +46,13 @@ class NtcConnectorISpec extends BaseISpec {
 
       val result = await(connector.getRecords(selectionNino))
 
-      result.toList.head shouldBe TaxCreditPayment(LocalDate.now().minusMonths(2).minusDays(5), BigDecimal("264.16"), CTC)
+      val date = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+        .minusMonths(2)
+        .minusDays(5)
+        .toLocalDate
+
+      result.toList.head shouldBe TaxCreditPayment(date, BigDecimal("264.16"), CTC)
+
       /* assert against following TaxCreditPayment record
       {
       subjectDate: "2022-12-09",

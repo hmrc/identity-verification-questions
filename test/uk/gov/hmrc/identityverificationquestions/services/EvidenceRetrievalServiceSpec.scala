@@ -30,7 +30,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
 import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipService
 import uk.gov.hmrc.identityverificationquestions.sources.sa.SAService
 
-import java.time.{Duration, LocalDate, LocalDateTime}
+import java.time.{Duration, Instant, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
@@ -59,7 +59,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
   "setExpiryDate" should {
     "return a expiry date" in new Setup {
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
-      val result: LocalDateTime = service.setExpiryDate
+      val result: Instant = service.setExpiryDate
       val dateStampRegex: Regex = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])(T)([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9]).([0-9]{1,3}).*?$".r //eg "2022-07-07T11:45:26.828..."
       dateStampRegex.pattern.matcher(result.toString).matches shouldBe true
     }
