@@ -8,14 +8,7 @@ val appName = "identity-verification-questions"
 lazy val scoverageSettings = {
   import scoverage.*
   Seq(
-    ScoverageKeys.coverageExcludedPackages :=
-      """<empty>;
-        |Reverse.*;
-        |.*BuildInfo.*;
-        |.*TestVerifyPersonalIdentityController.*;
-        |.*views.*;
-        |.*Routes.*;
-        |.*RoutesPrefix.*;""".stripMargin,
+    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*BuildInfo.*;.*TestVerifyPersonalIdentityController.*;.*views.*;.*Routes.*;.*RoutesPrefix.*;",
     ScoverageKeys.coverageMinimumStmtTotal := 85,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
