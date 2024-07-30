@@ -55,6 +55,7 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
                                 (implicit hc: HeaderCarrier, request: Request[_], executionContext: ExecutionContext): Future[AuditResult] = {
 
     val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
+    val applicationID: String = request.headers.get("X-Application-ID").getOrElse("-")
 
     val nino: String = questionData.selection.nino.map {
       case ni => ni.nino
@@ -111,7 +112,8 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
           "nino" -> nino,
           "source" -> evidenceOption,
           "question" -> name,
-          "givenAnswer" -> givenAnswer
+          "givenAnswer" -> givenAnswer,
+          "callingServiceApplicationID" -> applicationID
         ) ++ outComeDetails ++ ivJourneyDetails
       )
     )
