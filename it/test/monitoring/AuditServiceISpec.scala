@@ -22,7 +22,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json, OFormat}
 import play.api.test.FakeRequest
 import test.iUtils.BaseISpec
-import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.NationalInsurance
 import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, CorrelationId, QuestionDataCache, QuestionWithAnswers, Score, Selection, SimpleAnswer}
@@ -61,12 +61,26 @@ class AuditServiceISpec extends BaseISpec {
       }
     }
 
-    "send correct data for audit type CircuitBreakerUnhealthyService with Nino" in {
-      auditService.sendCircuitBreakerEvent(Selection(Nino("AA000002D")),"unavailableService")
+    "send correct data for audit type CircuitBreakerUnhealthyService with Nino and SaUtr" in {
+      auditService.sendCircuitBreakerEvent(Selection(Nino("AA000002D"), SaUtr("1234567890") ), "unavailableService")
       val multifactorAuthenticationCheckAuditRecord = recoverAuditRecords("CircuitBreakerUnhealthyService")
-      (multifactorAuthenticationCheckAuditRecord \ "detail").validate[Selection] match {
+      (multifactorAuthenticationCheckAuditRecord \ "detail").validate[SelectionResult] match {
         case JsSuccess(detail, _) =>
-          detail.nino shouldBe Some(Nino("AA000002D"))
+          detail.nino shouldBe "AA000002D"
+          detail.sautr shouldBe "1234567890"
+          detail.payeRef shouldBe "n/a"
+        case JsError(error) => fail(s"Unable to parse CircuitBreakerUnhealthyServiceResult. Error : $error")
+      }
+    }
+
+    "send correct data for audit type CircuitBreakerUnhealthyService with payref" in {
+      auditService.sendCircuitBreakerEvent(Selection(EmpRef("fakeTaxOfficeNumber", "fakeTaxOfficeReference") ), "unavailableService")
+      val multifactorAuthenticationCheckAuditRecord = recoverAuditRecords("CircuitBreakerUnhealthyService")
+      (multifactorAuthenticationCheckAuditRecord \ "detail").validate[SelectionResult] match {
+        case JsSuccess(detail, _) =>
+          detail.nino shouldBe "n/a"
+          detail.sautr shouldBe "n/a"
+          detail.payeRef shouldBe "fakeTaxOfficeNumber/fakeTaxOfficeReference"
         case JsError(error) => fail(s"Unable to parse CircuitBreakerUnhealthyServiceResult. Error : $error")
       }
     }
@@ -82,6 +96,14 @@ case class IdentityVerificationAnswerResult(nino:String,
                                             callingService:String,
                                             correlationId:String,
                                             validAnswers:String)
+
+case class SelectionResult(nino: String,
+                           sautr: String,
+                           payeRef: String)
+
+object SelectionResult{
+  implicit val format: OFormat[SelectionResult] = Json.format
+}
 
 object IdentityVerificationAnswerResult{
   implicit val format: OFormat[IdentityVerificationAnswerResult] = Json.format

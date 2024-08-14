@@ -35,13 +35,14 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
   def sendCircuitBreakerEvent(identifiers: Selection, unavailableServiceName: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[AuditResult] = {
     val tags = Map("transactionName" -> "CircuitBreakerUnhealthyEvent")
 
+    println(identifiers.sautr.fold("n/a")(sautr => sautr.value)+"    dsfsdfsdf")
     auditConnector.sendEvent(
       DataEvent(
         auditSource = AuditSource,
         auditType = "CircuitBreakerUnhealthyService",
         detail = Map("unavailableServiceName" -> s"$unavailableServiceName",
           "nino" -> identifiers.nino.fold("n/a")(nino => nino.value),
-          "satur" -> identifiers.sautr.fold("n/a")(sautr => sautr.value),
+          "sautr" -> identifiers.sautr.fold("n/a")(sautr => sautr.value),
           "payeRef" -> identifiers.payeRef.fold("n/a")(payeRef => payeRef.value)),
         tags = tags
       )
