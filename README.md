@@ -225,7 +225,7 @@ It is up to the calling service to decide which answers they would like to know 
 
 ## How to run the tests
 
-```sbt clean test``` and  ```sbt clean it:test```
+```sbt clean test``` and  ```sbt clean it/test```
 
 Note: acceptance testing is done as part of the main IV suite with question repository enabled from IV backend, see https://github.com/hmrc/identity-verification-ui-tests
 

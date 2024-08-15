@@ -41,7 +41,7 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
         auditType = "CircuitBreakerUnhealthyService",
         detail = Map("unavailableServiceName" -> s"$unavailableServiceName",
           "nino" -> identifiers.nino.fold("n/a")(nino => nino.value),
-          "satur" -> identifiers.sautr.fold("n/a")(sautr => sautr.value),
+          "sautr" -> identifiers.sautr.fold("n/a")(sautr => sautr.value),
           "payeRef" -> identifiers.payeRef.fold("n/a")(payeRef => payeRef.value)),
         tags = tags
       )
@@ -55,6 +55,7 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
                                 (implicit hc: HeaderCarrier, request: Request[_], executionContext: ExecutionContext): Future[AuditResult] = {
 
     val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
+    val applicationID: String = request.headers.get("X-Application-ID").getOrElse("-")
 
     val nino: String = questionData.selection.nino.map {
       case ni => ni.nino
@@ -111,7 +112,8 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
           "nino" -> nino,
           "source" -> evidenceOption,
           "question" -> name,
-          "givenAnswer" -> givenAnswer
+          "givenAnswer" -> givenAnswer,
+          "callingServiceApplicationID" -> applicationID
         ) ++ outComeDetails ++ ivJourneyDetails
       )
     )

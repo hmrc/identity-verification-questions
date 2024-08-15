@@ -21,11 +21,17 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{noContent, post, stubFor}
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.http.RequestMethod
+import com.github.tomakehurst.wiremock.matching.{ContainsPattern, RequestPatternBuilder, UrlPathPattern}
+import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import com.typesafe.config.{Config, ConfigFactory}
+import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 
 import scala.collection.JavaConverters._
-import scala.util.Try
+import scala.collection.convert.ImplicitConversions.`iterator asScala`
+import scala.util.{Failure, Success, Try}
 
 trait WireMockSupport extends BeforeAndAfterEach with BeforeAndAfterAll {
   self: Suite =>
@@ -71,5 +77,40 @@ trait WireMockSupport extends BeforeAndAfterEach with BeforeAndAfterAll {
 
     servicePorts ++ auditingPort
   }
+
+
+
+
+  def recoverAuditRecords(auditTypeToBeFound: String): JsValue = {
+
+    def extractRequestBody(request: LoggedRequest): JsValue = Try(Json.parse(request.getBodyAsString)) match {
+      case Failure(_)     => throw new IllegalStateException(s"Audit should receive json request but it did not. Request details:\n$request")
+      case Success(value) => value
+    }
+
+    val auditRequestPattern = new RequestPatternBuilder(RequestMethod.POST, new UrlPathPattern(new ContainsPattern("/write/audit"), false))
+
+    def filterAuditTypeRequests(allAuditMessages: Seq[LoggedRequest], auditType: String) = allAuditMessages.filter(loggedRequest =>
+      (extractRequestBody(loggedRequest) \ "auditType").validate[String] match {
+        case JsSuccess(value, _) => value.equals(auditType)
+        case JsError(_)          => false
+      }
+    )
+
+    eventually {
+      val allAuditRequests = WireMock.findAll(auditRequestPattern).listIterator.toList
+
+      val allAuditTypeRequestsFound: Seq[LoggedRequest] = filterAuditTypeRequests(allAuditRequests, auditTypeToBeFound)
+
+      WireMock.removeServeEvents(auditRequestPattern)
+
+      if (allAuditTypeRequestsFound.size == 1) {
+        extractRequestBody(allAuditTypeRequestsFound.head)
+      } else
+        throw new AssertionError(s"Expecting exactly 1 json with auditType equals to $auditTypeToBeFound but got ${allAuditTypeRequestsFound.size}")
+    }
+
+  }
+
 
 }
