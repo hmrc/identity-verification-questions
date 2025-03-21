@@ -41,7 +41,7 @@ class SAPaymentConnectorISpec extends BaseISpec {
 
       val result: Seq[SAPaymentReturn] = await(connector.getReturns(SaUtr("1234567890")))
 
-      result shouldBe Seq(SAPaymentReturn(Seq(SAPayment(4278.39, Some(LocalDate.parse("2023-03-11")), Some("PYT")))))
+      result shouldBe Seq(SAPaymentReturn(Seq(SAPayment(4278.39, Some(LocalDate.parse("2024-03-11")), Some("PYT")))))
     }
   }
 
