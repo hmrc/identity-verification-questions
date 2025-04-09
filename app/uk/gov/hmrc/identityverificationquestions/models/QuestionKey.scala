@@ -33,6 +33,8 @@ object QuestionKey {
     P60.StatutoryAdoptionPay,
     P60.StudentLoanDeductions,
     P60.PostgraduateLoanDeductions,
+    P45.PaymentToDate,
+    P45.EmployeeNIContributions,
     Payslip.IncomeTax,
     Payslip.NationalInsurance,
     PassportQuestion,
@@ -70,6 +72,11 @@ case object P60 {
   case object PostgraduateLoanDeductions extends QuestionKey("rti-p60-postgraduate-loan-deductions", "P60")
 }
 
+case object P45 {
+  case object PaymentToDate extends QuestionKey("rti-p45-payment-for-year", "P45")
+  case object EmployeeNIContributions extends QuestionKey("rti-p45-employee-ni-contributions", "P45")
+}
+
 case object Payslip {
   case object IncomeTax extends QuestionKey("rti-payslip-income-tax", "Payslip")
   case object NationalInsurance extends QuestionKey("rti-payslip-national-insurance", "Payslip")
@@ -96,6 +103,7 @@ case object TaxCredits {
 
 sealed trait ServiceName
 case object p60Service extends ServiceName
+case object p45Service extends ServiceName
 case object payslipService extends ServiceName
 //case object passportService extends ServiceName
 //case object scpEmailService extends ServiceName

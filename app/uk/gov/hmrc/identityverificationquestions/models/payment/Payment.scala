@@ -31,7 +31,8 @@ case class Payment(paymentDate: LocalDate,
                    statutorySharedParentalPay: Option[BigDecimal] = None,
                    statutoryAdoptionPay: Option[BigDecimal] = None,
                    studentLoanDeductions: Option[BigDecimal] = None,
-                   postgraduateLoanDeductions: Option[BigDecimal] = None)
+                   postgraduateLoanDeductions: Option[BigDecimal] = None,
+                   leavingDate: Option[LocalDate] = None)
 
 object Payment {
   implicit val paymentReads: Reads[Payment] = {
@@ -44,8 +45,9 @@ object Payment {
     ((__ \ "pmtDate").read[LocalDate] and
       (__ \ "mandatoryMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]] and
       (__ \ "niLettersAndValues").tolerantReadNullable[Seq[NiLettersAndValues]] and
-      (__ \ "optionalMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]]
-      ) { (paymentDate, optMandatoryPaymentItems, optNiLettersAndValues, optionalMonetaryPaymentItems) =>
+      (__ \ "optionalMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]] and
+      (__ \ "leavingDate").tolerantReadNullable[LocalDate]
+      ) { (paymentDate, optMandatoryPaymentItems, optNiLettersAndValues, optionalMonetaryPaymentItems, leavingDate) =>
       val niLettersAndValues = optNiLettersAndValues.getOrElse(Seq.empty)
       val mandatoryPayments = optMandatoryPaymentItems.getOrElse(Seq.empty)
       val optionalMonetaryPayment = optionalMonetaryPaymentItems.getOrElse(Seq.empty)
@@ -60,7 +62,7 @@ object Payment {
       val studentLoanDeductions = findValue("StudentLoansYTD", optionalMonetaryPayment)
       val postgraduateLoanDeductions = findValue("PostGraduateLoansYTD", optionalMonetaryPayment)
       Payment(paymentDate, taxablePayYtd, employeeNIContrib, incomeTaxPaid, nationalInsPaid, earningsAbovePT,
-        statutoryMaternityPay, statutorySharedParentalPay, statutoryAdoptionPay, studentLoanDeductions, postgraduateLoanDeductions)
+        statutoryMaternityPay, statutorySharedParentalPay, statutoryAdoptionPay, studentLoanDeductions, postgraduateLoanDeductions, leavingDate)
     }
   }
 }

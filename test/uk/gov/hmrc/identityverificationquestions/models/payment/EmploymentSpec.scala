@@ -59,13 +59,13 @@ class EmploymentSpec extends UnitSpec {
   }
 
   trait Setup extends P60TestData {
-    val paymentOne = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None)
+    val paymentOne = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)))
     val paymentTwo = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5))
     val paymentThree = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
     val paymentFour = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
     val p60Response = Seq(Employment(Seq(paymentOne)), Employment(Seq(paymentTwo)), Employment(Seq(paymentThree, paymentFour)))
 
-    val paymentFive = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), None, Some(0), None)
+    val paymentFive = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), None, Some(0), None, leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)))
     val p60ResponseWithEmployerWithoutPayments = Seq(Employment(Seq(paymentFive)), Employment(Seq()))
 
     val p60ResponseWithoutEmployments = Seq()
