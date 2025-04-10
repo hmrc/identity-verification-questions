@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionResponse, QuestionWithAnswers, Selection}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
+import uk.gov.hmrc.identityverificationquestions.sources.P45.P45Service
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
@@ -40,6 +41,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
   "calling callAllEvidenceSources" should {
     "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
       (mockP60Service.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockP45Service.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockSAService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockPayslipService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
       (mockEmpRefService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
@@ -47,6 +49,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
       (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
       (mockAppConfig.ntcIsEnabled _).expects().returning(true)
       (mockP60Service.isUserAllowed(_:String)).expects(userAgent).returning(true)
+      (mockP45Service.isUserAllowed(_:String)).expects(userAgent).returning(true)
       (mockPayslipService.isUserAllowed(_:String)).expects(userAgent).returning(true)
       (mockSAService.isUserAllowed(_:String)).expects(userAgent).returning(true)
       (mockEmpRefService.isUserAllowed(_:String)).expects(userAgent).returning(true)
@@ -71,13 +74,14 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
     val mockP60Service: P60Service = mock[P60Service]
+    val mockP45Service: P45Service = mock[P45Service]
     val mockSAService: SAService = mock[SAService]
     val mockPayslipService: PayslipService = mock[PayslipService]
     val mockEmpRefService: EmpRefService = mock[EmpRefService]
     val mockNtcService: NtcService = mock[NtcService]
 
     val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
-    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockSAService, mockPayslipService, mockNtcService, mockEmpRefService)
+    val service = new EvidenceRetrievalService(mongoRepo, mockAppConfig, mockP60Service, mockP45Service, mockSAService, mockPayslipService, mockNtcService, mockEmpRefService)
     val ninoIdentifier: Nino = Nino("AA000000D")
     val saUtrIdentifier: SaUtr = SaUtr("12345678")
     val dobIdentifier: LocalDate = LocalDate.parse("1984-01-01")

@@ -28,7 +28,6 @@ import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Se
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
-import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Connector
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -43,7 +42,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
 
   "calling `questions`" should {
     "return a sequence of Question's" when {
-      "P60Connector returns a non empty sequence of Payment's" in new WithStubbing {
+      "P45Connector returns a non empty sequence of Payment's" in new WithStubbing {
         (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree, paymentFive)))
         (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(2).atLeastOnce()
@@ -53,11 +52,14 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
         )
       }
 
-      "P60Connector returns a non empty sequence of Payment's with previous year in additional information" in new WithStubbing {
-        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
+      "P45Connector returns a non empty sequence of Payment's with previous year in additional information" in new WithStubbing {
+        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
         (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
-        service.questions(selectionNino, corrId).futureValue shouldBe Seq(paymentToDateQuestion2, employeeNIContributionsQuestion2)
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq(
+          paymentToDateQuestion2, employeeNIContributionsQuestion2
+        )
       }
     }
 
@@ -69,13 +71,13 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
         service.questions(selectionNoNino, corrId).futureValue shouldBe Seq()
       }
 
-      "P60Connector returns an empty sequence of Payment's" in new WithStubbing {
+      "P45Connector returns an empty sequence of Payment's" in new WithStubbing {
         (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
 
-      "P60Connector returns an insufficient Payment's" in new WithStubbing {
+      "P45Connector returns an insufficient Payment's" in new WithStubbing {
         (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(insufficientPayment)))
         (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
@@ -105,12 +107,12 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait TestDate {
-    val paymentOne: Payment = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None)
-    val paymentTwo: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5))
-    val paymentThree: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(1200), Some(1), Some(8), None, leavingDate = Some(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE)))
-    val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
+    val paymentOne: Payment = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2019-05-28", ISO_LOCAL_DATE)))
+    val paymentTwo: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5), leavingDate = Some(LocalDate.parse("2019-04-20", ISO_LOCAL_DATE)))
+    val paymentThree: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None, leavingDate = Some(LocalDate.parse("2019-04-20", ISO_LOCAL_DATE)))
+    val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None, leavingDate = Some(LocalDate.parse("2019-05-05", ISO_LOCAL_DATE)))
     val paymentFive: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), None, None, None, None,
-      Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.00))
+      Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.00), leavingDate = Some(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE)))
     val insufficientPayment: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), None, None, None, leavingDate = Some(LocalDate.parse("2019-04-15", ISO_LOCAL_DATE)))
 
     val ninoIdentifier: Nino = Nino("AA000000D")

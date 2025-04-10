@@ -21,6 +21,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
+import uk.gov.hmrc.identityverificationquestions.sources.P45.P45Service
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefService
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcService
@@ -35,6 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          appConfig: AppConfig,
                                          p60Service: P60Service,
+                                         p45Service: P45Service,
                                          saService: SAService,
                                          payslipService: PayslipService,
                                          ntcService: NtcService,
@@ -44,8 +46,8 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
   def callAllEvidenceSources(selection: Selection, userAgent: String)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
 
     val services: Seq[QuestionService] =
-      if (appConfig.ntcIsEnabled) Seq(p60Service, saService, payslipService, empRefService, ntcService)
-      else Seq(p60Service, saService, payslipService, empRefService)
+      if (appConfig.ntcIsEnabled) Seq(p60Service, p45Service, saService, payslipService, empRefService, ntcService)
+      else Seq(p60Service, p45Service, saService, payslipService, empRefService)
 
     val corrId: CorrelationId = CorrelationId()
 

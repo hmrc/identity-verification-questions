@@ -57,11 +57,11 @@ class P45Service @Inject()(p45Connector: P45Connector,
       (if (taxYears.size > 1) Map("previousTaxYear" -> taxYears.head.display) else Map())
 
     val p45Questions: Seq[QuestionWithAnswers] = {
-      val PaymentToDateAnswers: Seq[QuestionWithAnswers] = records.filter(_.leavingDate.nonEmpty).flatMap(_.taxablePayYTD).filter(_ > 0).map(roundDownWithPence) match {
+      val PaymentToDateAnswers: Seq[QuestionWithAnswers] = records.flatMap(_.taxablePayYTD).filter(_ > 0).map(roundDownWithPence) match {
         case Nil => Nil
         case answers => Seq(QuestionWithAnswers(PaymentToDate, answers.map(_.toString), additionalInfoMap))
       }
-      val EmployeeNIContributionsAnswers: Seq[QuestionWithAnswers] = records.filter(_.leavingDate.nonEmpty).flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
+      val EmployeeNIContributionsAnswers: Seq[QuestionWithAnswers] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
         case Nil => Nil
         case answers => Seq(QuestionWithAnswers(EmployeeNIContributions, answers.map(_.toString), additionalInfoMap))
       }

@@ -31,6 +31,7 @@ import uk.gov.hmrc.identityverificationquestions.services.utilities.{TaxYear, Ta
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class P45Connector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
   with HodConnectorConfig
   with TaxYearBuilder
@@ -62,7 +63,8 @@ class P45Connector @Inject()(val http: CoreGet, metricsService: MetricsService, 
       val futureEmployments = Future.sequence(getTaxYears.map(tYear => getRecordsForYear(nino, tYear))).map(_.flatten)
       for {
         employments <- futureEmployments
-        newest = employments.flatMap(_.newest)
+        paymentsWithLeavingDate = employments.map(e => Employment(e.payments.filter(_.leavingDate.nonEmpty)))
+        newest = paymentsWithLeavingDate.flatMap(_.newest)
       } yield newest
     }.getOrElse {
       logger.warn(s"$serviceName, No nino identifier for selection: $selection")
