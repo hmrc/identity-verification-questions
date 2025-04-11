@@ -19,6 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.services
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.{AnswerCheck, QuestionKey, QuestionResult}
+import uk.gov.hmrc.identityverificationquestions.sources.P45.P45AnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60AnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefAnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcAnswerService
@@ -30,12 +31,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
+                                          p45AnswerService: P45AnswerService,
                                           saAnswerService: SAAnswerService,
                                           payslipAnswerService: PayslipAnswerService,
                                           ntcAnswerService: NtcAnswerService,
                                           empRefAnswerService: EmpRefAnswerService)(implicit ec: ExecutionContext) {
 
-  val answerServices = Seq(p60AnswerService, saAnswerService, payslipAnswerService, empRefAnswerService, ntcAnswerService)
+  val answerServices = Seq(p60AnswerService, p45AnswerService, saAnswerService, payslipAnswerService, empRefAnswerService, ntcAnswerService)
 
   private def getQuestionService(questionKey: QuestionKey): AnswerService = {
     answerServices.filter(_.supportedQuestions.contains(questionKey)) match {
