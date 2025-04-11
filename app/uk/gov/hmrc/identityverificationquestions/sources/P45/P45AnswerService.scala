@@ -40,7 +40,7 @@ class P45AnswerService @Inject()(p45AnswerConnector: P45AnswerConnector, as: Aud
   override def connector: AnswerConnector[QuestionResult] = p45AnswerConnector
 
   override def supportedQuestions: Seq[QuestionKey] =
-    Seq(PaymentToDate, EmployeeNIContributions)
+    Seq(PaymentToDate, TaxToDate)
 
   override def answerTransformer(records: Seq[QuestionResult], filteredAnswers: Seq[AnswerDetails]): Seq[QuestionResult] = records
 

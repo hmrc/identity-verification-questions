@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models.P45.{EmployeeNIContributions, PaymentToDate}
+import uk.gov.hmrc.identityverificationquestions.models.P45.{PaymentToDate, TaxToDate}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, p45Service}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
@@ -48,7 +48,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
         (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(2).atLeastOnce()
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq(
-          paymentToDateQuestion, employeeNIContributionsQuestion
+          paymentToDateQuestion, taxToDateQuestion
         )
       }
 
@@ -58,7 +58,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
         (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq(
-          paymentToDateQuestion2, employeeNIContributionsQuestion2
+          paymentToDateQuestion2, taxToDateQuestion2
         )
       }
     }
@@ -122,10 +122,10 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
     val selectionNoNino: Selection = Selection(utrIdentifier)
 
     val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-    val employeeNIContributionsQuestion: QuestionWithAnswers = QuestionWithAnswers(EmployeeNIContributions, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20"))
+    val taxToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20"))
 
     val paymentToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
-    val employeeNIContributionsQuestion2: QuestionWithAnswers = QuestionWithAnswers(EmployeeNIContributions, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val taxToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
   }
 
 }

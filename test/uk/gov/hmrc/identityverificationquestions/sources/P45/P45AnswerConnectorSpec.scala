@@ -21,7 +21,7 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.models.P45.{PaymentToDate, EmployeeNIContributions}
+import uk.gov.hmrc.identityverificationquestions.models.P45.{PaymentToDate, TaxToDate}
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
@@ -37,7 +37,7 @@ class P45AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
   val connector = new P45AnswerConnector(mongoRepo, auditService)
 
   val answerDetailsPaymentToDate: AnswerDetails = AnswerDetails(PaymentToDate, SimpleAnswer("100.11"))
-  val answerDetailsEmployeeNIContributions: AnswerDetails = AnswerDetails(EmployeeNIContributions, SimpleAnswer("50.05"))
+  val answerDetailsTaxToDate: AnswerDetails = AnswerDetails(TaxToDate, SimpleAnswer("50.05"))
 
   override def afterEach(): Unit = {
     super.afterEach()
@@ -54,12 +54,12 @@ class P45AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         connector.verifyAnswer(corrId, answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
       }
 
-      "matching EmployeeNIContributions result" in {
-        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EmployeeNIContributions, Seq("50.05", "10.10"))), dateTime)
+      "matching TaxToDate result" in {
+        val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(TaxToDate, Seq("50.05", "10.10"))), dateTime)
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
-        connector.verifyAnswer(corrId, answerDetailsEmployeeNIContributions, None).futureValue shouldBe QuestionResult(EmployeeNIContributions, Correct)
+        connector.verifyAnswer(corrId, answerDetailsTaxToDate, None).futureValue shouldBe QuestionResult(TaxToDate, Correct)
       }
     }
 
@@ -74,14 +74,14 @@ class P45AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         connector.verifyAnswer(corrId, answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Incorrect)
       }
 
-      "failed matching EmployeeNIContributions" in {
-        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EmployeeNIContributions, Seq("200.22", "300.33"))), dateTime)
+      "failed matching TaxToDate" in {
+        val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(TaxToDate, Seq("200.22", "300.33"))), dateTime)
 
         (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
           .expects(*, inCorrectQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(inCorrectQDC))
-        connector.verifyAnswer(corrId, answerDetailsEmployeeNIContributions, None).futureValue shouldBe QuestionResult(EmployeeNIContributions, Incorrect)
+        connector.verifyAnswer(corrId, answerDetailsTaxToDate, None).futureValue shouldBe QuestionResult(TaxToDate, Incorrect)
       }
     }
 

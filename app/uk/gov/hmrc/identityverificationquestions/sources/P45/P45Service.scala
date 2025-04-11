@@ -61,11 +61,11 @@ class P45Service @Inject()(p45Connector: P45Connector,
         case Nil => Nil
         case answers => Seq(QuestionWithAnswers(PaymentToDate, answers.map(_.toString), additionalInfoMap))
       }
-      val EmployeeNIContributionsAnswers: Seq[QuestionWithAnswers] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
+      val TaxToDateAnswers: Seq[QuestionWithAnswers] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
         case Nil => Nil
-        case answers => Seq(QuestionWithAnswers(EmployeeNIContributions, answers.map(_.toString), additionalInfoMap))
+        case answers => Seq(QuestionWithAnswers(TaxToDate, answers.map(_.toString), additionalInfoMap))
       }
-      PaymentToDateAnswers ++ EmployeeNIContributionsAnswers
+      PaymentToDateAnswers ++ TaxToDateAnswers
     }
 
     p45Questions

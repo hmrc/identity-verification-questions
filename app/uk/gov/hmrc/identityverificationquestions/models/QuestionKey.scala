@@ -34,7 +34,7 @@ object QuestionKey {
     P60.StudentLoanDeductions,
     P60.PostgraduateLoanDeductions,
     P45.PaymentToDate,
-    P45.EmployeeNIContributions,
+    P45.TaxToDate,
     Payslip.IncomeTax,
     Payslip.NationalInsurance,
     PassportQuestion,
@@ -74,7 +74,7 @@ case object P60 {
 
 case object P45 {
   case object PaymentToDate extends QuestionKey("rti-p45-payment-for-year", "P45")
-  case object EmployeeNIContributions extends QuestionKey("rti-p45-employee-ni-contributions", "P45")
+  case object TaxToDate extends QuestionKey("rti-p45-total-tax-to-date", "P45")
 }
 
 case object Payslip {
