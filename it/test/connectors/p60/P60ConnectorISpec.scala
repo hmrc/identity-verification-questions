@@ -52,7 +52,8 @@ class P60ConnectorISpec extends BaseISpec {
                                           statutorySharedParentalPay = Some(0),
                                           statutoryAdoptionPay = Some(0),
                                           studentLoanDeductions = Some(800.02),
-                                          postgraduateLoanDeductions = Some(0))
+                                          postgraduateLoanDeductions = Some(0),
+                                          totalTaxYTD = Some(120.99))
     }
 
     "successfully obtain data for nino AA002023B" in {
@@ -69,7 +70,8 @@ class P60ConnectorISpec extends BaseISpec {
                                           statutorySharedParentalPay = Some(0),
                                           statutoryAdoptionPay = Some(400.02),
                                           studentLoanDeductions = Some(0),
-                                          postgraduateLoanDeductions = Some(300.02))
+                                          postgraduateLoanDeductions = Some(300.02),
+                                          totalTaxYTD = Some(120.99))
     }
     "successfully obtain data for nino AA002024B" in {
       val ninoIdentifier: Nino = Nino("AA002024B")
@@ -85,7 +87,8 @@ class P60ConnectorISpec extends BaseISpec {
                                           statutorySharedParentalPay = Some(500.02),
                                           statutoryAdoptionPay = Some(0),
                                           studentLoanDeductions = Some(0),
-                                          postgraduateLoanDeductions = Some(0))
+                                          postgraduateLoanDeductions = Some(0),
+                                          totalTaxYTD = Some(120.99))
     }
     "return UpstreamErrorResponse when P60 data not found for nino AA002099B" in {
       val ninoIdentifier: Nino = Nino("AA002099B")

@@ -47,7 +47,7 @@ class PayslipConnectorISpec extends BaseISpec {
       val connector: PayslipConnector = fakeApplication.injector.instanceOf[PayslipConnector]
 
       val result = await(connector.getRecords(selectionNino))
-      result.toList.head shouldBe Payment(paymentDate, Some(3000), Some(120.99), Some(155.02), Some(100.02), None, None, None, None, None, None)
+      result.toList.head shouldBe Payment(paymentDate, Some(3000), Some(120.99), Some(155.02), Some(100.02), None, None, None, None, None, None, totalTaxYTD = Some(120.99))
     }
   }
 }

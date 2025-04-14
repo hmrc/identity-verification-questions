@@ -29,6 +29,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
 class P45ConnectorISpec extends BaseISpec {
 
@@ -38,6 +39,7 @@ class P45ConnectorISpec extends BaseISpec {
   "get p45 returns" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val paymentDate: LocalDate = LocalDate.now().minusMonths(6).minusDays(5)
+    val paymentDate2: LocalDate = LocalDate.now().minusYears(1).minusMonths(8)
 
     "successfully obtain data for nino AA000003B" in {
       val ninoIdentifier: Nino = Nino("AA000003B")
@@ -46,47 +48,20 @@ class P45ConnectorISpec extends BaseISpec {
       val connector: P45Connector = fakeApplication.injector.instanceOf[P45Connector]
 
       val result = await(connector.getRecords(selectionNino))
-      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
-        earningsAbovePT = Some(0),
-        statutoryMaternityPay = Some(300.02),
-        statutorySharedParentalPay = Some(0),
-        statutoryAdoptionPay = Some(0),
-        studentLoanDeductions = Some(800.02),
-        postgraduateLoanDeductions = Some(0))
+      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(130.99), Some(155.02), Some(100.02), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(130.99))
     }
 
-    "successfully obtain data for nino AA002023B" in {
-      val ninoIdentifier: Nino = Nino("AA002023B")
+    "successfully obtain data for nino AA000013A" in {
+      val ninoIdentifier: Nino = Nino("AA000013A")
       val selectionNino: Selection = Selection(ninoIdentifier)
 
       val connector : P45Connector = fakeApplication.injector.instanceOf[P45Connector]
 
       val result = await(connector.getRecords(selectionNino))
 
-      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
-        earningsAbovePT = Some(0),
-        statutoryMaternityPay = Some(0),
-        statutorySharedParentalPay = Some(0),
-        statutoryAdoptionPay = Some(400.02),
-        studentLoanDeductions = Some(0),
-        postgraduateLoanDeductions = Some(300.02))
+      result.toList.head shouldBe Payment(paymentDate2, Some(0), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(130.99))
     }
-    "successfully obtain data for nino AA002024B" in {
-      val ninoIdentifier: Nino = Nino("AA002024B")
-      val selectionNino: Selection = Selection(ninoIdentifier)
 
-      val connector : P45Connector = fakeApplication.injector.instanceOf[P45Connector]
-
-      val result = await(connector.getRecords(selectionNino))
-
-      result.toList.head shouldBe Payment(paymentDate, Some(0), Some(0), Some(155.02), Some(100.02),
-        earningsAbovePT = Some(200.02),
-        statutoryMaternityPay = Some(0),
-        statutorySharedParentalPay = Some(500.02),
-        statutoryAdoptionPay = Some(0),
-        studentLoanDeductions = Some(0),
-        postgraduateLoanDeductions = Some(0))
-    }
     "return UpstreamErrorResponse when P60 data not found for nino AA002099B" in {
       val ninoIdentifier: Nino = Nino("AA002099B")
       val selectionNino: Selection = Selection(ninoIdentifier)
