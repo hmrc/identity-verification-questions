@@ -51,18 +51,18 @@ class P45ConnectorISpec extends BaseISpec {
       result.toList.head shouldBe Payment(paymentDate, Some(0), Some(130.99), Some(155.02), Some(100.02), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(130.99))
     }
 
-    "successfully obtain data for nino AA000013A" in {
-      val ninoIdentifier: Nino = Nino("AA000013A")
+    "successfully obtain data for nino AA000045A" in {
+      val ninoIdentifier: Nino = Nino("AA000045A")
       val selectionNino: Selection = Selection(ninoIdentifier)
 
       val connector : P45Connector = fakeApplication.injector.instanceOf[P45Connector]
 
       val result = await(connector.getRecords(selectionNino))
 
-      result.toList.head shouldBe Payment(paymentDate2, Some(0), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(130.99))
+      result.toList.head shouldBe Payment(paymentDate, Some(45.99), Some(130.99), Some(155.02), Some(100.02), leavingDate = Some(LocalDate.parse("2013-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(145.99))
     }
 
-    "return UpstreamErrorResponse when P60 data not found for nino AA002099B" in {
+    "return UpstreamErrorResponse when P45 data not found for nino AA002099B" in {
       val ninoIdentifier: Nino = Nino("AA002099B")
       val selectionNino: Selection = Selection(ninoIdentifier)
 
