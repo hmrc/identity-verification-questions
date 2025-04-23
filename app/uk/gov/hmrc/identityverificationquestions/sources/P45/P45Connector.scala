@@ -49,7 +49,7 @@ class P45Connector @Inject()(val http: CoreGet, metricsService: MetricsService, 
       val desHeaders: HeaderCarrier = headersForDES
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
-      metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.p60ConnectorTimer.time()) {
+      metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.p45ConnectorTimer.time()) {
         http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
