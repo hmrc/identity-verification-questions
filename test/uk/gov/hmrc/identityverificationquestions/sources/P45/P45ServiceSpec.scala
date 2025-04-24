@@ -107,8 +107,8 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait TestDate {
-    val paymentOne: Payment = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2019-05-28", ISO_LOCAL_DATE)))
-    val paymentTwo: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5), leavingDate = Some(LocalDate.parse("2019-04-20", ISO_LOCAL_DATE)))
+    val paymentOne: Payment = Payment(LocalDate.parse("2019-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2019-05-28", ISO_LOCAL_DATE)), totalTaxYTD = Some(45.45))
+    val paymentTwo: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5), leavingDate = Some(LocalDate.parse("2019-04-20", ISO_LOCAL_DATE)), totalTaxYTD = Some(46.46))
     val paymentThree: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None, leavingDate = Some(LocalDate.parse("2019-04-20", ISO_LOCAL_DATE)))
     val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None, leavingDate = Some(LocalDate.parse("2019-05-05", ISO_LOCAL_DATE)))
     val paymentFive: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), None, None, None, None,
@@ -122,10 +122,10 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
     val selectionNoNino: Selection = Selection(utrIdentifier)
 
     val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-    val taxToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20"))
+    val taxToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("45.45", "46.46"), Map("currentTaxYear" -> "2019/20"))
 
     val paymentToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
-    val taxToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("34.82", "34.82"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val taxToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("45.45", "46.46"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
   }
 
 }

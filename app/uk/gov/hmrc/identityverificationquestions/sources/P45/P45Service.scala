@@ -61,7 +61,7 @@ class P45Service @Inject()(p45Connector: P45Connector,
         case Nil => Nil
         case answers => Seq(QuestionWithAnswers(PaymentToDate, answers.map(_.toString), additionalInfoMap))
       }
-      val TaxToDateAnswers: Seq[QuestionWithAnswers] = records.flatMap(_.employeeNIContrib).filter(_ > 0).map(roundDownWithPence) match {
+      val TaxToDateAnswers: Seq[QuestionWithAnswers] = records.flatMap(_.totalTaxYTD).filter(_ > 0).map(roundDownWithPence) match {
         case Nil => Nil
         case answers => Seq(QuestionWithAnswers(TaxToDate, answers.map(_.toString), additionalInfoMap))
       }

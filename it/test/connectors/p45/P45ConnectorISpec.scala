@@ -39,7 +39,6 @@ class P45ConnectorISpec extends BaseISpec {
   "get p45 returns" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val paymentDate: LocalDate = LocalDate.now().minusMonths(6).minusDays(5)
-    val paymentDate2: LocalDate = LocalDate.now().minusYears(1).minusMonths(8)
 
     "successfully obtain data for nino AA000003B" in {
       val ninoIdentifier: Nino = Nino("AA000003B")
