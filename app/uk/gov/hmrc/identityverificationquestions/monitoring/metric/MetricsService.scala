@@ -27,6 +27,7 @@ class MetricsService @Inject()(val metrics: Metrics)(implicit executionContext: 
   def payeConnectorTimer: Timer = metrics.defaultRegistry.timer("pay-as-you-earn-emp-connector-response-timer")
   def ntcConnectorTimer: Timer = metrics.defaultRegistry.timer("national-tax-credits-connector-response-timer")
   def p60ConnectorTimer: Timer = metrics.defaultRegistry.timer("p60-rti-connector-response-timer")
+  def p45ConnectorTimer: Timer = metrics.defaultRegistry.timer("p45-rti-connector-response-timer")
   def payslipConnectorTimer: Timer = metrics.defaultRegistry.timer("payslip-rti-connector-response-timer")
   def saPaymentConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-payment-connector-response-timer")
   def saPensionsConnectorTimer: Timer = metrics.defaultRegistry.timer("self-assessment-pensions-connector-response-timer")

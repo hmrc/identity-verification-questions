@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 
 class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneServerPerSuite {
   "POST /questions" should {
-    "return 200 if provided with valid json" in new Setup {
+    "return 200 if provided with valid json with userAgent of IV" in new Setup {
       rtiProxyReturnOk(rtiResponseJson)
       ivReturnOk
       basGatewayStub
@@ -42,6 +42,22 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
       private val questions: Seq[Question] = questionResponse.get.questions
       questions.nonEmpty shouldBe true
       questions.map(_.questionKey.evidenceOption).contains("P60") shouldBe true
+      questions.map(_.questionKey.evidenceOption).contains("P45") shouldBe false
+      questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
+    }
+
+    "return 200 if provided with valid json for P45 with userAgent of nino-IV" in new Setup {
+      rtiProxyReturnOk(rtiResponseJson)
+      ivReturnOk
+      basGatewayStub
+      val response: WSResponse = await(resourceRequestP45(questionRoute).post(validQuestionRequest))
+      response.status shouldBe 200
+      val questionResponse: JsResult[QuestionResponse] = Json.parse(response.body).validate[QuestionResponse]
+      questionResponse.isSuccess shouldBe true
+      private val questions: Seq[Question] = questionResponse.get.questions
+      questions.nonEmpty shouldBe true
+      questions.map(_.questionKey.evidenceOption).contains("P60") shouldBe true
+      questions.map(_.questionKey.evidenceOption).contains("P45") shouldBe true
       questions.map(q => q.questionKey) should contain(paymentToDateQuestion.questionKey)
     }
 

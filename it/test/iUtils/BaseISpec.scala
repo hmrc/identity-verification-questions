@@ -63,6 +63,9 @@ trait BaseISpec extends AnyWordSpecLike
   protected def resourceRequest(url: String): WSRequest =
     wsClient.url(resource(url)).withHttpHeaders("Csrf-Token" -> "nocheck", "User-Agent" -> "identity-verification")
 
+  protected def resourceRequestP45(url: String): WSRequest =
+    wsClient.url(resource(url)).withHttpHeaders("Csrf-Token" -> "nocheck", "User-Agent" -> "nino-identity-verification")
+
   protected def wsClient: WSClient = app.injector.instanceOf[WSClient]
 
   private val csrfIgnoreFlags = Map(

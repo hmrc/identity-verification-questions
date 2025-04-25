@@ -95,6 +95,7 @@ trait RtiTestData {
       |            "inYear": [
       |              {
       |                "payId": "65553-1808",
+      |                "leavingDate": "2013-07-23",
       |                "payFreq": "IO",
       |                "mandatoryMonetaryAmount": [
       |                  {

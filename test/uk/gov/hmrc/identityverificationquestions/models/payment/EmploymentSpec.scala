@@ -54,26 +54,26 @@ class EmploymentSpec extends UnitSpec {
     }
 
     "create a Seq[Employment] without payment if fields are not in json" in new Setup {
-      p60ResponseWithoutmandatoryMonetaryAmountFieldJson.validate[Seq[Employment]] shouldBe JsSuccess(p60ResponseWithoutmandatoryMonetaryAmountField)
+      p60ResponseWithoutmandatoryMonetaryAmountFieldJson.validate[Seq[Employment]] shouldBe JsSuccess(p60ResponseWithoutMandatoryMonetaryAmountField)
     }
   }
 
   trait Setup extends P60TestData {
-    val paymentOne = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None)
-    val paymentTwo = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5))
-    val paymentThree = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
-    val paymentFour = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
-    val p60Response = Seq(Employment(Seq(paymentOne)), Employment(Seq(paymentTwo)), Employment(Seq(paymentThree, paymentFour)))
+    val paymentOne: Payment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(10.10))
+    val paymentTwo: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5), totalTaxYTD = Some(11.11))
+    val paymentThree: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None, totalTaxYTD = Some(0))
+    val paymentFour: Payment = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None, totalTaxYTD = Some(13.13))
+    val p60Response: Seq[Employment] = Seq(Employment(Seq(paymentOne)), Employment(Seq(paymentTwo)), Employment(Seq(paymentThree, paymentFour)))
 
-    val paymentFive = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), None, Some(0), None)
-    val p60ResponseWithEmployerWithoutPayments = Seq(Employment(Seq(paymentFive)), Employment(Seq()))
+    val paymentFive: Payment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), None, Some(0), None, leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(0))
+    val p60ResponseWithEmployerWithoutPayments: Seq[Employment] = Seq(Employment(Seq(paymentFive)), Employment(Seq()))
 
-    val p60ResponseWithoutEmployments = Seq()
+    val p60ResponseWithoutEmployments: Seq[Nothing] = Seq()
 
-    val paymentSix = Payment(LocalDate.parse("2015-06-24", ISO_LOCAL_DATE), Some(1333.33), None, Some(90), None)
-    val paymentSeven = Payment(LocalDate.parse("2015-06-25", ISO_LOCAL_DATE), Some(4000), Some(34.82), Some(90), Some(5))
-    val paymentEight = Payment(LocalDate.parse("2015-06-24", ISO_LOCAL_DATE), None, None, None, None)
-    val p60ResponseWithoutOptionalFields = Seq(Employment(Seq(paymentSix, paymentSeven)))
-    val p60ResponseWithoutmandatoryMonetaryAmountField = Seq(Employment(Seq(paymentEight, paymentSeven)))
+    val paymentSix: Payment = Payment(LocalDate.parse("2015-06-24", ISO_LOCAL_DATE), Some(1333.33), None, Some(90), None, totalTaxYTD = Some(90))
+    val paymentSeven: Payment = Payment(LocalDate.parse("2015-06-25", ISO_LOCAL_DATE), Some(4000), Some(34.82), Some(90), Some(5), totalTaxYTD = Some(270))
+    val paymentEight: Payment = Payment(LocalDate.parse("2015-06-24", ISO_LOCAL_DATE), None, None, None, None)
+    val p60ResponseWithoutOptionalFields: Seq[Employment] = Seq(Employment(Seq(paymentSix, paymentSeven)))
+    val p60ResponseWithoutMandatoryMonetaryAmountField: Seq[Employment] = Seq(Employment(Seq(paymentEight, paymentSeven)))
   }
 }

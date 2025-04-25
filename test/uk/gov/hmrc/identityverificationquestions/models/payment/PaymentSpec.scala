@@ -78,6 +78,6 @@ class PaymentSpec extends UnitSpec {
         |""".stripMargin
     )
   }
-  val validPayment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(100.01), Some(34.82), Some(10), Some(12.34))
+  val validPayment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(100.01), Some(34.82), Some(10), Some(12.34), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(10.10))
 
 }

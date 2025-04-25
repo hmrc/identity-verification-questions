@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.identityverificationquestions.sources.P60
+package uk.gov.hmrc.identityverificationquestions.sources.P45
 
-import Utils.testData.P60TestData
 import Utils.{LogCapturing, UnitSpec}
 import org.apache.pekko.actor.ActorSystem
+import Utils.testData.P60TestData
 import ch.qos.logback.classic.Level
 import com.typesafe.config.Config
-import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
+import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, HodConf}
+import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, p45Service}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
-import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, p60Service}
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
 
@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class P60ConnectorSpec extends UnitSpec with LogCapturing {
+class P45ConnectorSpec extends UnitSpec with LogCapturing {
 
   "calling getRecords" should {
     "return a sequence of Payment records" when {
@@ -42,7 +42,7 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(*).returning(Right(HodConf("authToken", "envHeader")))
         (mockAppConfig.serviceBaseUrl(_: ServiceName)).expects(*).returning("http://localhost:8080")
 
-        val expectedResponse = Seq(paymentOne, paymentTwo, paymentFour)
+        val expectedResponse: Seq[Payment] = Seq(paymentOne)
 
         connector.getRecords(selectionNino).futureValue shouldBe expectedResponse
       }
@@ -50,10 +50,10 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
 
     "returns empty sequence and logs a warning" when {
       "no nino in identifiers" in new Setup {
-        withCaptureOfLoggingFrom[P60ConnectorSpec] { logs =>
+        withCaptureOfLoggingFrom[P45ConnectorSpec] { logs =>
           connector.getRecords(selectionNoNino).futureValue shouldBe Seq()
           val warnLogs = logs.filter(_.getLevel == Level.WARN)
-          warnLogs.count(_.getMessage == "p60Service, No nino identifier for selection: 12345678") shouldBe 1
+          warnLogs.count(_.getMessage == "p45Service, No nino identifier for selection: 12345678") shouldBe 1
         }
       }
     }
@@ -83,19 +83,19 @@ class P60ConnectorSpec extends UnitSpec with LogCapturing {
     val mockAppConfig: AppConfig = mock[AppConfig]
     val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
-    val connector: P60Connector = new P60Connector(http, metricsService, mockAppConfig) {
-      override def serviceName: ServiceName = p60Service
+    val connector: P45Connector = new P45Connector(http, metricsService, mockAppConfig) {
+      override def serviceName: ServiceName = p45Service
       override protected def getTaxYears = Seq(TaxYear(2020))
     }
   }
 
-   trait TestData {
-     val paymentOne: Payment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(10.10))
-     val paymentTwo: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5), totalTaxYTD = Some(11.11))
-     val paymentThree: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None, totalTaxYTD = Some(0))
-     val paymentFour: Payment = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None, totalTaxYTD = Some(13.13))
+  trait TestData {
+    val paymentOne: Payment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(0), Some(34.82), Some(10), None, leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(10.10))
+    val paymentTwo: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(3000), Some(34.82), Some(11), Some(5))
+    val paymentThree: Payment = Payment(LocalDate.parse("2014-04-30", ISO_LOCAL_DATE), Some(1200), None, Some(8), None)
+    val paymentFour: Payment = Payment(LocalDate.parse("2014-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None)
 
-     val selectionNino: Selection = Selection(ninoIdentifier, saUtrIdentifier)
-     val selectionNoNino: Selection = Selection(saUtrIdentifier)
-   }
+    val selectionNino: Selection = Selection(ninoIdentifier, saUtrIdentifier)
+    val selectionNoNino: Selection = Selection(saUtrIdentifier)
+  }
 }
