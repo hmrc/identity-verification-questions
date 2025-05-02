@@ -1,5 +1,4 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
-import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 
@@ -25,7 +24,7 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
   .disablePlugins(JUnitXmlReportPlugin)
-  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "resources")
+  .settings(Compile / unmanagedResourceDirectories += baseDirectory.value / "resources")
   .settings(Compile / console / scalacOptions --= Seq("-deprecation", "-Xfatal-warnings", "-Xlint"))
   .settings(routesImport ++= Seq("models._"))
   .settings(playDefaultPort := 10101)
