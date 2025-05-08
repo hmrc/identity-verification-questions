@@ -61,11 +61,20 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
           paymentToDateQuestion2, taxToDateQuestion2
         )
       }
+
+      "P45Connector returns a non empty sequence of Payment's when there is only payments details" in new WithStubbing {
+        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentSix,paymentThree)))
+        (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
+
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq(
+          paymentToDateQuestion2
+        )
+      }
     }
 
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
-        (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
+        (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(1)
         (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
         service.questions(selectionNoNino, corrId).futureValue shouldBe Seq()
@@ -73,13 +82,6 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
 
       "P45Connector returns an empty sequence of Payment's" in new WithStubbing {
         (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
-
-        service.questions(selectionNino, corrId).futureValue shouldBe Seq()
-      }
-
-      "P45Connector returns an insufficient Payment's" in new WithStubbing {
-        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(insufficientPayment)))
-        (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
@@ -99,7 +101,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
   }
 
   trait WithStubbing extends Setup {
-    (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
+    (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(1)
     (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
     (mockAppConfig.serviceCbNumberOfCallsToTrigger(_: ServiceName)).expects(service.serviceName).returning(Some(20))
     (mockAppConfig.serviceCbUnavailableDurationInSec(_: ServiceName)).expects(service.serviceName).returning(Some(60))
@@ -113,7 +115,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
     val paymentFour: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), Some(1266), None, Some(10), None, leavingDate = Some(LocalDate.parse("2019-05-05", ISO_LOCAL_DATE)))
     val paymentFive: Payment = Payment(LocalDate.parse("2019-05-30", ISO_LOCAL_DATE), None, None, None, None,
       Some(1000), Some(2000), Some(3000), Some(4000), Some(5000), Some(300.00), leavingDate = Some(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE)))
-    val insufficientPayment: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), None, None, None, leavingDate = Some(LocalDate.parse("2019-04-15", ISO_LOCAL_DATE)))
+    val paymentSix: Payment = Payment(LocalDate.parse("2019-04-30", ISO_LOCAL_DATE), Some(3000), None, None, None, leavingDate = Some(LocalDate.parse("2019-04-15", ISO_LOCAL_DATE)))
 
     val ninoIdentifier: Nino = Nino("AA000000D")
     val utrIdentifier: SaUtr = SaUtr("12345678")
