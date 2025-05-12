@@ -29,8 +29,8 @@ import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 
-import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`iterator asScala`
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 trait WireMockSupport extends BeforeAndAfterEach with BeforeAndAfterAll {
