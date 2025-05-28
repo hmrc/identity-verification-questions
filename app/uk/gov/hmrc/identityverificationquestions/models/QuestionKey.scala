@@ -73,7 +73,7 @@ case object P60 {
 }
 
 case object P45 {
-  case object PaymentToDate extends QuestionKey("rti-p45-payment-for-year", "P45")
+  case object PaymentToDate extends QuestionKey("rti-p45-total-pay-to-date", "P45")
   case object TaxToDate extends QuestionKey("rti-p45-total-tax-to-date", "P45")
 }
 
