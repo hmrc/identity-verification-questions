@@ -17,9 +17,10 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
+import mocks.MockHttpClientV2
 import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYear
@@ -27,19 +28,16 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
 
-class SAPensionsConnectorSpec extends UnitSpec {
+class SAPensionsConnectorSpec extends UnitSpec with MockHttpClientV2 {
   "sa pensions connector" should {
     "return an existing self assessment pension returns" in new Setup {
-      val expectedResult = Seq(SAReturn(TaxYear(testYear), Seq(SARecord(BigDecimal(100.00), BigDecimal(50.00)))))
+      val expectedResult: Seq[SAReturn] = Seq(SAReturn(TaxYear(testYear), Seq(SARecord(BigDecimal(100.00), BigDecimal(50.00)))))
 
       val expectedUrl = s"$mockedBaseUrl/individuals/nino/$testNino/self-assessment/income?startYear=$testYear&endYear=$testYear"
 
-      (mockHttpClient.GET[Seq[SAReturn]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAReturn]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.successful(expectedResult))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2Execute[Seq[SAReturn]](expectedResult)
 
       connector.getReturns(testNino, testYear, testYear).futureValue shouldBe expectedResult
     }
@@ -47,10 +45,8 @@ class SAPensionsConnectorSpec extends UnitSpec {
     "return an empty list of pension returns if 404 is returned" in new Setup {
       val expectedUrl = s"$mockedBaseUrl/individuals/nino/$testNino/self-assessment/income?startYear=$testYear&endYear=$testYear"
 
-      (mockHttpClient.GET[Seq[SAReturn]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAReturn]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.failed(new NotFoundException("intentional failure")))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2ExecuteException[Seq[SAReturn]](new NotFoundException("intentional failure"))
 
       connector.getReturns(testNino, testYear, testYear).futureValue shouldBe Seq()
     }
@@ -60,10 +56,8 @@ class SAPensionsConnectorSpec extends UnitSpec {
 
       val errorMessage = "intentional failure"
 
-      (mockHttpClient.GET[Seq[SAReturn]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAReturn]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.failed(new RuntimeException(errorMessage)))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2ExecuteException[Seq[SAReturn]](new RuntimeException(errorMessage))
 
       val ex: RuntimeException = intercept[RuntimeException] {
         connector.getReturns(testNino, testYear, testYear).futureValue
@@ -102,7 +96,6 @@ class SAPensionsConnectorSpec extends UnitSpec {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockedBaseUrl  = "https://sa-adapter:443"
-    val mockHttpClient: HttpClient = mock[HttpClient]
     val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
     lazy val additionalConfig: Map[String, Any] = Map.empty
@@ -120,7 +113,7 @@ class SAPensionsConnectorSpec extends UnitSpec {
 
     val fixedDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
 
-    val connector: SAPensionsConnector = new SAPensionsConnector(mockHttpClient, servicesConfig, appConfig, metricsService) {
+    val connector: SAPensionsConnector = new SAPensionsConnector(mockHttpClientV2, servicesConfig, appConfig, metricsService) {
       override def currentDate: Instant = fixedDate
     }
   }

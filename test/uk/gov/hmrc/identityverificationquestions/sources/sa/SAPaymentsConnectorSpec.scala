@@ -17,43 +17,39 @@
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import Utils.UnitSpec
-import java.time.LocalDate
+import mocks.MockHttpClientV2
 import play.api.Configuration
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps}
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
 
-class SAPaymentsConnectorSpec extends UnitSpec {
+class SAPaymentsConnectorSpec extends UnitSpec with MockHttpClientV2 {
 
   "sa payments connector" should {
     "return an existing self assessment payments returns" in new Setup {
-      val expectedData = List(SAPayment(BigDecimal(1550), Some(LocalDate.now()), Some("PYT")))
-      val expectedResult = List(SAPaymentReturn(expectedData))
+      val expectedData: List[SAPayment] = List(SAPayment(BigDecimal(1550), Some(LocalDate.now()), Some("PYT")))
+      val expectedResult: List[SAPaymentReturn] = List(SAPaymentReturn(expectedData))
 
       val expectedUrl = s"$mockedBaseUrl/individuals/self-assessment/payments/utr/$TEST_SAUTR"
 
-      (mockHttpClient.GET[Seq[SAPayment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAPayment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.successful(expectedData))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2Execute[Seq[SAPayment]](expectedData)
 
       connector.getReturns(SAUTR).futureValue shouldBe expectedResult
     }
 
     "return an existing self assessment payment returns using SaUtr" in new Setup {
-      val expectedData = List(SAPayment(BigDecimal(1550), Some(LocalDate.now()), Some("PYT")))
-      val expectedResult = List(SAPaymentReturn(expectedData))
+      val expectedData: List[SAPayment] = List(SAPayment(BigDecimal(1550), Some(LocalDate.now()), Some("PYT")))
+      val expectedResult: List[SAPaymentReturn] = List(SAPaymentReturn(expectedData))
 
       val expectedUrl = s"$mockedBaseUrl/individuals/self-assessment/payments/utr/$TEST_SAUTR"
 
-      (mockHttpClient.GET[Seq[SAPayment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAPayment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.successful(expectedData))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2Execute[Seq[SAPayment]](expectedData)
 
       connector.getReturns(SAUTR).futureValue shouldBe expectedResult
     }
@@ -61,10 +57,8 @@ class SAPaymentsConnectorSpec extends UnitSpec {
     "return an empty list of payments returns if 404 is returned" in new Setup {
       val expectedUrl = s"$mockedBaseUrl/individuals/self-assessment/payments/utr/$TEST_SAUTR"
 
-      (mockHttpClient.GET[Seq[SAPayment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAPayment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.failed(new NotFoundException("intentional failure")))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2ExecuteException[Seq[SAPayment]](new NotFoundException("intentional failure"))
 
       connector.getReturns(SAUTR).futureValue shouldBe List()
     }
@@ -74,10 +68,8 @@ class SAPaymentsConnectorSpec extends UnitSpec {
 
       val errorMessage = "intentional failure"
 
-      (mockHttpClient.GET[Seq[SAPayment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[SAPayment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(expectedUrl, *, *, *, *, *)
-        .returning(Future.failed(new RuntimeException(errorMessage)))
+      mockHttpClientV2Get(url"$expectedUrl")
+      mockHttpClientV2ExecuteException[Seq[SAPayment]](new RuntimeException(errorMessage))
 
       val ex: RuntimeException = intercept[RuntimeException] {
         connector.getReturns(SAUTR).futureValue
@@ -92,7 +84,6 @@ class SAPaymentsConnectorSpec extends UnitSpec {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockedBaseUrl = "https://sa-adapter:443"
-    val mockHttpClient: HttpClient = mock[HttpClient]
     val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     lazy val additionalConfig: Map[String, Any] = Map.empty
     private lazy val configData: Map[String, Any] = Map(
@@ -106,6 +97,6 @@ class SAPaymentsConnectorSpec extends UnitSpec {
     val TEST_SAUTR = "123456789"
     val SAUTR: SaUtr = SaUtr(TEST_SAUTR)
 
-    val connector = new SAPaymentsConnector(mockHttpClient, servicesConfig, metricsService)
+    val connector = new SAPaymentsConnector(mockHttpClientV2, servicesConfig, metricsService)
   }
 }

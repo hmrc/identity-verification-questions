@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.identityverificationquestions.models.taxcredit
 
-import java.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.http.controllers.JsPathEnrichment._
+
+import java.time.LocalDate
 
 
 trait NtcJsonFormats {
@@ -53,8 +53,8 @@ trait NtcJsonFormats {
   }
   
   implicit val taxCreditClaimReads: Reads[TaxCreditClaim] = (
-    (__ \ "applicant1" \ "bankOrBuildingSociety").tolerantReadNullable[TaxCreditBankAccount] and
-    (__ \ "applicant2" \ "bankOrBuildingSociety").tolerantReadNullable[TaxCreditBankAccount] and
+    (__ \ "applicant1" \ "bankOrBuildingSociety").readNullable[TaxCreditBankAccount] and
+    (__ \ "applicant2" \ "bankOrBuildingSociety").readNullable[TaxCreditBankAccount] and
     (__ \ "previousPayment").readNullable[Seq[Option[TaxCreditPayment]]]
   )((account1, account2, payments) => {
     val accounts = account1.toSeq ++ account2.toSeq

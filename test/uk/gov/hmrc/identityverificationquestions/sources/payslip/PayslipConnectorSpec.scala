@@ -17,24 +17,24 @@
 package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import Utils.{LogCapturing, UnitSpec}
+import mocks.MockHttpClientV2
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpGet, HttpReads, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpReads, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.models.payment.{Employment, Payment}
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import scala.concurrent.ExecutionContext
 
-class PayslipConnectorSpec extends UnitSpec with LogCapturing {
+class PayslipConnectorSpec extends UnitSpec with LogCapturing with MockHttpClientV2 {
 
   trait Setup {
 
-    val httpClientMock: HttpGet = mock[HttpGet]
     val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
     val servicesConfig: ServicesConfig = app.injector.instanceOf[ServicesConfig]
@@ -42,7 +42,7 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
     def nowMinusMonths(months: Int): LocalDate = toDate("2015-04-10").minusMonths(months)
     def month = "04"
 
-    def connector: PayslipConnector = new PayslipConnector(httpClientMock, metricsService, appConfig){
+    def connector: PayslipConnector = new PayslipConnector(mockHttpClientV2, metricsService, appConfig){
       override def today: LocalDate = {
         val date = s"2015-$month-10"
         toDate(date)
@@ -66,34 +66,24 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
   "a connector" should {
 
     "return payments when data are not available for current tax year and we are in April" in new Setup {
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16", *, *, *, *, *)
-        .returning(Future.successful(Seq(Employment(payments))))
-
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15", *, *, *, *, *)
-        .returning(Future.successful(Seq(Employment(payments))))
-
-      override def payments = Seq(
+      override def payments: Seq[Payment] = Seq(
         Payment(toDate("2015-06-28"), Some(BigDecimal(0)), Some(BigDecimal("10.10")), Some(BigDecimal("10.00"))),
         Payment(toDate("2015-04-30"), Some(BigDecimal("3000")), Some(BigDecimal("11.11")), Some(BigDecimal("11.00")), Some(BigDecimal("5.00"))),
         Payment(toDate("2014-12-30"), Some(BigDecimal("1200")), Some(BigDecimal("0")), Some(BigDecimal("8.00"))),
         Payment(toDate("2015-05-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
 
+      mockHttpClientV2Get(url"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16")
+      mockHttpClientV2Get(url"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15")
+      mockHttpClientV2SetHeader().repeat(2)
+      mockHttpClientV2Execute[Seq[Employment]](Seq(Employment(payments))).repeat(2)
+
       val res: Seq[Payment] = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
-      res.seq.isEmpty should be(false)
+      res.isEmpty should be(false)
       res.size should be(6)
     }
 
     "return payments when data are available for current tax year and we are in September " in new Setup {
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16", *, *, *, *, *)
-        .returning(Future.successful(Seq(Employment(payments))))
-
       override def month = "09"
 
       override def payments = Seq(
@@ -102,17 +92,17 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2014-12-30"), Some(BigDecimal("1200")), Some(BigDecimal("0")), Some(BigDecimal("8.00"))),
         Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
+
+      mockHttpClientV2Get(url"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16")
+      mockHttpClientV2SetHeader()
+      mockHttpClientV2Execute[Seq[Employment]](Seq(Employment(payments)))
+
       val res: Seq[Payment] = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
-      res.seq.isEmpty should be(false)
+      res.isEmpty should be(false)
       res.size should be(3)
     }
 
     "return payments when data are available for current tax year and we are in March " in new Setup {
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15", *, *, *, *, *)
-        .returning(Future.successful(Seq(Employment(payments))))
-
       override def month = "03"
 
       override def payments = Seq(
@@ -122,23 +112,16 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
 
+      mockHttpClientV2Get(url"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15")
+      mockHttpClientV2SetHeader()
+      mockHttpClientV2Execute[Seq[Employment]](Seq(Employment(payments)))
+
       val res: Seq[Payment] = connector.getRecords(Selection(nino= Nino("AA000003D"))).futureValue
-      res.seq.isEmpty should be(false)
+      res.isEmpty should be(false)
       res.size should be(4)
     }
 
     "return payments when data are available for previous tax year and we are in April and for the current tax year we got 404 " in new Setup {
-
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16", *, *, *, *, *)
-        .returning(Future.failed(UpstreamErrorResponse("NotFound", 404, 404)))
-
-      (httpClientMock.GET[Seq[Employment]](_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-        (_: HttpReads[Seq[Employment]], _: HeaderCarrier, _: ExecutionContext))
-        .expects(s"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15", *, *, *, *, *)
-        .returning(Future.successful(Seq(Employment(payments))))
-
       override def month = "04"
 
       override def payments = Seq(
@@ -148,8 +131,14 @@ class PayslipConnectorSpec extends UnitSpec with LogCapturing {
         Payment(toDate("2015-08-30"), Some(BigDecimal("1266")), Some(BigDecimal("13.13")), Some(BigDecimal("10.00")))
       )
 
+      mockHttpClientV2Get(url"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/15-16")
+      mockHttpClientV2Get(url"http://localhost:9928/rti/individual/payments/nino/AA000003/tax-year/14-15")
+      mockHttpClientV2SetHeader().repeat(2)
+      mockHttpClientV2ExecuteException[Seq[Employment]](UpstreamErrorResponse("NotFound", 404, 404))
+      mockHttpClientV2Execute[Seq[Employment]](Seq(Employment(payments)))
+
       val res: Seq[Payment] = connector.getRecords(Selection(nino = Nino("AA000003D"))).futureValue
-      res.seq.isEmpty should be(false)
+      res.isEmpty should be(false)
       res.size should be(3)
     }
 

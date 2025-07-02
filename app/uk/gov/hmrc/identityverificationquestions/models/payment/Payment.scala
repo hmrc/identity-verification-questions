@@ -17,9 +17,9 @@
 package uk.gov.hmrc.identityverificationquestions.models.payment
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import java.time.LocalDate
 import play.api.libs.json.{Reads, __}
-import uk.gov.hmrc.http.controllers.JsPathEnrichment._
+
+import java.time.LocalDate
 
 case class Payment(paymentDate: LocalDate,
                    taxablePayYTD: Option[BigDecimal] = None,
@@ -44,10 +44,10 @@ object Payment {
     }
 
     ((__ \ "pmtDate").read[LocalDate] and
-      (__ \ "mandatoryMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]] and
-      (__ \ "niLettersAndValues").tolerantReadNullable[Seq[NiLettersAndValues]] and
-      (__ \ "optionalMonetaryAmount").tolerantReadNullable[Seq[PaymentItem]] and
-      (__ \ "leavingDate").tolerantReadNullable[LocalDate]
+      (__ \ "mandatoryMonetaryAmount").readNullable[Seq[PaymentItem]] and
+      (__ \ "niLettersAndValues").readNullable[Seq[NiLettersAndValues]] and
+      (__ \ "optionalMonetaryAmount").readNullable[Seq[PaymentItem]] and
+      (__ \ "leavingDate").readNullable[LocalDate]
       ) { (paymentDate, optMandatoryPaymentItems, optNiLettersAndValues, optionalMonetaryPaymentItems, leavingDate) =>
       val niLettersAndValues = optNiLettersAndValues.getOrElse(Seq.empty)
       val mandatoryPayments = optMandatoryPaymentItems.getOrElse(Seq.empty)

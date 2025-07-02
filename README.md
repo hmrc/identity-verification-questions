@@ -22,10 +22,10 @@ More evidence sources will be added in due course.
 
 ## Routes
 
-| Method | Path                                             | Description                                           |
-|--------|--------------------------------------------------|-------------------------------------------------------|
-|  POST  | ```/questions```                                 | Get questions and a correlation id for a set of identifiers  |
-|  POST  | ```/answers```                                   | Supply answers for set of previously fetched questions          |
+| Method | Path             | Description                                                 |
+|--------|------------------|-------------------------------------------------------------|
+| POST   | ```/questions``` | Get questions and a correlation id for a set of identifiers |
+| POST   | ```/answers```   | Supply answers for set of previously fetched questions      |
 
 ### POST /questions
 Include a POST JSON body containing a set of identifiers for the questions such as:
@@ -54,10 +54,10 @@ In order to use this service, you must be **authorised** by the Verification tea
 
 #### Response
 
-| Status | Description                                                                                                                                             |
-|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 200    | Returns a correlation id, along with a (possibly empty) set of questions for the identifiers given|
-| 403    | You are not authorized to use the question repository - see above |
+| Status | Description                                                                                        |
+|--------|----------------------------------------------------------------------------------------------------|
+| 200    | Returns a correlation id, along with a (possibly empty) set of questions for the identifiers given |
+| 403    | You are not authorized to use the question repository - see above                                  |
 |
 
 Example response, showing 2 possible questions that can be asked (both from P60 evidence source):
@@ -192,11 +192,11 @@ TODO add more examples for different evidence sources.
 
 #### Response
 
-| Status | Description                                           |
-|--------|-------------------------------------------------------|
-| 200    | The outcome of the answer check, indicating a correct or incorrect response|
-| 403    | You are not authorized to use the question repository - see above |
-| 404    | The supplied correlation id and selection did not match any known questions|
+| Status | Description                                                                 |
+|--------|-----------------------------------------------------------------------------|
+| 200    | The outcome of the answer check, indicating a correct or incorrect response |
+| 403    | You are not authorized to use the question repository - see above           |
+| 404    | The supplied correlation id and selection did not match any known questions |
 
 The outcome of each question answered will be provided in the response, for example:
 
@@ -225,7 +225,9 @@ It is up to the calling service to decide which answers they would like to know 
 
 ## How to run the tests
 
-```sbt clean test``` and  ```sbt clean it/test```
+```sbt clean test```
+
+For IT tests currently you must start up the services ```sm2 --start IV_ALL``` and then ```sbt clean it/test```
 
 Note: acceptance testing is done as part of the main IV suite with question repository enabled from IV backend, see https://github.com/hmrc/identity-verification-ui-tests
 

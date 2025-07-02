@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package test.iUtils
+package iUtils
 
-import com.github.tomakehurst.wiremock.client.WireMock.{get, notFound, okJson, serverError, stubFor, urlEqualTo, urlMatching}
+import com.github.tomakehurst.wiremock.client.MappingBuilder
+import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.{Fault, HttpHeader}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import iUtils.TestData.SCPEmailTestData
 import play.api.libs.json.{JsValue, Json}
-import test.iUtils.TestData.SCPEmailTestData
 
 trait WireMockStubs extends SCPEmailTestData {
   def rtiProxyReturnOk(payments: JsValue): StubMapping =
@@ -68,4 +70,66 @@ trait WireMockStubs extends SCPEmailTestData {
           okJson(accountInfoResponseJson.toString())
         )
     )
+
+  def stubPostWithoutResponseBody(url: String, status: Int, requestBody: String, requestHeaders: Seq[HttpHeader] = Seq.empty): StubMapping = {
+    val mappingWithHeaders: MappingBuilder = requestHeaders.foldLeft(post(urlEqualTo(url)).withRequestBody(equalToJson(requestBody))) { (result, nxt) =>
+      result.withHeader(nxt.key(), equalTo(nxt.firstValue()))
+    }
+
+    stubFor(mappingWithHeaders
+      .willReturn(
+        aResponse()
+          .withStatus(status)
+          .withHeader("Content-Type", "application/json; charset=utf-8")))
+  }
+
+  def stubPostWithError(url: String, requestBody: String, requestHeaders: Seq[HttpHeader] = Seq.empty): StubMapping = {
+    val mappingWithHeaders: MappingBuilder = requestHeaders.foldLeft(post(urlEqualTo(url)).withRequestBody(equalToJson(requestBody))) { (result, nxt) =>
+      result.withHeader(nxt.key(), equalTo(nxt.firstValue()))
+    }
+
+    stubFor(mappingWithHeaders
+      .willReturn(
+        aResponse().withFault(Fault.RANDOM_DATA_THEN_CLOSE)
+      )
+    )
+  }
+
+  def stubPostWithResponseBody(url: String, status: Int, requestBody: String, response: String, requestHeaders: Seq[HttpHeader] = Seq.empty): StubMapping = {
+    val mappingWithHeaders: MappingBuilder = requestHeaders.foldLeft(post(urlEqualTo(url)).withRequestBody(equalToJson(requestBody))) { (result, nxt) =>
+      result.withHeader(nxt.key(), equalTo(nxt.firstValue()))
+    }
+
+    stubFor(mappingWithHeaders
+      .willReturn(
+        aResponse()
+          .withStatus(status)
+          .withBody(response)
+          .withHeader("Content-Type", "application/json; charset=utf-8")))
+
+  }
+
+  def stubGetWithResponseBody(url: String, status: Int, response: String, requestHeaders: Seq[HttpHeader] = Seq.empty): StubMapping = {
+    val mappingWithHeaders: MappingBuilder = requestHeaders.foldLeft(get(urlMatching(url))) { (result, nxt) =>
+      result.withHeader(nxt.key(), equalTo(nxt.firstValue()))
+    }
+
+    stubFor(mappingWithHeaders
+      .willReturn(
+        aResponse()
+          .withStatus(status)
+          .withBody(response)
+          .withHeader("Content-Type", "application/json; charset=utf-8")))
+  }
+
+  def stubGetWithoutResponseBody(url: String, status: Int): StubMapping =
+    stubFor(get(urlMatching(url))
+      .willReturn(
+        aResponse()
+          .withStatus(status)))
+
+  def stubGetWithError(url: String): StubMapping =
+    stubFor(get(urlMatching(url))
+      .willReturn(
+        aResponse().withFault(Fault.EMPTY_RESPONSE)))
 }

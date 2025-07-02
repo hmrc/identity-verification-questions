@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test.iUtils
+package iUtils
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.classic.{Level, Logger => LogbackLogger}

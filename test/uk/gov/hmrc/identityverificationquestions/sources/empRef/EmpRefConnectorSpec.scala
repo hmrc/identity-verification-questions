@@ -17,14 +17,14 @@
 package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import Utils.UnitSpec
-import uk.gov.hmrc.http.HttpGet
+import mocks.MockHttpClientV2
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
 import java.time.LocalDate
 
-class EmpRefConnectorSpec extends UnitSpec {
+class EmpRefConnectorSpec extends UnitSpec with MockHttpClientV2 {
 
   "lastTwoYearsOfPayments" should {
     "return the last 2 years of payment details" in new Setup {
@@ -44,9 +44,8 @@ class EmpRefConnectorSpec extends UnitSpec {
   }
 
   trait Setup {
-    val mockHttpGet: HttpGet = mock[HttpGet]
     val metricsService: MetricsService = mock[MetricsService]
     val mockAppConfig: AppConfig = mock[AppConfig]
-    val empRefConnector = new EmpRefConnector(mockHttpGet, metricsService, mockAppConfig)
+    val empRefConnector = new EmpRefConnector(mockHttpClientV2, metricsService, mockAppConfig)
   }
 }

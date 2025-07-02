@@ -73,14 +73,14 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       "return true" when {
         "The user-agent is not on the denied list for p60" in new Setup {
           (mockAppConfig.deniedUserAgentListForP60 _).expects().returning(Seq("identity-verification"))
-          service.isUserAllowed("lost-credentials") shouldBe (true)
+          service.isUserAllowed("lost-credentials") shouldBe true
         }
       }
 
       "return false" when {
         "The user-agent is on the denied list for p60" in new Setup {
           (mockAppConfig.deniedUserAgentListForP60 _).expects().returning(Seq("identity-verification"))
-          service.isUserAllowed("identity-verification") shouldBe (false)
+          service.isUserAllowed("identity-verification") shouldBe false
         }
       }
     }
@@ -95,7 +95,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service threw Exception, origin: origin; detail: uk.gov.hmrc.http.Upstream4xxResponse: bad bad bad request"
+            errorLogs.head.getMessage shouldBe "p60Service threw Exception, origin: origin; detail: uk.gov.hmrc.http.UpstreamErrorResponse: bad bad bad request"
           }
         }
 
@@ -107,7 +107,7 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
             service.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
             val errorLogs = logs.filter(_.getLevel == Level.ERROR)
             errorLogs.size shouldBe 1
-            errorLogs.head.getMessage shouldBe "p60Service threw Exception, origin: origin; detail: uk.gov.hmrc.http.Upstream5xxResponse: internal server error"
+            errorLogs.head.getMessage shouldBe "p60Service threw Exception, origin: origin; detail: uk.gov.hmrc.http.UpstreamErrorResponse: internal server error"
           }
         }
 

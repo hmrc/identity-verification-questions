@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package test.controllers
+package controllers
 
 import play.api.libs.json.{JsString, JsSuccess, Json}
 import play.api.libs.ws.WSResponse
-import test.iUtils.BaseISpec
+import iUtils.BaseISpec
 import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
 import uk.gov.hmrc.identityverificationquestions.models._

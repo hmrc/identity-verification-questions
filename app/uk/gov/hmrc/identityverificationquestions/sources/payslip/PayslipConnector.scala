@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -29,21 +29,22 @@ import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName,
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{TaxYear, TaxYearBuilder}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PayslipConnector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
+class PayslipConnector @Inject()(val http: HttpClientV2, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
     with HodConnectorConfig
     with TaxYearBuilder
     with Logging {
 
   def serviceName: ServiceName = payslipService
 
-  lazy val checkLastThisManyMonths = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
+  private lazy val checkLastThisManyMonths = appConfig.rtiNumberOfPayslipMonthsToCheck(serviceName)
 
   //PE-2125 to use only till the (5th of April + valueOf('rti.tax-year.payslips.months'))
   // the two years here may be the same in which case the Set() will deduplicate
-  protected def getTaxYears = Set(currentTaxYear, currentTaxYearWithBuffer(checkLastThisManyMonths)).toSeq
+  protected def getTaxYears: Seq[TaxYear] = Set(currentTaxYear, currentTaxYearWithBuffer(checkLastThisManyMonths)).toSeq
 
   def selectPayments(employments: Seq[Employment]): Seq[Payment] = {
     val startPoint = today.minusMonths(checkLastThisManyMonths)
@@ -63,7 +64,7 @@ class PayslipConnector @Inject()(val http: CoreGet, metricsService: MetricsServi
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
       metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.payslipConnectorTimer.time()) {
-        http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+        http.get(url"$url").setHeader(headers:_*).execute[Seq[Employment]].recoverWith {
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
             Future.successful(Seq())
