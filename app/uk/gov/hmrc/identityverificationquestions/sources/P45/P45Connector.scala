@@ -40,7 +40,7 @@ class P45Connector @Inject()(val http: HttpClientV2, metricsService: MetricsServ
 
   def serviceName: ServiceName = p45Service
 
-  protected def getTaxYears: Seq[TaxYear] = Set(currentTaxYear.previous, currentTaxYearWithBuffer.previous).toSeq
+  protected def getTaxYears: Seq[TaxYear] = Set(currentTaxYear, currentTaxYear.previous).toSeq
 
   override def getRecords(selection: Selection)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[Payment]] = {
 
