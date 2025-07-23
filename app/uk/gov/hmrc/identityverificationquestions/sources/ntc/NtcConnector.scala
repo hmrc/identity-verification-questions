@@ -18,7 +18,8 @@ package uk.gov.hmrc.identityverificationquestions.sources.ntc
 
 import play.api.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -30,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NtcConnector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[TaxCreditRecord]
+class NtcConnector @Inject()(val http: HttpClientV2, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[TaxCreditRecord]
   with HodConnectorConfig with Logging with NtcJsonFormats {
 
   def serviceName: ServiceName = taxCreditService
@@ -60,9 +61,8 @@ class NtcConnector @Inject()(val http: CoreGet, metricsService: MetricsService, 
 
     metricsService.timeToGetResponseWithMetrics[Seq[TaxCreditRecord]](metricsService.ntcConnectorTimer.time()) {
       selection.nino.fold(Future.successful(Seq.empty[TaxCreditRecord])) { nino =>
-        http.GET[TaxCreditClaim](s"$baseUrl/national-tax-credits/citizens/${nino.value}/verification-data", headers = headers)(
-          implicitly[HttpReads[TaxCreditClaim]], hc, ec
-        ).map(selectRecords).recoverWith {
+        val url = s"$baseUrl/national-tax-credits/citizens/${nino.value}/verification-data"
+        http.get(url"$url").setHeader(headers:_*).execute[TaxCreditClaim].map(selectRecords).recoverWith {
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
             Future.successful(Seq())

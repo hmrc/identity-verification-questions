@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package monitoring
+package monitoring.auditing
 
 import org.mockito.MockitoSugar.mock
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json, OFormat}
+import play.api.libs.json._
 import play.api.test.FakeRequest
-import test.iUtils.BaseISpec
+import iUtils.BaseISpec
 import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.NationalInsurance
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, CorrelationId, QuestionDataCache, QuestionWithAnswers, Score, Selection, SimpleAnswer}
+import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 
 import java.time.Instant

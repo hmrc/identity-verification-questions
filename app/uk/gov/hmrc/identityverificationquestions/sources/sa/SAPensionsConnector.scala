@@ -16,20 +16,21 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.{Instant, LocalDate, LocalTime, ZoneId, ZonedDateTime}
+import java.time._
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig, appConfig: AppConfig, metricsService: MetricsService)
+class SAPensionsConnector @Inject()(val http: HttpClientV2, servicesConfig: ServicesConfig, appConfig: AppConfig, metricsService: MetricsService)
   extends QuestionConnector[SAReturn] {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
@@ -42,7 +43,7 @@ class SAPensionsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
   def getReturns(nino: Nino, startYear: Int, endYear: Int)(implicit hc: HeaderCarrier, ec: ExecutionContext) : Future[Seq[SAReturn]] = {
     val url = s"$baseUrl/individuals/nino/$nino/self-assessment/income?startYear=$startYear&endYear=$endYear"
     metricsService.timeToGetResponseWithMetrics[Seq[SAReturn]](metricsService.saPensionsConnectorTimer.time()) {
-      http.GET[Seq[SAReturn]](url).recover {
+      http.get(url"$url").execute[Seq[SAReturn]].recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 => Seq()
         case _: NotFoundException => Seq()
       }

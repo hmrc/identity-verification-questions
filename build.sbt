@@ -8,7 +8,7 @@ lazy val scoverageSettings = {
   import scoverage.*
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*BuildInfo.*;.*TestVerifyPersonalIdentityController.*;.*views.*;.*Routes.*;.*RoutesPrefix.*;",
-    ScoverageKeys.coverageMinimumStmtTotal := 85,
+    ScoverageKeys.coverageMinimumStmtTotal := 87,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )}
@@ -29,9 +29,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(routesImport ++= Seq("models._"))
   .settings(playDefaultPort := 10101)
   .settings(scoverageSettings *)
-  .settings(resolvers ++= Seq(
-    Resolver.jcenterRepo
-  ))
 
 
 lazy val it = project

@@ -18,29 +18,29 @@ package uk.gov.hmrc.identityverificationquestions.monitoring.analytics
 
 import org.apache.pekko.Done
 import play.api.Logging
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AnalyticsConnector @Inject() (appConfig: AppConfig, http:HttpClient) extends Logging {
+class AnalyticsConnector @Inject() (appConfig: AppConfig, http: HttpClientV2) extends Logging {
   def serviceUrl: String = appConfig.platformAnalyticsUrl
-
-  private implicit val dimensionWrites: OWrites[DimensionValue] = Json.writes[DimensionValue]
-  private implicit val eventWrites: OWrites[Event] = Json.writes[Event]
-  private implicit val analyticsWrites: OWrites[AnalyticsRequest] = Json.writes[AnalyticsRequest]
 
   def sendEvent(request: AnalyticsRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Done] = {
     val url = s"$serviceUrl/platform-analytics/event"
-    http.POST[AnalyticsRequest, HttpResponse](url, request).map(_ => Done).recover {
-      case e : Throwable =>
-        logger.error(s"Couldn't send analytics event $request")
-        Done
-    }
+    //TODO Error handling could be revisited in the future, always returns Done no matter outcome
+    http.post(url"$url")
+      .withBody(Json.toJson(request))
+      .execute[HttpResponse].map(_ => Done).recover {
+        case _: Throwable =>
+          logger.error(s"Couldn't send analytics event $request")
+          Done
+      }
   }
 
 }

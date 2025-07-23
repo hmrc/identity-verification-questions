@@ -18,7 +18,8 @@ package uk.gov.hmrc.identityverificationquestions.sources.sa
 
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.Selection
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
@@ -27,7 +28,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesConfig, metricsService: MetricsService)
+class SAPaymentsConnector @Inject()(val http: HttpClientV2, servicesConfig: ServicesConfig, metricsService: MetricsService)
   extends QuestionConnector[SAPaymentReturn] {
   lazy val baseUrl: String = servicesConfig.baseUrl("self-assessment")
 
@@ -35,7 +36,7 @@ class SAPaymentsConnector @Inject()(val http: CoreGet, servicesConfig: ServicesC
     val url = s"$baseUrl/individuals/self-assessment/payments/utr/$saUtr"
 
     metricsService.timeToGetResponseWithMetrics[Seq[SAPaymentReturn]](metricsService.saPaymentConnectorTimer.time()) {
-      http.GET[Seq[SAPayment]](url).map { payments =>
+      http.get(url"$url").execute[Seq[SAPayment]].map { payments =>
         Seq(SAPaymentReturn(payments))
       }.recover {
         case e: UpstreamErrorResponse if e.statusCode == 404 => List()

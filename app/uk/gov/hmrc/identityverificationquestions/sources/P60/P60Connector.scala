@@ -19,7 +19,8 @@ package uk.gov.hmrc.identityverificationquestions.sources.P60
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
@@ -32,7 +33,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class P60Connector @Inject()(val http: CoreGet, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
+class P60Connector @Inject()(val http: HttpClientV2, metricsService: MetricsService, val appConfig: AppConfig) extends QuestionConnector[Payment]
   with HodConnectorConfig
   with TaxYearBuilder
   with Logging {
@@ -50,7 +51,7 @@ class P60Connector @Inject()(val http: CoreGet, metricsService: MetricsService, 
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
       metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.p60ConnectorTimer.time()) {
-        http.GET[Seq[Employment]](url, headers = headers)(implicitly, hc, ec).recoverWith {
+        http.get(url"$url").setHeader(headers:_*).execute[Seq[Employment]].recoverWith {
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
             Future.successful(Seq())

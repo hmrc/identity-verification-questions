@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,54 +14,92 @@
  * limitations under the License.
  */
 
-package test.connectors.ntc
+package connectors.ntc
 
-import java.time.{Instant, ZoneId, ZonedDateTime}
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
-import test.iUtils.BaseISpec
+import ch.qos.logback.classic.Level
+import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
+import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Selection
-import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{CTC, TaxCreditPayment}
+import uk.gov.hmrc.identityverificationquestions.models.taxcredit._
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcConnector
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class NtcConnectorISpec extends BaseISpec {
+class NtcConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs {
 
   def await[A](future: Future[A]): A = Await.result(future, 50.second)
 
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder().build()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val connector: NtcConnector = app.injector.instanceOf[NtcConnector]
+
+  private val ninoIdentifier: Nino = Nino("AA000003D")
+  private val selectionNino: Selection = Selection(ninoIdentifier)
+  private val url = s"/national-tax-credits/citizens/${ninoIdentifier.value}/verification-data"
+
+  private val date = LocalDate.parse("2024-12-01")
+
+  private val jsonParse: String =
+    """
+      |{
+      |  "applicant1": {
+      |    "bankOrBuildingSociety": {
+      |      "accountNumber": "12345678",
+      |      "modifiedBacsAccountNumber": "87654321"
+      |    }
+      |  },
+      |  "applicant2": {
+      |    "bankOrBuildingSociety": {
+      |      "accountNumber": "23456789",
+      |      "modifiedBacsAccountNumber": null
+      |    }
+      |  },
+      |  "previousPayment": [
+      |    {
+      |      "subjectDate": "2024-12-01",
+      |      "amount": -150.75,
+      |      "taxCreditId": "CTC",
+      |      "paymentType": "REGULAR"
+      |    },
+      |    {
+      |      "subjectDate": "2024-12-01",
+      |      "amount": -200.00,
+      |      "taxCreditId": "WTC",
+      |      "paymentType": "REGULAR"
+      |    }
+      |  ]
+      |}
+      |""".stripMargin
+  private val responseBody: String = Json.parse(jsonParse).toString()
 
   "get ntc returns" should {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    "successfully obtain data for nino AA000003D" in {
-      val ninoIdentifier: Nino = Nino("AA000003D")
-      val selectionNino: Selection = Selection(ninoIdentifier)
+    "successfully obtain data for valid Nino" in {
+      stubGetWithResponseBody(url, OK, responseBody)
+      val result: Seq[TaxCreditRecord] = await(connector.getRecords(selectionNino))
 
-      val connector: NtcConnector = fakeApplication.injector.instanceOf[NtcConnector]
+      result.toList.head shouldBe TaxCreditPayment(date, BigDecimal("150.75"), CTC)
 
-      val result = await(connector.getRecords(selectionNino))
+      val sumPaymentsOnly: Seq[TaxCreditPayment] = result.collect {
+        case payment: TaxCreditPayment if payment.taxCreditId == Sum => payment
+      }
 
-      val date = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
-        .minusMonths(2)
-        .minusDays(5)
-        .toLocalDate
+      sumPaymentsOnly.head shouldBe TaxCreditPayment(date, BigDecimal(350.75), Sum)
+    }
 
-      result.toList.head shouldBe TaxCreditPayment(date, BigDecimal("264.16"), CTC)
+    "return an empty List() if Get request throws UpstreamErrorResponse for NOT_FOUND status" in {
+      withCaptureOfLoggingFrom[NtcConnector] { logs =>
+        stubGetWithResponseBody(url, NOT_FOUND, responseBody)
+        val result: Seq[TaxCreditRecord] = await(connector.getRecords(selectionNino))
+        result shouldBe List.empty
 
-      /* assert against following TaxCreditPayment record
-      {
-      subjectDate: "2022-12-09",
-      amount: -379.3,
-      taxCreditId: "WTC",
-      paymentType: "REGULAR "
-      } */
-      result.toList(2).asInstanceOf[TaxCreditPayment].amount.toString shouldBe "379.30"
-
+        val infoLogs = logs.filter(_.getLevel == Level.INFO)
+        infoLogs.size shouldBe 1
+        infoLogs.head.getMessage should include ("taxCreditService is not available for user:")
+      }
     }
   }
 }

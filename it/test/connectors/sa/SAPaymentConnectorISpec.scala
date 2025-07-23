@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,93 @@
  * limitations under the License.
  */
 
-package test.connectors.sa
+package connectors.sa
 
-import java.time.LocalDate
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
-import test.iUtils.BaseISpec
+import iUtils.{BaseISpec, WireMockStubs}
+import play.api.libs.json.Json
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.sources.sa.{SAPayment, SAPaymentReturn, SAPaymentsConnector}
 
-import scala.concurrent.duration._
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class SAPaymentConnectorISpec extends BaseISpec {
+class SAPaymentConnectorISpec extends BaseISpec with WireMockStubs {
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   def await[A](future: Future[A]): A = Await.result(future, 50.second)
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder().build()
+  private val connector : SAPaymentsConnector = app.injector.instanceOf[SAPaymentsConnector]
+
+  private val validSa = SAPaymentReturn(List(SAPayment(3800, Some(LocalDate.parse("2011-01-31")), Some("PYT")), SAPayment(1515, Some(LocalDate.parse("2011-07-31")), Some("BCC")), SAPayment(0, Some(LocalDate.parse("2011-05-31")), Some("BCC"))))
+  private val utr = "1234567890"
+  private val url = s"/individuals/self-assessment/payments/utr/$utr"
+  private val sampleArrayOfResponsesString: String =
+    """
+      |{
+      |  "paymentsList": [
+      |    {
+      |      "createdDate": "2011-01-31",
+      |      "transactionCode": "PYT",
+      |      "amount": {
+      |        "amount": 3800,
+      |        "currency": "GBP"
+      |      },
+      |      "transactionId": {
+      |        "tieBreaker": 9534,
+      |        "sequenceNumber": null,
+      |        "creationDate": "2011-01-31"
+      |      },
+      |      "taxYearEnd": "null"
+      |    },
+      |    {
+      |      "createdDate": "2011-07-31",
+      |      "transactionCode": "BCC",
+      |      "amount": {
+      |        "amount": 1515,
+      |        "currency": "GBP"
+      |      },
+      |      "transactionId": {
+      |        "tieBreaker": 1234,
+      |        "sequenceNumber": null,
+      |        "creationDate": "2011-07-31"
+      |      },
+      |      "taxYearEnd": "2012-04-05"
+      |    },
+      |    {
+      |      "createdDate": "2011-05-31",
+      |      "transactionCode": "BCC",
+      |      "amount": {
+      |        "amount": 0,
+      |        "currency": "GBP"
+      |      },
+      |      "transactionId": {
+      |        "tieBreaker": 1234,
+      |        "sequenceNumber": null,
+      |        "creationDate": "2011-05-31"
+      |      },
+      |      "taxYearEnd": "2012-04-05"
+      |    }
+      |  ]
+      |}
+      |""".stripMargin
+  private val responseBody: String = Json.parse(sampleArrayOfResponsesString).toString()
 
   "get sa payment returns" should {
     "successfully obtain a return" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+      stubGetWithResponseBody(url, OK, responseBody)
+      val result: Seq[SAPaymentReturn] = await(connector.getReturns(SaUtr(utr)))
 
-      val connector : SAPaymentsConnector = fakeApplication.injector.instanceOf[SAPaymentsConnector]
+      result shouldBe Seq(validSa)
+    }
 
-      val result: Seq[SAPaymentReturn] = await(connector.getReturns(SaUtr("1234567890")))
+    "return an empty List() if Get request throws UpstreamErrorResponse for NOT_FOUND status" in {
+      stubGetWithResponseBody(url, NOT_FOUND, responseBody)
+      val result: Seq[SAPaymentReturn] = await(connector.getReturns(SaUtr(utr)))
 
-      result shouldBe Seq(SAPaymentReturn(Seq(SAPayment(4278.39, Some(LocalDate.parse("2024-03-11")), Some("PYT")))))
+      result shouldBe List.empty
     }
   }
 

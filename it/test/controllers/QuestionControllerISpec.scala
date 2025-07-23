@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package test.controllers
+package controllers
 
 import ch.qos.logback.classic.Level
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
 import play.api.libs.ws.WSResponse
-import test.iUtils.{BaseISpec, LogCapturing, WireMockStubs}
-import test.iUtils.TestData.RtiTestData
+import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
+import iUtils.TestData.RtiTestData
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
 import uk.gov.hmrc.identityverificationquestions.models._
@@ -72,7 +72,7 @@ class QuestionControllerISpec extends BaseISpec with LogCapturing with BaseOneSe
         questionResponse.isSuccess shouldBe true
         questionResponse.get.questions should not contain paymentToDateQuestion
         questionResponse.get.questions should not contain employeeNIContributionsQuestion
-        logs.filter(_.getLevel == Level.ERROR).count(_.getMessage.contains("p60Service threw Exception, origin: identity-verification; detail: uk.gov.hmrc.http.Upstream5xxResponse")) shouldBe 1
+        logs.filter(_.getLevel == Level.ERROR).count(_.getMessage.contains("p60Service threw Exception, origin: identity-verification; detail: uk.gov.hmrc.http.UpstreamErrorResponse")) shouldBe 1
       }
     }
 

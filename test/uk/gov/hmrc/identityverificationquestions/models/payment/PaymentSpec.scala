@@ -17,12 +17,15 @@
 package uk.gov.hmrc.identityverificationquestions.models.payment
 
 import Utils.UnitSpec
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE  //   ISO_LOCAL_DATE_TIME
 
 class PaymentSpec extends UnitSpec {
+
+  val validPayment: Payment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(100.01), Some(34.82), Some(10), Some(12.34), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(10.10))
+
   "deserializing valid json" should {
     "create an Payment object" in new Setup {
       validPaymentJson.validate[Payment] shouldBe JsSuccess(validPayment)
@@ -30,7 +33,7 @@ class PaymentSpec extends UnitSpec {
   }
 
   trait Setup {
-    val validPaymentJson = Json.parse(
+    val validPaymentJson: JsValue = Json.parse(
       """
         |{
         |  "payId": "20425",
@@ -78,6 +81,4 @@ class PaymentSpec extends UnitSpec {
         |""".stripMargin
     )
   }
-  val validPayment = Payment(LocalDate.parse("2014-06-28", ISO_LOCAL_DATE), Some(100.01), Some(34.82), Some(10), Some(12.34), leavingDate = Some(LocalDate.parse("2012-06-22", ISO_LOCAL_DATE)), totalTaxYTD = Some(10.10))
-
 }

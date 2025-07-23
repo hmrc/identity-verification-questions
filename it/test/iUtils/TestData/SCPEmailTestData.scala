@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test.iUtils.TestData
+package iUtils.TestData
 
 import play.api.libs.json.{JsValue, Json}
 

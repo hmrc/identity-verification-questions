@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package test.iUtils
+package iUtils
 
-import com.github.tomakehurst.wiremock.client.WireMock.{ok, post, stubFor, urlPathEqualTo}
-import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.http.{HeaderNames, Status}
@@ -28,8 +27,8 @@ import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits, Injecting}
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
-import java.time.{LocalDateTime, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+import java.time.{LocalDateTime, ZoneId, ZoneOffset}
 
 trait BaseISpec extends AnyWordSpecLike
   with Matchers
@@ -77,10 +76,6 @@ trait BaseISpec extends AnyWordSpecLike
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    stubFor(
-      post(urlPathEqualTo("/platform-analytics/event"))
-        .willReturn(ok())
-    )
     await(identityverificationquestions.collection.drop().toFuture())
   }
 
