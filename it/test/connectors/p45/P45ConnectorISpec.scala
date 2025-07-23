@@ -34,7 +34,7 @@ class P45ConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs w
 
   def await[A](future: Future[A]): A = Await.result(future, 50.second)
 
-  private val jsonParse: String =
+  private val currentJsonParse: String =
     """
       |{
       |  "individual": {
@@ -85,6 +85,49 @@ class P45ConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs w
       |                "pmtDate": "2015-04-06",
       |                "rcvdDate": "2015-04-06",
       |                "taxYear": "14-15"
+      |              },
+      |              {
+      |                "payId": "20426",
+      |                "leavingDate": "2012-06-22",
+      |                "payFreq": "IO",
+      |                "mandatoryMonetaryAmount": [
+      |                  {
+      |                    "type": "TaxablePayYTD",
+      |                    "amount": 0
+      |                  },
+      |                  {
+      |                    "type": "TaxablePay",
+      |                    "amount": 102.02
+      |                  },
+      |                  {
+      |                    "type": "TotalTaxYTD",
+      |                    "amount": 130.99
+      |                  },
+      |                  {
+      |                    "type": "TaxDeductedOrRefunded",
+      |                    "amount": 155.02
+      |                  }
+      |                ],
+      |                "niLettersAndValues": [
+      |                  {
+      |                    "niFigure": [
+      |                      {
+      |                        "type": "EmpeeContribnsInPd",
+      |                        "amount": 100.02
+      |                      },
+      |                      {
+      |                        "type": "EmpeeContribnsYTD",
+      |                        "amount": 130.99
+      |                      }
+      |                    ]
+      |                  }
+      |                ],
+      |                "starter": {
+      |                  "startDate": "2011-08-13"
+      |                },
+      |                "pmtDate": "2015-04-05",
+      |                "rcvdDate": "2015-04-06",
+      |                "taxYear": "14-15"
       |              }
       |            ]
       |          }
@@ -94,26 +137,110 @@ class P45ConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs w
       |  }
       |}
       |""".stripMargin
-  private val responseBody: String = Json.parse(jsonParse).toString()
+  private val previousJsonParse: String =
+    """
+      |{
+      |  "individual": {
+      |    "employments": {
+      |      "employment": [
+      |        {
+      |          "payments": {
+      |            "inYear": [
+      |              {
+      |                "payId": "20425",
+      |                "leavingDate": "2012-06-22",
+      |                "payFreq": "IO",
+      |                "mandatoryMonetaryAmount": [
+      |                  {
+      |                    "type": "TaxablePayYTD",
+      |                    "amount": 0
+      |                  },
+      |                  {
+      |                    "type": "TaxablePay",
+      |                    "amount": 102.02
+      |                  },
+      |                  {
+      |                    "type": "TotalTaxYTD",
+      |                    "amount": 130.99
+      |                  },
+      |                  {
+      |                    "type": "TaxDeductedOrRefunded",
+      |                    "amount": 155.02
+      |                  }
+      |                ],
+      |                "niLettersAndValues": [
+      |                  {
+      |                    "niFigure": [
+      |                      {
+      |                        "type": "EmpeeContribnsInPd",
+      |                        "amount": 100.02
+      |                      },
+      |                      {
+      |                        "type": "EmpeeContribnsYTD",
+      |                        "amount": 130.99
+      |                      }
+      |                    ]
+      |                  }
+      |                ],
+      |                "starter": {
+      |                  "startDate": "2011-08-13"
+      |                },
+      |                "pmtDate": "2014-04-03",
+      |                "rcvdDate": "2015-04-06",
+      |                "taxYear": "14-15"
+      |              }
+      |            ]
+      |          }
+      |        }
+      |      ]
+      |    }
+      |  }
+      |}
+      |""".stripMargin
+  private val currentResponseBody: String = Json.parse(currentJsonParse).toString()
+  private val previousResponseBody: String = Json.parse(previousJsonParse).toString()
+  private val emptyReponseBody: String = Json.parse("{}").toString()
 
   "get p45 returns" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val connector: P45Connector = app.injector.instanceOf[P45Connector]
     val ninoIdentifier: Nino = Nino("AA000003B")
     val selectionNino: Selection = Selection(ninoIdentifier)
-    val resultData = Payment(LocalDate.parse("2015-04-06"), Some(0), Some(130.99), Some(155.02), Some(100.02), None, None, None, None, None, None, Some(LocalDate.parse("2012-06-22")), Some(130.99))
-    val url = s"/rti/individual/payments/nino/${ninoIdentifier.withoutSuffix}/tax-year/${currentTaxYear.previous.yearForUrl}"
+    val currentResultData = Payment(LocalDate.parse("2015-04-06"), Some(0), Some(130.99), Some(155.02), Some(100.02), None, None, None, None, None, None, Some(LocalDate.parse("2012-06-22")), Some(130.99))
+    val previousResultData = Payment(LocalDate.parse("2014-04-03"), Some(0), Some(130.99), Some(155.02), Some(100.02), None, None, None, None, None, None, Some(LocalDate.parse("2012-06-22")), Some(130.99))
+    val currentTaxUrl = s"/rti/individual/payments/nino/${ninoIdentifier.withoutSuffix}/tax-year/${currentTaxYear.yearForUrl}"
+    val previousTaxUrl = s"/rti/individual/payments/nino/${ninoIdentifier.withoutSuffix}/tax-year/${currentTaxYear.previous.yearForUrl}"
 
-    "successfully obtain data for a valid NINO" in {
-      stubGetWithResponseBody(url, OK, responseBody)
-      val result: Seq[Payment] = await(connector.getRecords(selectionNino))
+    "successfully obtain data for a valid NINO" when {
+      "both tax years exist with data" in {
+        stubGetWithResponseBody(currentTaxUrl, OK, currentResponseBody)
+        stubGetWithResponseBody(previousTaxUrl, OK, previousResponseBody)
+        val result: Seq[Payment] = await(connector.getRecords(selectionNino))
 
-      result shouldBe List(resultData)
+        result shouldBe List(currentResultData, previousResultData)
+      }
+
+      "only current tax year exists with data" in {
+        stubGetWithResponseBody(currentTaxUrl, OK, currentResponseBody)
+        stubGetWithResponseBody(previousTaxUrl, NOT_FOUND, emptyReponseBody)
+        val result: Seq[Payment] = await(connector.getRecords(selectionNino))
+
+        result shouldBe List(currentResultData)
+      }
+
+      "only previous tax year exists with data" in {
+        stubGetWithResponseBody(currentTaxUrl, NOT_FOUND, emptyReponseBody)
+        stubGetWithResponseBody(previousTaxUrl, OK, previousResponseBody)
+        val result: Seq[Payment] = await(connector.getRecords(selectionNino))
+
+        result shouldBe List(previousResultData)
+      }
     }
 
     "return empty Seq() AND warnLogs if no NINO is given" in {
       withCaptureOfLoggingFrom[P45Connector] { logs =>
-        stubGetWithResponseBody(url, OK, responseBody)
+        stubGetWithResponseBody(currentTaxUrl, OK, currentResponseBody)
+        stubGetWithResponseBody(previousTaxUrl, OK, previousResponseBody)
         val payeRef: EmpRef = EmpRef("fakeTaxOfficeNumber", "fakeTaxOfficeReference")
         val selectionPayeRef: Selection = Selection(payeRef)
         val result: Seq[Payment] = await(connector.getRecords(selectionPayeRef))
@@ -126,14 +253,15 @@ class P45ConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs w
       }
     }
 
-    "return UpstreamErrorResponse and empty Seq() when P45 data not found" in {
+    "return UpstreamErrorResponse and empty Seq() when P45 data not found for both tax years" in {
       withCaptureOfLoggingFrom[P45Connector] { logs =>
-        stubGetWithResponseBody(url, NOT_FOUND, responseBody)
+        stubGetWithResponseBody(currentTaxUrl, NOT_FOUND, currentResponseBody)
+        stubGetWithResponseBody(previousTaxUrl, NOT_FOUND, previousResponseBody)
         val result: Seq[Payment] = await(connector.getRecords(selectionNino))
         result shouldBe Seq.empty
 
         val infoLogs = logs.filter(_.getLevel == Level.INFO)
-        infoLogs.size shouldBe 1
+        infoLogs.size shouldBe 2
         infoLogs.head.getMessage should include ("p45Service is not available for user:")
       }
     }

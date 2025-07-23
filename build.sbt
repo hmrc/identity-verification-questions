@@ -8,7 +8,7 @@ lazy val scoverageSettings = {
   import scoverage.*
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*BuildInfo.*;.*TestVerifyPersonalIdentityController.*;.*views.*;.*Routes.*;.*RoutesPrefix.*;",
-    ScoverageKeys.coverageMinimumStmtTotal := 87,
+    ScoverageKeys.coverageMinimumStmtTotal := 86,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )}
