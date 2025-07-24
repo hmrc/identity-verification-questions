@@ -45,29 +45,17 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
       "P45Connector returns a non empty sequence of Payment's" in new WithStubbing {
         (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree, paymentFive)))
-        (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(2).atLeastOnce()
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq(
           paymentToDateQuestion, taxToDateQuestion
         )
       }
 
-      "P45Connector returns a non empty sequence of Payment's with previous year in additional information" in new WithStubbing {
-        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree)))
-        (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
-
-        service.questions(selectionNino, corrId).futureValue shouldBe Seq(
-          paymentToDateQuestion2, taxToDateQuestion2
-        )
-      }
-
       "P45Connector returns a non empty sequence of Payment's when there is only payments details" in new WithStubbing {
         (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentSix,paymentThree)))
-        (mockAppConfig.bufferInMonthsForService(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq(
-          paymentToDateQuestion2
+          paymentToDateQuestion
         )
       }
     }
@@ -123,11 +111,8 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
     val selectionNino: Selection = Selection(ninoIdentifier, utrIdentifier)
     val selectionNoNino: Selection = Selection(utrIdentifier)
 
-    val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
-    val taxToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("45.45", "46.46"), Map("currentTaxYear" -> "2019/20"))
-
-    val paymentToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
-    val taxToDateQuestion2: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("45.45", "46.46"), Map("currentTaxYear" -> "2019/20", "previousTaxYear" -> "2018/19"))
+    val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2020/21", "previousTaxYear" -> "2019/20"))
+    val taxToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(TaxToDate, Seq("45.45", "46.46"), Map("currentTaxYear" -> "2020/21", "previousTaxYear" -> "2019/20"))
   }
 
 }

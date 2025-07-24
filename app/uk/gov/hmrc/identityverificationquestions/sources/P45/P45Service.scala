@@ -52,7 +52,7 @@ class P45Service @Inject()(p45Connector: P45Connector,
 
   override def evidenceTransformer(records: Seq[Payment], corrId: CorrelationId): Seq[QuestionWithAnswers] = {
 
-    def taxYears: SortedSet[TaxYear] = SortedSet(currentTaxYear.previous, currentTaxYearWithBuffer.previous)
+    def taxYears: SortedSet[TaxYear] = SortedSet(currentTaxYear, currentTaxYear.previous)
     def additionalInfoMap: Map[String, String] = Map("currentTaxYear" -> taxYears.last.display) ++
       (if (taxYears.size > 1) Map("previousTaxYear" -> taxYears.head.display) else Map())
 
