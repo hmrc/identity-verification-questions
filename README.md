@@ -247,3 +247,14 @@ Locally, make sure you have https://github.com/hmrc/iv-test-data running and the
 ```sbt run```
 
 The service should start up on port 10101
+
+## UI Automation tests
+
+This service is used by both the identity-verification and lost-credentials services.  
+The UI automation tests for both of these services are in the following repos:
+
+https://github.com/hmrc/identity-verification-ui-tests
+https://github.com/hmrc/scp-lost-credentials-acceptance-tests
+
+For changes to this service, please ensure that the relevant tests in these repos are run and pass.
+
