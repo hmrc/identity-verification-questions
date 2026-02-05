@@ -17,12 +17,13 @@
 package uk.gov.hmrc.identityverificationquestions.sources.P60
 
 import Utils.UnitSpec
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest.BeforeAndAfterEach
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EarningsAbovePT, PaymentToDate, PostgraduateLoanDeductions, StatutoryMaternityPay, StudentLoanDeductions}
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
@@ -31,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
   val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
   val auditService: AuditService = mock[AuditService]
   val connector = new P60AnswerConnector(mongoRepo, auditService)
@@ -51,7 +52,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
     "return score of 'Correct'" when {
       "matching PaymentToDate result" in {
         val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "100.11"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsPaymentToDate, None).futureValue shouldBe QuestionResult(PaymentToDate, Correct)
@@ -59,7 +60,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       "matching EarningsAbovePT result when input is £1 more than data stored" in {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("101.11")), None).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
@@ -67,28 +68,28 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       "matching EarningsAbovePT result when input is £1 less than data stored" in {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsEarningsAbovePT.copy(answer = SimpleAnswer("99.11")), None).futureValue shouldBe QuestionResult(EarningsAbovePT, Correct)
       }
       "matching StatutoryMaternityPay result" in {
         val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(StatutoryMaternityPay, Seq("200.22", "300.02"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsStatutoryMaternityPay, None).futureValue shouldBe QuestionResult(StatutoryMaternityPay, Correct)
       }
       "matching StudentLoanDeductions result with no pence" in {
         val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(StudentLoanDeductions, Seq("200.22", "800.00"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsStudentLoans, None).futureValue shouldBe QuestionResult(StudentLoanDeductions, Correct)
       }
       "matching PostgraduateLoanDeductions result with no pence" in {
         val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PostgraduateLoanDeductions, Seq("200.22", "300.00"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsPostgraduateLoans, None).futureValue shouldBe QuestionResult(PostgraduateLoanDeductions, Correct)
@@ -99,7 +100,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       "failed matching PaymentToDate" in {
         val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PaymentToDate, Seq("200.22", "300.33"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, inCorrectQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(inCorrectQDC))
@@ -109,7 +110,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))
@@ -119,7 +120,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(EarningsAbovePT, Seq("200.22", "100.11"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))
@@ -129,7 +130,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(StatutoryMaternityPay, Seq("200.22", "300.02"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))
@@ -139,7 +140,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(StudentLoanDeductions, Seq("200.22", "800.00"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))
@@ -149,7 +150,7 @@ class P60AnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(PostgraduateLoanDeductions, Seq("200.22", "300.00"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))

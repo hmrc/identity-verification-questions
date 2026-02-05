@@ -17,14 +17,15 @@
 package controllers
 
 import ch.qos.logback.classic.Level
+import iUtils.TestData.RtiTestData
+import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
 import org.scalatestplus.play.BaseOneServerPerSuite
 import play.api.libs.json.{JsObject, JsResult, Json}
+import play.api.libs.ws.WSBodyWritables.writeableOf_JsValue
 import play.api.libs.ws.WSResponse
-import iUtils.{BaseISpec, LogCapturing, WireMockStubs}
-import iUtils.TestData.RtiTestData
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
-import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
 
 import java.time.LocalDateTime

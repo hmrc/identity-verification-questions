@@ -18,8 +18,8 @@ package uk.gov.hmrc.identityverificationquestions.sources.P60
 
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
-import uk.gov.hmrc.identityverificationquestions.models.P60._
-import uk.gov.hmrc.identityverificationquestions.models.{AnswerDetails, QuestionKey, QuestionResult, ServiceName, p60Service}
+import uk.gov.hmrc.identityverificationquestions.models.*
+import uk.gov.hmrc.identityverificationquestions.models.P60.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.services.AnswerService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}

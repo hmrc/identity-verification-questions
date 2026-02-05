@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import Utils.{LogCapturing, UnitSpec}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -31,6 +29,8 @@ import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{HealthState, MetricsService}
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,11 +43,11 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
   "calling `questions`" should {
     "return a sequence of Question's" when {
       "PayslipConnector returns a non empty sequence of Payment's" in new WithStubbing {
-        (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
+        (mockPayslipConnector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo)))
-        (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
-        (mockMetricsService.setHealthState(_ : String, _: HealthState)).expects(service.serviceName.toString, *).atLeastOnce()
-      service.questions(selectionNino, corrId).futureValue shouldBe Seq(
+        (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
+        (mockMetricsService.setHealthState(_: String, _: HealthState)).expects(service.serviceName.toString, *).atLeastOnce()
+        service.questions(selectionNino, corrId).futureValue shouldBe Seq(
           incomeTaxQuestion, nationalInsuranceQuestion
         )
       }
@@ -56,20 +56,20 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
     "return a empty sequence of Question's" when {
       "Evidence source in Not available" in new Setup {
         (mockAppConfig.minimumMeoQuestionCount(_: String)).expects(service.serviceName.toString).returning(2)
-        (mockAppConfig.serviceStatus(_ :ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
+        (mockAppConfig.serviceStatus(_: ServiceName)).expects(service.serviceName).returning(mockAppConfig.ServiceState(None, List("nino")))
 
         service.questions(selectionNoNino, corrId).futureValue shouldBe Seq()
       }
 
       "PayslipConnector returns an empty sequence of Payment's" in new WithStubbing {
-        (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
-        (mockMetricsService.setHealthState(_ : String, _: HealthState)).expects(service.serviceName.toString, *).atLeastOnce()
+        (mockPayslipConnector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
+        (mockMetricsService.setHealthState(_: String, _: HealthState)).expects(service.serviceName.toString, *).atLeastOnce()
         service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
       "PayslipConnector returns an insufficient Payment's" in new WithStubbing {
-        (mockPayslipConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentThree)))
-        (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_ :ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
-        (mockMetricsService.setHealthState(_ : String, _: HealthState)).expects(service.serviceName.toString, *).atLeastOnce()
+        (mockPayslipConnector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentThree)))
+        (mockAppConfig.rtiNumberOfPayslipMonthsToCheck(_: ServiceName)).expects(service.serviceName).returning(3).atLeastOnce()
+        (mockMetricsService.setHealthState(_: String, _: HealthState)).expects(service.serviceName.toString, *).atLeastOnce()
         service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }
     }
@@ -79,7 +79,7 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockAppConfig: AppConfig = mock[AppConfig]
     val mockPayslipConnector: PayslipConnector = mock[PayslipConnector]
-    val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
+    val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
     val mockMetricsService: MetricsService = mock[MetricsService]
     val service: PayslipService = new PayslipService(mockPayslipConnector, mockEventDispatcher, mockAuditService, mockAppConfig, mockMetricsService) {
@@ -106,7 +106,7 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
     val selectionNino: Selection = Selection(ninoIdentifier, utrIdentifier)
     val selectionNoNino: Selection = Selection(utrIdentifier)
 
-    val incomeTaxQuestion: QuestionWithAnswers = QuestionWithAnswers(IncomeTax,List("340.82", "356.56"),Map("months" -> "3"))
+    val incomeTaxQuestion: QuestionWithAnswers = QuestionWithAnswers(IncomeTax, List("340.82", "356.56"), Map("months" -> "3"))
     val nationalInsuranceQuestion: QuestionWithAnswers = QuestionWithAnswers(NationalInsurance, Seq("10.00", "11.00"), Map("months" -> "3"))
 
   }

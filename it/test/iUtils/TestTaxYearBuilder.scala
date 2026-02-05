@@ -27,20 +27,20 @@ trait TestTaxYearBuilder {
 
   def today: LocalDate = LocalDate.now
 
-  def currentYear = today.getYear
+  def currentYear: Int = today.getYear
 
-  def startOfTheTaxYear = LocalDate.of(currentYear, startingMonthForTaxYear, startingDayForTaxYear)
+  def startOfTheTaxYear: LocalDate = LocalDate.of(currentYear, startingMonthForTaxYear, startingDayForTaxYear)
 
   /**
    *
    * @param bufferInMonths the number of months after the start of current tax year while we still look at the old one
    * @return the current tax year - deferred a bit.
    */
-  def currentTaxYearWithBuffer(bufferInMonths: Int) =
+  def currentTaxYearWithBuffer(bufferInMonths: Int): TaxYear =
     currentTaxYear(startOfTheTaxYear.plusMonths(bufferInMonths))
 
   private def currentTaxYear(logicalStartOfYear: LocalDate): TaxYear = TaxYear(
-    if (today isBefore logicalStartOfYear) currentYear - 1
+    if (today.isBefore(logicalStartOfYear)) currentYear - 1
     else currentYear
   )
 

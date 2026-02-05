@@ -92,7 +92,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   lazy val saPaymentTolerancePastDays: Int = getIntOrThrowError("sa.payment.tolerance.past.days")
 
   private def getIntOrThrowError(key: String): Int = config.getOptional[Int](key).getOrElse(configNotFoundError(key))
-  def configNotFoundError(key: String) = throw new RuntimeException(s"Could not find configuration key '$key'")
+  private def configNotFoundError(key: String) = throw new RuntimeException(s"Could not find configuration key '$key'")
 
   lazy val payeeAmountOfDaysLeewayForPaymentDate: Int = getIntOrDefault("microservice.services.desPayeService.payeeAmountOfDaysLeewayForPaymentDate", 4)
 }

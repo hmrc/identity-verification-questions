@@ -34,7 +34,7 @@ class AnswerController @Inject()(answersVerificationService: AnswerVerificationS
   extends BackendController(cc)
     with Logging {
 
-  def answer(): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def answer: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val userAgent: Option[String] = request.headers.get("User-Agent")
     val userAllowed: Boolean = appConfig.allowedUserAgentList.contains(userAgent.getOrElse(""))
 

@@ -17,11 +17,11 @@
 package iUtils
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.classic.{Level, Logger => LogbackLogger}
+import ch.qos.logback.classic.{Level, Logger as LogbackLogger}
 import ch.qos.logback.core.read.ListAppender
 import play.api.{Logger, LoggerLike}
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConverters.*
 import scala.reflect.ClassTag
 
 trait LogCapturing {
@@ -43,7 +43,7 @@ trait LogCapturing {
       val underlying = logger.logger.asInstanceOf[LogbackLogger]
       appender.setContext(underlying.getLoggerContext)
       underlying.addAppender(appender)
-      underlying.setLevel(Level.ALL)
+      underlying.setLevel(Level.TRACE)
       underlying.setAdditive(true)
     }
 

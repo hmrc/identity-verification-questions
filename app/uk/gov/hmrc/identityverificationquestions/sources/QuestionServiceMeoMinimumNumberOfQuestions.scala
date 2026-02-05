@@ -30,7 +30,7 @@ trait QuestionServiceMeoMinimumNumberOfQuestions extends QuestionService {
 
   lazy val minimumNumber = appConfig.minimumMeoQuestionCount(serviceName.toString)
 
-  override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] =
+  override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] =
     for {
       foundQuestions <- super.questions(selection, corrId)
       questionsToReturn = if (foundQuestions.size >= minimumNumber) foundQuestions else Seq()

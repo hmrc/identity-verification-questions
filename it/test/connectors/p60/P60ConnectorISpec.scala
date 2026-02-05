@@ -27,7 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Connector
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 class P60ConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs with TestTaxYearBuilder {

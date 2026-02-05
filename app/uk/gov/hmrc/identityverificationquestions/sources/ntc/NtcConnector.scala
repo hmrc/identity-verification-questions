@@ -17,13 +17,13 @@
 package uk.gov.hmrc.identityverificationquestions.sources.ntc
 
 import play.api.Logging
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
-import uk.gov.hmrc.identityverificationquestions.models.taxcredit._
+import uk.gov.hmrc.identityverificationquestions.models.taxcredit.*
 import uk.gov.hmrc.identityverificationquestions.models.{Selection, ServiceName, taxCreditService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
@@ -62,7 +62,7 @@ class NtcConnector @Inject()(val http: HttpClientV2, metricsService: MetricsServ
     metricsService.timeToGetResponseWithMetrics[Seq[TaxCreditRecord]](metricsService.ntcConnectorTimer.time()) {
       selection.nino.fold(Future.successful(Seq.empty[TaxCreditRecord])) { nino =>
         val url = s"$baseUrl/national-tax-credits/citizens/${nino.value}/verification-data"
-        http.get(url"$url").setHeader(headers:_*).execute[TaxCreditClaim].map(selectRecords).recoverWith {
+        http.get(url"$url").setHeader(headers*).execute[TaxCreditClaim].map(selectRecords).recoverWith {
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
             Future.successful(Seq())

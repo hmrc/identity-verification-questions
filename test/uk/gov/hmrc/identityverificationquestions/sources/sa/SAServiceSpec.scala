@@ -38,11 +38,11 @@ class SAServiceSpec extends UnitSpec {
   val testRequest: Selection = Selection(Nino("AA000003D"))
   "Self Assessment Service" should {
     "obtain payment question if only it is returned" in new Setup {
-      (mockSaPaymentService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+      (mockSaPaymentService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
         .expects(testRequest, *, *, *, *)
         .returning(Future.successful(Seq(paymentQuestion)))
 
-      (mockSaPensionService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+      (mockSaPensionService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
         .expects(testRequest, *, *, *, *)
         .returning(Future.successful(Seq()))
 
@@ -52,11 +52,11 @@ class SAServiceSpec extends UnitSpec {
     }
 
     "obtain payment question if both questions are returned" in new Setup {
-      (mockSaPaymentService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+      (mockSaPaymentService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
         .expects(testRequest, *, *, *, *)
         .returning(Future.successful(Seq(paymentQuestion)))
 
-      (mockSaPensionService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+      (mockSaPensionService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
         .expects(testRequest, *, *, *, *)
         .returning(Future.successful(Seq(pensionQuestion)))
 
@@ -66,11 +66,11 @@ class SAServiceSpec extends UnitSpec {
     }
 
     "obtain pension question if only it is returned" in new Setup {
-      (mockSaPaymentService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+      (mockSaPaymentService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
         .expects(testRequest, *, *, *, *)
         .returning(Future.successful(Seq()))
 
-      (mockSaPensionService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+      (mockSaPensionService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
         .expects(testRequest, *, *, *, *)
         .returning(Future.successful(Seq(pensionQuestion)))
 
@@ -82,7 +82,7 @@ class SAServiceSpec extends UnitSpec {
 
   //private trait Setup extends JourneyData {
   private trait Setup {
-    lazy val additionalConfig: Map[String, Any] = Map.empty
+    private lazy val additionalConfig: Map[String, Any] = Map.empty
     private lazy val configData: Map[String, Any] = Map(
       "hods.circuit.breaker.numberOfCallsToTrigger" -> 3,
       "hods.circuit.breaker.unavailablePeriodDurationInSec" -> 15,
@@ -90,22 +90,22 @@ class SAServiceSpec extends UnitSpec {
       "microservice.services.SelfAssessmentService.minimumMeoQuestions" -> 1,
       "version" -> "2"
     ) ++ additionalConfig
-    val config: Configuration = Configuration.from(configData)
-    val servicesConfig = new ServicesConfig(config)
+    private val config: Configuration = Configuration.from(configData)
+    private val servicesConfig = new ServicesConfig(config)
     implicit val appConfig: AppConfig = new AppConfig(config, servicesConfig)
 
-    implicit val request : Request[_] = FakeRequest()
+    implicit val request : Request[?] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     protected val mockSaPensionService: SAPensionService = mock[SAPensionService]
     protected val mockSaPaymentService: SAPaymentService = mock[SAPaymentService]
-    protected val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
-    protected val mockAuditService: AuditService = mock[AuditService]
+    private val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
+    private val mockAuditService: AuditService = mock[AuditService]
 
 
     val paymentQuestion: QuestionWithAnswers = QuestionWithAnswers(SelfAssessedPaymentQuestion,  Seq("123.11"))
     val pensionQuestion: QuestionWithAnswers = QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, Seq("456.22"))
-    val metricsService: MetricsService = mock[MetricsService]
+    private val metricsService: MetricsService = mock[MetricsService]
     val service = new SAService(appConfig, mockSaPensionService, mockSaPaymentService, mockEventDispatcher, mockAuditService, metricsService)
   }
 }

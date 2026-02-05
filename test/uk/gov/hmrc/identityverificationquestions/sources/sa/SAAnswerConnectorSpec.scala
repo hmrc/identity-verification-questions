@@ -146,7 +146,7 @@ class SAAnswerConnectorSpec extends UnitSpec with Eventually with LogCapturing w
     val servicesConfig = new ServicesConfig(config)
     implicit val appConfig: AppConfig = new AppConfig(config, servicesConfig)
 
-    implicit val request: Request[_] = FakeRequest()
+    implicit val request: Request[?] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val testSAPaymentQuestion = QuestionWithAnswers(SelfAssessedPaymentQuestion, Seq(

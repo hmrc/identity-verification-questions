@@ -16,16 +16,16 @@
 
 package monitoring.auditing
 
-import org.mockito.MockitoSugar.mock
+import iUtils.BaseISpec
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.test.FakeRequest
-import iUtils.BaseISpec
 import uk.gov.hmrc.domain.{EmpRef, Nino, SaUtr}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.NationalInsurance
-import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 
 import java.time.Instant
@@ -33,16 +33,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceISpec extends BaseISpec {
 
-
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder().configure(Map("auditing.enabled" -> "true") ++ Map("auditing.consumer.baseUri.port" -> wiremockPort)).build()
-
-
+  override protected def extraConfig: Map[String, Any] =
+    Map(
+      "auditing.enabled" -> true,
+      "auditing.consumer.baseUri.port" -> wiremockPort
+    )
 
   "Audit Service" should {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val selection = Selection(Nino("AA000002D"))
     val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(selection)).withHeaders("User-Agent" -> "identity-verification", "X-Application-ID" -> "fakeApplicationId")
-    val auditService: AuditService = fakeApplication.injector.instanceOf[AuditService]
+    val auditService: AuditService = app.injector.instanceOf[AuditService]
     val answerDetails = AnswerDetails(NationalInsurance, SimpleAnswer(""))
     val questionDataCache = QuestionDataCache(CorrelationId(), selection, Seq(QuestionWithAnswers(NationalInsurance, Seq("", ""))), Instant.now())
     val score = mock[Score]
@@ -50,7 +51,7 @@ class AuditServiceISpec extends BaseISpec {
 
 
     "send correct data for audit type IdentityVerificationAnswer" in {
-      auditService.sendQuestionAnsweredResult(answerDetails, questionDataCache, score, None)(hc, fakeRequest, global)
+      auditService.sendQuestionAnsweredResult(answerDetails, questionDataCache, score, None)(using hc, fakeRequest, global)
       val multifactorAuthenticationCheckAuditRecord = recoverAuditRecords("IdentityVerificationAnswer")
       (multifactorAuthenticationCheckAuditRecord \ "detail").validate[IdentityVerificationAnswerResult] match {
         case JsSuccess(detail, _) =>
@@ -102,9 +103,9 @@ case class SelectionResult(nino: String,
                            payeRef: String)
 
 object SelectionResult{
-  implicit val format: OFormat[SelectionResult] = Json.format
+  implicit val format: OFormat[SelectionResult] = Json.format[SelectionResult]
 }
 
 object IdentityVerificationAnswerResult{
-  implicit val format: OFormat[IdentityVerificationAnswerResult] = Json.format
+  implicit val format: OFormat[IdentityVerificationAnswerResult] = Json.format[IdentityVerificationAnswerResult]
 }

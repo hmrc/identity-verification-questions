@@ -20,15 +20,13 @@ import Utils.LogCapturing
 import ch.qos.logback.classic.Level
 import iUtils.{BaseISpec, WireMockStubs}
 import org.apache.pekko.Done
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.monitoring.analytics.{AnalyticsConnector, AnalyticsRequest, DimensionValue, Event}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
 
 class AnalyticsConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs {
 

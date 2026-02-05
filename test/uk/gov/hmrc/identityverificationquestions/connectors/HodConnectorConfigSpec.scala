@@ -29,7 +29,7 @@ class HodConnectorConfigSpec extends UnitSpec {
       "valid hodConfig returned from AppConfig for service" in new Setup {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Right(HodConf("authToken", "envHeader")))
 
-        testHodConfig.publicHeadersForDES shouldBe hcForDES
+        testHodConfig.headersForDES.shouldBe(hcForDES)
       }
     }
 
@@ -38,21 +38,21 @@ class HodConnectorConfigSpec extends UnitSpec {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Left(MissingAuthorizationToken))
 
         an[RuntimeException] shouldBe thrownBy {
-          testHodConfig.publicHeadersForDES
+          testHodConfig.headersForDES
         }
       }
 
       "MissingEnvironmentHeader returned" in new Setup {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Left(MissingEnvironmentHeader))
         an[RuntimeException] shouldBe thrownBy {
-          testHodConfig.publicHeadersForDES
+          testHodConfig.headersForDES
         }
       }
 
       "MissingAllConfig returned" in new Setup {
         (mockAppConfig.hodConfiguration(_: ServiceName)).expects(p60Service).returning(Left(MissingAllConfig))
         an[RuntimeException] shouldBe thrownBy {
-          testHodConfig.publicHeadersForDES
+          testHodConfig.headersForDES
         }
       }
     }
@@ -62,12 +62,10 @@ class HodConnectorConfigSpec extends UnitSpec {
 
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
 
-    val testHodConfig = new HodConnectorConfig {
+    val testHodConfig: HodConnectorConfig = new HodConnectorConfig {
       override implicit val appConfig: AppConfig = mockAppConfig
 
       override def serviceName: ServiceName = p60Service
-
-      def publicHeadersForDES: HeaderCarrier = headersForDES
     }
   }
 

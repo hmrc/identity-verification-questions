@@ -18,13 +18,13 @@ package uk.gov.hmrc.identityverificationquestions.sources.P45
 
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
-import uk.gov.hmrc.identityverificationquestions.models.P45._
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
+import uk.gov.hmrc.identityverificationquestions.models.P45.*
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
-import uk.gov.hmrc.identityverificationquestions.services.utilities._
+import uk.gov.hmrc.identityverificationquestions.services.utilities.*
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
 import javax.inject.{Inject, Singleton}

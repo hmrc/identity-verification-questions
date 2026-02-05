@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton

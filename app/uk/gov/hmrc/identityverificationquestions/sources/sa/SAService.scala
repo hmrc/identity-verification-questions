@@ -20,7 +20,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
@@ -43,7 +43,7 @@ class SAService @Inject() (
   val serviceName: ServiceName = selfAssessmentService
 
   override def questions(selection: Selection, corrId: CorrelationId)
-                        (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
+                        (implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
 
     val paymentQuestionsFuture = saPaymentService.questions(selection, corrId)
     val pensionQuestionsFuture = saPensionService.questions(selection, corrId)

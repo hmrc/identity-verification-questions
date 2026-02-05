@@ -28,17 +28,16 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class AnalyticsEventHandler @Inject()(connector: AnalyticsConnector) extends Logging {
 
-  def handleEvent(event: MonitoringEvent)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+  def handleEvent(event: MonitoringEvent)(implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     event match {
       case e: ServiceUnavailableEvent => sendEvent(serviceUnavailableEvent(e.serviceName))
-      case _ => ()
     }
   }
 
-  private def clientId(implicit request: Request[_]) = request.cookies.get("_ga").map(_.value)
+  private def clientId(implicit request: Request[?]) = request.cookies.get("_ga").map(_.value)
 
-  private def sendEvent(reqCreator: (Option[String]) => AnalyticsRequest)
-                       (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+  private def sendEvent(reqCreator: Option[String] => AnalyticsRequest)
+                       (implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     val xSessionId: Option[String] = request.headers.get(HeaderNames.xSessionId)
     if (clientId.isDefined || xSessionId.isDefined) {
       val analyticsRequest = reqCreator(clientId)

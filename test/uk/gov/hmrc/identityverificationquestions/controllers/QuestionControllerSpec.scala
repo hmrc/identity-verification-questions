@@ -35,7 +35,7 @@ class QuestionControllerSpec extends UnitSpec with LogCapturing {
 
   "POST /questions" should {
     "return 200 ok" in new Setup {
-      (fakeEvidenceRetrievalService.callAllEvidenceSources(_: Selection, _:String)(_:Request[_],_: HeaderCarrier)).expects(*, *, *, *).returning(Future.successful(questionResponse))
+      (fakeEvidenceRetrievalService.callAllEvidenceSources(_: Selection, _:String)(using _:Request[?],_: HeaderCarrier)).expects(*, *, *, *).returning(Future.successful(questionResponse))
       val result: Future[Result] = controller.question()(fakeQuestionRequest)
       status(result) shouldBe OK
     }

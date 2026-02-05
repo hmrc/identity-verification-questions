@@ -17,7 +17,7 @@
 package iUtils
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.{Fault, HttpHeader}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import iUtils.TestData.SCPEmailTestData

@@ -49,7 +49,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
 
   "Obtain Questions" should {
     "obtain the correct questions" in new Setup {
-      (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(testRecords))
+      (mockConnector.getReturns(_: SaUtr)(using _: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(testRecords))
 
       private val actual = service.questions(testJourney, corrId).futureValue
 
@@ -68,7 +68,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     "limit questions to the last few years based on the payment window" in new Setup {
       override lazy val saPaymentWindowsYears: Int = 2
 
-      (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(testRecords))
+      (mockConnector.getReturns(_: SaUtr)(using _: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(testRecords))
 
       private val actual = service.questions(testJourney, corrId).futureValue
 
@@ -91,7 +91,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
         record.copy(payments = updatedPayments)
       }
 
-      (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(updatedRecords))
+      (mockConnector.getReturns(_: SaUtr)(using _: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(updatedRecords))
 
       private val actual = service.questions(testJourney, corrId).futureValue
 
@@ -114,7 +114,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
         record.copy(payments = updatedPayments)
       }
 
-      (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(updatedRecords))
+      (mockConnector.getReturns(_: SaUtr)(using _: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(updatedRecords))
 
       private val actual = service.questions(testJourney, corrId).futureValue
 
@@ -135,7 +135,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
         record.copy(payments = payments)
       })
 
-      (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(zeroRecords))
+      (mockConnector.getReturns(_: SaUtr)(using _: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *).returning(Future.successful(zeroRecords))
 
       val actual: Seq[QuestionWithAnswers] = service.questions(testJourney, corrId).futureValue
 
@@ -143,7 +143,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     }
 
     "do not obtain any questions if the connector returns NOT FOUND" in new Setup {
-      (mockConnector.getReturns(_: SaUtr)(_: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *)
+      (mockConnector.getReturns(_: SaUtr)(using _: HeaderCarrier, _: ExecutionContext)).expects(sautr, *, *)
         .returning(Future.failed(new NotFoundException("not found")))
 
       service.questions(testJourney, corrId).futureValue shouldBe Seq()
@@ -189,19 +189,19 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
       "sa.payment.tolerance.future.days" -> 3,
       "sa.payment.tolerance.past.days" -> 3
     ) ++ additionalConfig
-    val config: Configuration = Configuration.from(configData)
-    val servicesConfig = new ServicesConfig(config)
+    private val config: Configuration = Configuration.from(configData)
+    private val servicesConfig = new ServicesConfig(config)
     implicit val appConfig: AppConfig = new AppConfig(config, servicesConfig)
 
-    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
-    implicit val request: Request[_] = FakeRequest()
+    private val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    implicit val request: Request[?] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val fixedDate: LocalDate = LocalDate.parse("2020-06-01")
+    private val fixedDate: LocalDate = LocalDate.parse("2020-06-01")
 
     protected val mockConnector: SAPaymentsConnector = mock[SAPaymentsConnector]
-    protected val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
-    protected val mockAuditService: AuditService = mock[AuditService]
+    private val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
+    private val mockAuditService: AuditService = mock[AuditService]
 
     val sautr: SaUtr = SaUtr("123456789")
 

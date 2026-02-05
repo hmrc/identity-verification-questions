@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class EventDispatcher @Inject()(analyticsEventHandler: AnalyticsEventHandler) extends Logging {
 
-  def dispatchEvent(event: MonitoringEvent)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+  def dispatchEvent(event: MonitoringEvent)(implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     try {
       analyticsEventHandler.handleEvent(event)
     } catch {

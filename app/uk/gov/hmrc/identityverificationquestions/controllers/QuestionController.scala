@@ -35,7 +35,7 @@ class QuestionController @Inject()(evidenceRetrievalService: EvidenceRetrievalSe
     Ok(Json.toJson(result))
   }
 
-  def question(): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def question: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val userAgent: Option[String] = request.headers.get("User-Agent")
     val userAllowed: Boolean = appConfig.allowedUserAgentList.contains(userAgent.getOrElse(""))
     

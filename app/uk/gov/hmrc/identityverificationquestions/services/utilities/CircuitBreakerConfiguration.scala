@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.identityverificationquestions.services.utilities
 
-import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
+import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.ServiceName
 
 /**

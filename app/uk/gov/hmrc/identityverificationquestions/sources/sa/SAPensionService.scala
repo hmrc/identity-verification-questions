@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import java.time.Instant
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, ServiceName, selfAssessmentService}
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
@@ -27,18 +25,19 @@ import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsServic
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
+import java.time.Instant
 import javax.inject.Inject
 
 class SAPensionService @Inject() (
     val appConfig: AppConfig,
-    connector : SAPensionsConnector,
+    saPensionsConnector: SAPensionsConnector,
     val eventDispatcher: EventDispatcher,
     val auditService: AuditService,
     val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability
   with CircuitBreakerConfiguration {
 
-  override def connector: QuestionConnector[SAReturn] = connector
+  override def connector: SAPensionsConnector = saPensionsConnector
 
   override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForSA
 

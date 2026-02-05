@@ -21,7 +21,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.TestSuite
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-
+import scala.annotation.nowarn
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,26 +30,23 @@ trait MockHttpClientV2 extends MockFactory { this: TestSuite =>
   val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
 
   def mockHttpClientV2Get(url: URL): CallHandler2[URL, HeaderCarrier, RequestBuilder] =
-    (mockHttpClientV2
-      .get(_ : URL)(_: HeaderCarrier))
+    (mockHttpClientV2.get(_: URL)(using _: HeaderCarrier))
       .expects(url, *)
       .returning(mockRequestBuilder)
 
-  def mockHttpClientV2SetHeader(): CallHandler1[(String, String), RequestBuilder] =
-    (mockRequestBuilder
-      .setHeader(_: (String, String)))
+  @nowarn
+  def mockHttpClientV2SetHeader(): CallHandler1[Seq[(String, String)], RequestBuilder] =
+    (mockRequestBuilder.setHeader _)
       .expects(*)
       .returning(mockRequestBuilder)
 
-  def mockHttpClientV2Execute[O: HttpReads](response: O): CallHandler2[HttpReads[O], ExecutionContext, Future[O]] =
-    (mockRequestBuilder
-      .execute(_: HttpReads[O], _: ExecutionContext))
+  def mockHttpClientV2Execute[O](response: O): CallHandler2[HttpReads[O], ExecutionContext, Future[O]] =
+    (mockRequestBuilder.execute(using _: HttpReads[O], _: ExecutionContext))
       .expects(*, *)
       .returning(Future.successful(response))
 
-  def mockHttpClientV2ExecuteException[O: HttpReads](response: Throwable): CallHandler2[HttpReads[O], ExecutionContext, Future[O]] =
-    (mockRequestBuilder
-      .execute(_: HttpReads[O], _: ExecutionContext))
+  def mockHttpClientV2ExecuteException[O](response: Throwable): CallHandler2[HttpReads[O], ExecutionContext, Future[O]] =
+    (mockRequestBuilder.execute(using _: HttpReads[O], _: ExecutionContext))
       .expects(*, *)
       .returning(Future.failed(response))
 

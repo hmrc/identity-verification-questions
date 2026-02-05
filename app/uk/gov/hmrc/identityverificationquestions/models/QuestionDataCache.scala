@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.identityverificationquestions.models
 
-import java.time.Instant
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+
+import java.time.Instant
 
 /**
  * Mongo record/document containing the id selection, questions found from various

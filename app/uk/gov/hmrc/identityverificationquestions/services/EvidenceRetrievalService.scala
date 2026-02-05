@@ -19,7 +19,7 @@ package uk.gov.hmrc.identityverificationquestions.services
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 import uk.gov.hmrc.identityverificationquestions.sources.P45.P45Service
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60Service
@@ -43,7 +43,7 @@ class EvidenceRetrievalService @Inject()(mongoRepo: QuestionMongoRepository,
                                          empRefService: EmpRefService)
                                         (implicit ec: ExecutionContext) {
 
-  def callAllEvidenceSources(selection: Selection, userAgent: String)(implicit request: Request[_], hc: HeaderCarrier): Future[QuestionResponse] = {
+  def callAllEvidenceSources(selection: Selection, userAgent: String)(implicit request: Request[?], hc: HeaderCarrier): Future[QuestionResponse] = {
 
     val services: Seq[QuestionService] =
       if (appConfig.ntcIsEnabled) Seq(p60Service, p45Service, saService, payslipService, empRefService, ntcService)

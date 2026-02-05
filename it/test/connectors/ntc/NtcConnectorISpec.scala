@@ -22,12 +22,12 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Selection
-import uk.gov.hmrc.identityverificationquestions.models.taxcredit._
+import uk.gov.hmrc.identityverificationquestions.models.taxcredit.*
 import uk.gov.hmrc.identityverificationquestions.sources.ntc.NtcConnector
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 class NtcConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs {

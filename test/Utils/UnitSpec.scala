@@ -69,7 +69,6 @@ trait UnitSpec
   val reqId: String = UUID.randomUUID().toString
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
-  implicit val as: ActorSystem = ActorSystem()
 
 
   implicit val hc: HeaderCarrier = HeaderCarrier().copy(requestId=Some(RequestId(reqId)))

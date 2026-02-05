@@ -18,6 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.controllers
 
 import Utils.{LogCapturing, UnitSpec}
 import ch.qos.logback.classic.Level
+import org.mongodb.scala.SingleObservableFuture
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
@@ -40,10 +41,10 @@ class AnswerControllerSpec extends UnitSpec with LogCapturing {
     "return 200 with a valid json body" when {
       "origin, correlationId and identifiers match entry in mongo repo" in new Setup {
         await(questionMongoRepository.collection.insertOne(questionDataCache).toFuture())
-        (answersService.checkAnswers(_: AnswerCheck)(_: Request[_], _: HeaderCarrier)).expects(answerCheck, *, *).returning(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
+        (answersService.checkAnswers(_: AnswerCheck)(using _: Request[?], _: HeaderCarrier)).expects(answerCheck, *, *).returning(Future.successful(List(QuestionResult(PaymentToDate, Unknown))))
         val result: Future[Result] = controller.answer()(fakeRequest)
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(List(QuestionResult(PaymentToDate, Unknown)))
+        status(result).shouldBe(OK)
+        contentAsJson(result).shouldBe(Json.toJson(List(QuestionResult(PaymentToDate, Unknown))))
         await(questionMongoRepository.collection.drop().toFuture())
       }
     }
@@ -52,10 +53,10 @@ class AnswerControllerSpec extends UnitSpec with LogCapturing {
       "Unauthorised client called question repository" in new Setup {
         withCaptureOfLoggingFrom[AnswerController] { logs =>
           val result: Future[Result] = controller.answer()(fakeRequestWithUnknownAgent)
-          status(result) shouldBe FORBIDDEN
+          status(result).shouldBe(FORBIDDEN)
           val infoLogs = logs.filter(_.getLevel == Level.WARN)
-          infoLogs.size shouldBe 1
-          infoLogs.count(_.getMessage == "Unauthorised client called question repository, User-Agent is: Some(Unknown)") shouldBe 1
+          infoLogs.size.shouldBe(1)
+          infoLogs.count(_.getMessage == "Unauthorised client called question repository, User-Agent is: Some(Unknown)").shouldBe(1)
         }
       }
     }
@@ -67,7 +68,7 @@ class AnswerControllerSpec extends UnitSpec with LogCapturing {
     val fakeRequest: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck)).withHeaders("User-Agent" -> "identity-verification")
     val fakeRequestWithUnknownAgent: FakeRequest[JsValue] = FakeRequest().withBody(Json.toJson(answerCheck)).withHeaders("User-Agent" -> "Unknown")
     val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-    val controller = new AnswerController(answersService, appConfig)(Stubs.stubMessagesControllerComponents(), global)
+    val controller = new AnswerController(answersService, appConfig)(using Stubs.stubMessagesControllerComponents(), global)
   }
 
   trait TestData {
