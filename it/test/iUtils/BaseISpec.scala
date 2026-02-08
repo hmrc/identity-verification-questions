@@ -56,7 +56,7 @@ trait BaseISpec extends AnyWordSpecLike
       ++ Map(
         "mongodb.uri" -> "mongodb://localhost:27017/verification-questions-it-tests",
         "circuit.breaker.numberOfCallsToTrigger" -> 500,
-        "microservice.metrics.graphite.enabled" -> false  // <- add this
+        "microservice.metrics.graphite.enabled" -> false
       )
       ++ extraConfig
   ).build()
