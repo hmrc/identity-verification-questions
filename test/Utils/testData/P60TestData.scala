@@ -16,7 +16,7 @@
 
 package Utils.testData
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 
 trait P60TestData {
   val p60ResponseJson = Json.parse(
@@ -224,7 +224,7 @@ trait P60TestData {
       |}
     """.stripMargin)
 
-  val p60ResponseWithEmployerWithoutPaymentsJson = Json.parse(
+  val p60ResponseWithEmployerWithoutPaymentsJson: JsValue = Json.parse(
     """{
       |    "queryResult": 0,
       |    "request": {
@@ -298,7 +298,7 @@ trait P60TestData {
       |    }
       |}""".stripMargin)
 
-  val p60ResponseWithoutEmploymentsJson = Json.parse(
+  val p60ResponseWithoutEmploymentsJson: JsValue = Json.parse(
     """{
       |    "queryResult": 0,
       |    "request": {
@@ -316,7 +316,7 @@ trait P60TestData {
       |    }
       |}""".stripMargin)
 
-  val p60ResponseWithoutEmploymentJson = Json.parse(
+  val p60ResponseWithoutEmploymentJson: JsValue = Json.parse(
     """{
       |    "queryResult": 0,
       |    "request": {
@@ -332,7 +332,7 @@ trait P60TestData {
       |    }
       |}""".stripMargin)
 
-  val p60ResponseWithoutOptionalFieldsJson = Json.parse(
+  val p60ResponseWithoutOptionalFieldsJson: JsValue = Json.parse(
     """
       |{
       |  "queryResult": 0,
@@ -446,7 +446,7 @@ trait P60TestData {
       |  }
       |}""".stripMargin)
 
-  val p60ResponseWithoutmandatoryMonetaryAmountFieldJson = Json.parse(
+  val p60ResponseWithoutmandatoryMonetaryAmountFieldJson: JsValue = Json.parse(
     """
       |{
       |  "queryResult": 0,

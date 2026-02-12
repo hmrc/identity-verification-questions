@@ -16,25 +16,24 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import java.time.LocalDate
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
-import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
-import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{Broken, Good, MetricsService, Unhealthy}
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
+import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SAPaymentService @Inject()(connector: SAPaymentsConnector,
+class SAPaymentService @Inject()(saPaymentsConnector: SAPaymentsConnector,
                                  val eventDispatcher: EventDispatcher,
                                  val auditService: AuditService,
                                  val appConfig: AppConfig,
@@ -46,15 +45,15 @@ class SAPaymentService @Inject()(connector: SAPaymentsConnector,
 
   def currentDate: LocalDate = LocalDate.now()
 
-  override def connector: QuestionConnector[SAPaymentReturn] = connector
+  override def connector: SAPaymentsConnector = saPaymentsConnector
 
   override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForSA
 
   override def serviceName: ServiceName = selfAssessmentService
 
-  val allowedPaymentTypes = List("PYT", "TFO")
+  private val allowedPaymentTypes: List[String] = List("PYT", "TFO")
 
-  override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
+  override def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {

@@ -94,7 +94,7 @@ class SAPensionServiceSpec extends UnitSpec {
         "microservice.services.selfAssessmentService.minimumMeoQuestions" -> 1
       )
       (() => mockConnector.determinePeriod).expects().returning((2018,2019))
-      (mockConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
+      (mockConnector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext))
         .expects(selection, *, *).returning(Future.successful(testRecords))
 
       val actual: Seq[QuestionWithAnswers] = service.questions(selection, corrId).futureValue
@@ -114,7 +114,7 @@ class SAPensionServiceSpec extends UnitSpec {
         record.copy(returns=returns)
       })
 
-      (mockConnector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
+      (mockConnector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext))
         .expects(selection, *, *).returning(Future.successful(zeroRecords))
 
       val actual: Seq[QuestionWithAnswers] = service.questions(selection, corrId).futureValue
@@ -131,18 +131,18 @@ class SAPensionServiceSpec extends UnitSpec {
       "hods.circuit.breaker.unstablePeriodDurationInSec" -> 30,
       "microservice.services.selfAssessmentPensionService.minimumMeoQuestions" -> 1
     ) ++ additionalConfig
-    val config: Configuration = Configuration.from(configData)
-    val servicesConfig = new ServicesConfig(config)
+    private val config: Configuration = Configuration.from(configData)
+    private val servicesConfig = new ServicesConfig(config)
     implicit val appConfig : AppConfig = new AppConfig(config, servicesConfig)
 
-    implicit val request : Request[_] = FakeRequest()
+    implicit val request : Request[?] = FakeRequest()
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val fixedDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
+    private val fixedDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
 
     protected val mockConnector: SAPensionsConnector = mock[SAPensionsConnector]
-    protected val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
-    protected val mockAuditService: AuditService = mock[AuditService]
+    private val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
+    private val mockAuditService: AuditService = mock[AuditService]
 
     val testRecords : Seq[SAReturn] = Seq(
       SAReturn(
@@ -160,7 +160,7 @@ class SAPensionServiceSpec extends UnitSpec {
         )
       )
     )
-    val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
+    private val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     val selection: Selection = Selection(Nino("AA000003D"))
     val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService, metricsService) {
       override def currentDate: Instant = fixedDate

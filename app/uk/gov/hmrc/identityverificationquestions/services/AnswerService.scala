@@ -21,7 +21,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.circuitbreaker.UsingCircuitBreaker
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.connectors.AnswerConnector
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +49,7 @@ abstract class AnswerService (implicit ec: ExecutionContext) extends UsingCircui
     case _ => true
   }
 
-  def checkAnswers(answerCheck: AnswerCheck, answer: AnswerDetails)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
+  def checkAnswers(answerCheck: AnswerCheck, answer: AnswerDetails)(implicit request: Request[?], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     // Removed isAvailable check in VER-2219
     // We don't need to check the availability of services where we cache the answer data up-front
     // For services that we call after answer submission, we will need to check availability, but not the selection

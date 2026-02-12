@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 import uk.gov.hmrc.identityverificationquestions.models.TaxCredits.BankAccount
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.sources.P45.P45AnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.P60.P60AnswerService
 import uk.gov.hmrc.identityverificationquestions.sources.empRef.EmpRefAnswerService
@@ -38,8 +38,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
   "calling checkAnswers for P60" should {
     "return a Future of QuestionResult with a result of Unknown" when {
       "the requested answer service returns Unknown" in new mockOtherServiceApartFromP60 {
-        (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        (mockP60AnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(_: Request[_], _: HeaderCarrier)).expects(*, *, *, *)
+        (() => mockP60AnswerService.supportedQuestions).expects().returning(Seq(PaymentToDate))
+        (mockP60AnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(using _: Request[?], _: HeaderCarrier)).expects(*, *, *, *)
           .returning(Future.successful(Seq(QuestionResult(PaymentToDate, Unknown))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheckForP60))
         result shouldBe Seq(QuestionResult(PaymentToDate, Unknown))
@@ -48,8 +48,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
     "return a Future of QuestionResult with a result of Correct" when {
       "the requested answer service returns Correct" in new mockOtherServiceApartFromP60 {
-        (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        (mockP60AnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(_: Request[_], _: HeaderCarrier)).expects(*, *, *, *)
+        (() => mockP60AnswerService.supportedQuestions).expects().returning(Seq(PaymentToDate))
+        (mockP60AnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(using _: Request[?], _: HeaderCarrier)).expects(*, *, *, *)
           .returning(Future.successful(Seq(QuestionResult(PaymentToDate, Correct))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheckForP60))
         result shouldBe Seq(QuestionResult(PaymentToDate, Correct))
@@ -58,8 +58,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
     "return a Future of QuestionResult with a result of Incorrect" when {
       "the requested answer service returns Correct" in new mockOtherServiceApartFromP60 {
-        (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
-        (mockP60AnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(_: Request[_], _: HeaderCarrier)).expects(*, *, *, *)
+        (() => mockP60AnswerService.supportedQuestions).expects().returning(Seq(PaymentToDate))
+        (mockP60AnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(using _: Request[?], _: HeaderCarrier)).expects(*, *, *, *)
           .returning(Future.successful(Seq(QuestionResult(PaymentToDate, Incorrect))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheckForP60))
         result shouldBe Seq(QuestionResult(PaymentToDate, Incorrect))
@@ -68,7 +68,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
     "Throw a RuntimeException" when {
       "no supported answer service found for questionKey" in new mockOtherServiceApartFromP60 {
-        (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
+        (() => mockP60AnswerService.supportedQuestions).expects().returning(Seq.empty[QuestionKey])
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheckForP60)
         }
@@ -76,7 +76,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
       /** can't be easily tested until we have multiple evidence sources **/
       "multiple supporting answer services found for questionKey" in new mockOtherServiceApartFromP60 {
-        (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(PaymentToDate))
+        (() => mockP60AnswerService.supportedQuestions).expects().returning(Seq(PaymentToDate))
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheckForP60)
         }
@@ -87,8 +87,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
   "calling checkAnswers for Ntc" should {
     "return a Future of QuestionResult with a result of Unknown" when {
       "the requested answer service returns Unknown" in new mockOtherServiceApartFromNtc {
-        (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(BankAccount))
-        (mockNtcAnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(_: Request[_], _: HeaderCarrier)).expects(*, *, *, *)
+        (() =>mockNtcAnswerService.supportedQuestions).expects().returning(Seq(BankAccount))
+        (mockNtcAnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(using _: Request[?], _: HeaderCarrier)).expects(*, *, *, *)
           .returning(Future.successful(Seq(QuestionResult(BankAccount, Unknown))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheckForNtc))
         result shouldBe Seq(QuestionResult(BankAccount, Unknown))
@@ -97,8 +97,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
     "return a Future of QuestionResult with a result of Correct" when {
       "the requested answer service returns Correct" in new mockOtherServiceApartFromNtc {
-        (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(BankAccount))
-        (mockNtcAnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(_: Request[_], _: HeaderCarrier)).expects(*, *, *, *)
+        (() => mockNtcAnswerService.supportedQuestions).expects().returning(Seq(BankAccount))
+        (mockNtcAnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(using _: Request[?], _: HeaderCarrier)).expects(*, *, *, *)
           .returning(Future.successful(Seq(QuestionResult(BankAccount, Correct))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheckForNtc))
         result shouldBe Seq(QuestionResult(BankAccount, Correct))
@@ -107,8 +107,8 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
     "return a Future of QuestionResult with a result of Incorrect" when {
       "the requested answer service returns Correct" in new mockOtherServiceApartFromNtc {
-        (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(BankAccount))
-        (mockNtcAnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(_: Request[_], _: HeaderCarrier)).expects(*, *, *, *)
+        (() => mockNtcAnswerService.supportedQuestions).expects().returning(Seq(BankAccount))
+        (mockNtcAnswerService.checkAnswers(_: AnswerCheck, _: AnswerDetails)(using _: Request[?], _: HeaderCarrier)).expects(*, *, *, *)
           .returning(Future.successful(Seq(QuestionResult(BankAccount, Incorrect))))
         val result: Seq[QuestionResult] = await(service.checkAnswers(answerCheckForNtc))
         result shouldBe Seq(QuestionResult(BankAccount, Incorrect))
@@ -117,7 +117,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
     "Throw a RuntimeException" when {
       "no supported answer service found for questionKey" in new mockOtherServiceApartFromNtc {
-        (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq.empty[QuestionKey])
+        (() => mockNtcAnswerService.supportedQuestions).expects().returning(Seq.empty[QuestionKey])
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheckForNtc)
         }
@@ -125,7 +125,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
 
       /** can't be easily tested until we have multiple evidence sources **/
       "multiple supporting answer services found for questionKey" in new mockOtherServiceApartFromNtc {
-        (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq(BankAccount))
+        (() => mockNtcAnswerService.supportedQuestions).expects().returning(Seq(BankAccount))
         an[RuntimeException] shouldBe thrownBy {
           service.checkAnswers(answerCheckForNtc)
         }
@@ -134,7 +134,7 @@ class AnswerVerificationServiceSpec extends UnitSpec {
   }
 
   trait SetUp {
-    implicit val request: Request[_] = FakeRequest()
+    implicit val request: Request[?] = FakeRequest()
     val mockP60AnswerService: P60AnswerService = mock[P60AnswerService]
     val mockP45AnswerService: P45AnswerService = mock[P45AnswerService]
     val mockSAAnswerService: SAAnswerService = mock[SAAnswerService]
@@ -151,18 +151,18 @@ class AnswerVerificationServiceSpec extends UnitSpec {
   }
 
   trait mockOtherServiceApartFromP60 extends SetUp {
-    (mockP45AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockPayslipAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockEmpRefAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockNtcAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
+    (() => mockP45AnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockSAAnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockPayslipAnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockEmpRefAnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockNtcAnswerService.supportedQuestions).expects().returning(Seq())
   }
 
   trait mockOtherServiceApartFromNtc extends SetUp {
-    (mockSAAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockPayslipAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockEmpRefAnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockP60AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
-    (mockP45AnswerService.supportedQuestions _: () => Seq[QuestionKey]).expects().returning(Seq())
+    (() => mockSAAnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockPayslipAnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockEmpRefAnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockP60AnswerService.supportedQuestions).expects().returning(Seq())
+    (() => mockP45AnswerService.supportedQuestions).expects().returning(Seq())
   }
 }

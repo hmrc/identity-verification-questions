@@ -65,7 +65,7 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
     case _ => true
   }
 
-  def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
+  def questions(selection: Selection, corrId: CorrelationId)(implicit request: Request[?], hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[QuestionWithAnswers]] = {
     val origin = request.headers.get("user-agent").getOrElse("unknown origin")
     if (isAvailableForRequestedSelection(selection)) {
       withCircuitBreaker {

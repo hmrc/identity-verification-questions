@@ -43,7 +43,7 @@ class MetricsService @Inject()(val metrics: Metrics)(implicit executionContext: 
     }
   }
 
-  def healthySupplier(): MetricRegistry.MetricSupplier[Gauge[_]] = () => new HealthyGauge()
+  def healthySupplier(): MetricRegistry.MetricSupplier[Gauge[?]] = () => new HealthyGauge()
 
   def setHealthState(serviceName: String, healthState: HealthState): Unit =
     metrics.defaultRegistry.gauge(s"$serviceName-health-state", healthySupplier()).asInstanceOf[HealthyGauge].set(healthState)

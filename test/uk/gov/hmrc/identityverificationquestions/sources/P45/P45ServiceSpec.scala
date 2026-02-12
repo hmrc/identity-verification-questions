@@ -43,7 +43,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
   "calling `questions`" should {
     "return a sequence of Question's" when {
       "P45Connector returns a non empty sequence of Payment's" in new WithStubbing {
-        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext))
+        (mockP45Connector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *).returning(Future.successful(Seq(paymentOne, paymentTwo, paymentThree, paymentFive)))
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq(
@@ -52,7 +52,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
       }
 
       "P45Connector returns a non empty sequence of Payment's when there is only payments details" in new WithStubbing {
-        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentSix,paymentThree)))
+        (mockP45Connector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq(paymentSix,paymentThree)))
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq(
           paymentToDateQuestion
@@ -69,7 +69,7 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
       }
 
       "P45Connector returns an empty sequence of Payment's" in new WithStubbing {
-        (mockP45Connector.getRecords(_: Selection)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
+        (mockP45Connector.getRecords(_: Selection)(using _: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(Seq()))
 
         service.questions(selectionNino, corrId).futureValue shouldBe Seq()
       }

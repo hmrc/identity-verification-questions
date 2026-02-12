@@ -18,21 +18,21 @@ package uk.gov.hmrc.identityverificationquestions.services.utilities
 
 case class TaxYear(startYear: Int) extends Ordered[TaxYear] {
 
-  def finishYear = startYear + 1
+  def finishYear: Int = startYear + 1
 
-  def display = startYear + "/" + (finishYear % 100)
+  def display: String = s"$startYear/${finishYear % 100}"
 
-  def previous = back(1)
+  def previous: TaxYear = back(1)
 
   def back(years: Int) = TaxYear(startYear - years)
 
-  def next = forwards(1)
+  def next: TaxYear = forwards(1)
 
   def forwards(years: Int) = TaxYear(startYear + years)
 
   def yearForUrl: String = {
     def takeYY(value: Int) = value % 100
-    takeYY(startYear) + "-" + takeYY(finishYear)
+    s"${takeYY(startYear)}-${takeYY(finishYear)}"
   }
 
   override def compare(that: TaxYear): Int = startYear.compare(that.startYear)

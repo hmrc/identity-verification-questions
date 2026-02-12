@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
 
 case class SARecord(
   selfAssessmentIncome: BigDecimal,

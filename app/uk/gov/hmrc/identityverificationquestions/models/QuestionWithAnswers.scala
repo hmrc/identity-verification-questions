@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.models
 
-import play.api.libs.json.{Json, Format}
+import play.api.libs.json.{Format, Json}
 
 /**
  * The question to be asked of the user, along with their answers from evidence sources

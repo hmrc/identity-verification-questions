@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.services.json
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -28,7 +28,7 @@ class Mapping[A, B](toDomain: A => Either[String, B], fromDomain: B => A) {
   
   def jsonWrites(implicit base: Writes[A]): Writes[B] = Writes[B] { domain => base.writes(fromDomain(domain)) }
  
-  def jsonFormat(implicit base: Format[A]): Format[B] = Format(jsonReads(base), jsonWrites(base))
+  def jsonFormat(implicit base: Format[A]): Format[B] = Format(jsonReads(using base), jsonWrites(using base))
 }
 
 object Mappings {

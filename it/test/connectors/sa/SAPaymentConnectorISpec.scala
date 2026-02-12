@@ -24,7 +24,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.sa.{SAPayment, SAPaymen
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 class SAPaymentConnectorISpec extends BaseISpec with WireMockStubs {

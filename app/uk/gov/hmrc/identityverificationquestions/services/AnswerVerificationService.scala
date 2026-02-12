@@ -47,7 +47,7 @@ class AnswerVerificationService @Inject()(p60AnswerService: P60AnswerService,
     }
   }
 
-  def checkAnswers(answerToCheck: AnswerCheck)(implicit request: Request[_], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
+  def checkAnswers(answerToCheck: AnswerCheck)(implicit request: Request[?], hc: HeaderCarrier): Future[Seq[QuestionResult]] = {
     for {
       seqSeqQuestionResult <- Future.sequence(answerToCheck.answers.map { answer =>
         getQuestionService(answer.questionKey).checkAnswers(answerToCheck, answer)

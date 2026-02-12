@@ -26,7 +26,7 @@ trait HodConnectorConfig {
   implicit val appConfig: AppConfig
   def serviceName: ServiceName
 
-  protected def headersForDES(implicit hc: HeaderCarrier): HeaderCarrier =
+  def headersForDES(implicit hc: HeaderCarrier): HeaderCarrier =
     appConfig.hodConfiguration(serviceName) match {
       case Right(hodConf) =>
         hc.copy(authorization = Some(Authorization(s"Bearer ${hodConf.authorizationToken}")), extraHeaders = Seq("Environment" -> hodConf.environmentHeader))

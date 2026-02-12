@@ -110,12 +110,12 @@ class AnswerServiceSpec extends UnitSpec with LogCapturing {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     implicit val mockAppConfig: AppConfig = mock[AppConfig]
-    implicit val request: Request[_] = FakeRequest()
+    implicit val request: Request[?] = FakeRequest()
 
     def connectorResult: Future[TestRecord] = illegalAccessResult
 
     def connector: AnswerConnector[TestRecord] = new AnswerConnector[TestRecord] {
-      override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[TestRecord] = connectorResult
+      override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[?]): Future[TestRecord] = connectorResult
     }
 
     abstract class TestService extends AnswerService with CheckAvailability

@@ -16,14 +16,15 @@
 
 package controllers
 
-import play.api.libs.json.{JsString, JsSuccess, Json}
-import play.api.libs.ws.WSResponse
 import iUtils.BaseISpec
+import play.api.libs.json.{JsString, JsSuccess, Json}
+import play.api.libs.ws.WSBodyWritables.writeableOf_JsValue
+import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.domain.{Nino, SaUtr}
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.P60.{EmployeeNIContributions, PaymentToDate}
-import uk.gov.hmrc.identityverificationquestions.models._
 
-import java.time.{Duration, Instant, LocalDateTime, ZoneOffset}
+import java.time.{Duration, Instant}
 
 class AnswerControllerISpec extends BaseISpec {
 
@@ -76,7 +77,7 @@ class AnswerControllerISpec extends BaseISpec {
       val questionResultIncorrect: QuestionResult = QuestionResult(PaymentToDate, Incorrect)
       val paymentToDateQuestion: QuestionWithAnswers = QuestionWithAnswers(PaymentToDate, Seq("3000.00", "1200.00"), Map("currentTaxYear" -> "2019/20"))
       val employeeNIContributionsQuestion: QuestionWithAnswers = QuestionWithAnswers(EmployeeNIContributions, Seq("34.00", "34.00"), Map("currentTaxYear" -> "2019/20"))
-      val questions = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
+      val questions: Seq[QuestionWithAnswers] = Seq(paymentToDateQuestion, employeeNIContributionsQuestion)
       def questionDataCache(correlationId: CorrelationId, selection: Selection, questionSeq: Seq[QuestionWithAnswers] = questions) =
         QuestionDataCache(
           correlationId,

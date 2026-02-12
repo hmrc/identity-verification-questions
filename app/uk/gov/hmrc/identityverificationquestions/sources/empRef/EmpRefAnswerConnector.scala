@@ -20,8 +20,8 @@ import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.DateOfPayment
-import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
@@ -36,7 +36,7 @@ class EmpRefAnswerConnector @Inject()(questionRepo: QuestionMongoRepository, aud
 
   val payeeAmountOfDaysLeewayForPaymentDate: Int = appConfig.payeeAmountOfDaysLeewayForPaymentDate
 
-  override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[_]): Future[QuestionResult] = {
+  override def verifyAnswer(correlationId: CorrelationId, answer: AnswerDetails, ivJourney: Option[IvJourney])(implicit hc: HeaderCarrier, request: Request[?]): Future[QuestionResult] = {
     questionRepo.findAnswers(correlationId) map {
       case questionDataCaches if questionDataCaches.isEmpty => QuestionResult(answer.questionKey, Unknown)
       case questionDataCaches =>

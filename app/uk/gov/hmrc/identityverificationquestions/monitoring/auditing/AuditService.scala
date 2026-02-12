@@ -20,7 +20,7 @@ import com.google.common.io.BaseEncoding
 import play.api.Logger
 import play.api.mvc.{Request, RequestHeader}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
@@ -52,15 +52,12 @@ class AuditService @Inject()(auditConnector: AuditConnector) extends DeviceFinge
                                  questionData: QuestionDataCache,
                                  score: Score,
                                  ivJourney: Option[IvJourney])
-                                (implicit hc: HeaderCarrier, request: Request[_], executionContext: ExecutionContext): Future[AuditResult] = {
+                                (implicit hc: HeaderCarrier, request: Request[?], executionContext: ExecutionContext): Future[AuditResult] = {
 
     val callingService: String = request.headers.get("User-Agent").getOrElse("unknown User-Agent")
     val applicationID: String = request.headers.get("X-Application-ID").getOrElse("-")
 
-    val nino: String = questionData.selection.nino.map {
-      case ni => ni.nino
-      case _ => "Unknown Nino"
-    }.getOrElse("Unknown Nino")
+    val nino: String = questionData.selection.nino.map(ni => ni.nino).getOrElse("Unknown Nino")
 
     val deviceID: String = hc.deviceID.getOrElse("unknown")
 

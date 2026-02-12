@@ -14,7 +14,7 @@ lazy val scoverageSettings = {
   )}
 
 ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "3.7.4"
 
 routesImport := Seq.empty
 
@@ -29,7 +29,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(routesImport ++= Seq("models._"))
   .settings(playDefaultPort := 10101)
   .settings(scoverageSettings *)
-
+  .settings(
+    scalacOptions += s"-Wconf:src=${target.value}/.*:s",
+    scalacOptions += "-Wconf:msg=Flag.*repeatedly:s"
+  )
 
 lazy val it = project
   .enablePlugins(PlayScala)

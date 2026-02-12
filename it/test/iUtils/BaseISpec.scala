@@ -16,6 +16,7 @@
 
 package iUtils
 
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
@@ -52,8 +53,11 @@ trait BaseISpec extends AnyWordSpecLike
   override def fakeApplication(): Application = GuiceApplicationBuilder().configure(
     replaceExternalDependenciesWithMockServers
       ++ csrfIgnoreFlags
-      ++ Map("mongodb.uri" -> "mongodb://localhost:27017/verification-questions-it-tests")
-      ++ Map("circuit.breaker.numberOfCallsToTrigger" -> 500)
+      ++ Map(
+        "mongodb.uri" -> "mongodb://localhost:27017/verification-questions-it-tests",
+        "circuit.breaker.numberOfCallsToTrigger" -> 500,
+        "microservice.metrics.graphite.enabled" -> false
+      )
       ++ extraConfig
   ).build()
 

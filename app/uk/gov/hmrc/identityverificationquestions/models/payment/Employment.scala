@@ -15,8 +15,8 @@
  */
 
 package uk.gov.hmrc.identityverificationquestions.models.payment
-
 import play.api.libs.json.{JsSuccess, Reads}
+import play.api.libs.json.Reads.seq
 
 case class Employment(payments: Seq[Payment]) {
   def paymentsByDateDescending: Seq[Payment] = payments.sortWith((p1, p2) => p1.paymentDate.isAfter(p2.paymentDate))
@@ -32,8 +32,9 @@ object Employment{
     JsSuccess(Employment(payments))
   }
 
-  implicit val p60ResponseReads = Reads[Seq[Employment]] { json =>
-    val employments = (json \ "individual" \ "employments" \ "employment").asOpt[Seq[Employment]] match {
+  implicit val p60ResponseReads: Reads[Seq[Employment]] = Reads[Seq[Employment]] { json =>
+    // Use Reads.seq(reads) to avoid recursive lookup of Reads[Seq[Employment]]
+    val employments = (json \ "individual" \ "employments" \ "employment").asOpt[Seq[Employment]](using seq(using reads)) match {
       case Some(employments) => employments
       case _ => Seq()
     }

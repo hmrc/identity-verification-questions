@@ -17,12 +17,13 @@
 package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
 import Utils.UnitSpec
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest.BeforeAndAfterEach
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.{IncomeTax, NationalInsurance}
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
@@ -31,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
 
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
   val mongoRepo: QuestionMongoRepository = new QuestionMongoRepository(mongoComponent)
   val auditService: AuditService = mock[AuditService]
   val connector = new PayslipAnswerConnector(mongoRepo, auditService)
@@ -48,7 +49,7 @@ class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
     "return score of 'Correct'" when {
       "answer matches an answer retrieved from repo IncomeTax" in {
         val correctQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier), Seq(QuestionWithAnswers(IncomeTax, Seq("200.22", "100.11"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(answerDetailsIncomeTax, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsIncomeTax, None).futureValue shouldBe QuestionResult(IncomeTax, Correct)
@@ -56,7 +57,7 @@ class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       "answer matches an answer retrieved from repo NationalInsurance" in {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(NationalInsurance, Seq("200.22", "100.11"))), dateTime)
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Correct, *, *, *, *)
         await(mongoRepo.store(correctQDC))
         connector.verifyAnswer(corrId, answerDetailsNI, None).futureValue shouldBe QuestionResult(NationalInsurance, Correct)
@@ -67,7 +68,7 @@ class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
       "answer does not match an answer retrieved from repo" in {
         val inCorrectQDC: QuestionDataCache = QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(IncomeTax, Seq("200.22", "300.33"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, inCorrectQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(inCorrectQDC))
@@ -77,7 +78,7 @@ class PayslipAnswerConnectorSpec extends UnitSpec with BeforeAndAfterEach {
         val correctQDC: QuestionDataCache =
           QuestionDataCache(corrId, Selection(ninoIdentifier, saUtrIdentifier), Seq(QuestionWithAnswers(NationalInsurance, Seq("200.22", "100.11"))), dateTime)
 
-        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(_: HeaderCarrier, _: Request[_], _: ExecutionContext))
+        (auditService.sendQuestionAnsweredResult(_: AnswerDetails, _: QuestionDataCache, _: Score, _: Option[IvJourney])(using _: HeaderCarrier, _: Request[?], _: ExecutionContext))
           .expects(*, correctQDC, Incorrect, *, *, *, *)
 
         await(mongoRepo.store(correctQDC))

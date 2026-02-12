@@ -27,7 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.sources.payslip.PayslipConnecto
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 class PayslipConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs with TestTaxYearBuilder {

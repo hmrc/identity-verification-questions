@@ -40,14 +40,14 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
 
   "calling callAllEvidenceSources" should {
     "return a QuestionResponse with empty sequence of questions if no matching records" in new Setup {
-      (mockP60Service.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockP45Service.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockSAService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockPayslipService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockEmpRefService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockNtcService.questions(_: Selection, _: CorrelationId)(_: Request[_], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
-      (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
-      (mockAppConfig.ntcIsEnabled _).expects().returning(true)
+      (mockP60Service.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockP45Service.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockSAService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockPayslipService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockEmpRefService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (mockNtcService.questions(_: Selection, _: CorrelationId)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext)).expects(*,*,*,*,*).returning(Future.successful(Seq.empty[QuestionWithAnswers]))
+      (() => mockAppConfig.questionRecordTTL).expects().returning(Duration.ofSeconds(86400))
+      (() => mockAppConfig.ntcIsEnabled).expects().returning(true)
       (mockP60Service.isUserAllowed(_:String)).expects(userAgent).returning(true)
       (mockP45Service.isUserAllowed(_:String)).expects(userAgent).returning(true)
       (mockPayslipService.isUserAllowed(_:String)).expects(userAgent).returning(true)
@@ -61,7 +61,7 @@ class EvidenceRetrievalServiceSpec extends UnitSpec {
 
   "setExpiryDate" should {
     "return a expiry date" in new Setup {
-      (mockAppConfig.questionRecordTTL _).expects().returning(Duration.ofSeconds(86400))
+      (() => mockAppConfig.questionRecordTTL).expects().returning(Duration.ofSeconds(86400))
       val result: Instant = service.setExpiryDate
       val dateStampRegex: Regex = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])(T)([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9]).([0-9]{1,3}).*?$".r //eg "2022-07-07T11:45:26.828..."
       dateStampRegex.pattern.matcher(result.toString).matches shouldBe true

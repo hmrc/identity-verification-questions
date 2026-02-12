@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.P60
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
-import uk.gov.hmrc.identityverificationquestions.models.P60._
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
+import uk.gov.hmrc.identityverificationquestions.models.P60.*
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
@@ -28,6 +27,7 @@ import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsServic
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
+import javax.inject.{Inject, Singleton}
 import scala.collection.SortedSet
 
 @Singleton

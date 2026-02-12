@@ -18,7 +18,7 @@ package uk.gov.hmrc.identityverificationquestions.sources.payslip
 
 import play.api.Logging
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
@@ -51,7 +51,7 @@ class PayslipConnector @Inject()(val http: HttpClientV2, metricsService: Metrics
     for {
       employment <- employments
       payment <- employment.payments
-      if payment.paymentDate isAfter startPoint
+      if payment.paymentDate.isAfter(startPoint)
     } yield payment
   }
 
@@ -64,7 +64,7 @@ class PayslipConnector @Inject()(val http: HttpClientV2, metricsService: Metrics
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
       metricsService.timeToGetResponseWithMetrics[Seq[Employment]](metricsService.payslipConnectorTimer.time()) {
-        http.get(url"$url").setHeader(headers:_*).execute[Seq[Employment]].recoverWith {
+        http.get(url"$url").setHeader(headers*).execute[Seq[Employment]].recoverWith {
           case e: UpstreamErrorResponse if e.statusCode == 404 =>
             logger.info(s"$serviceName is not available for user: ${selection.toList.map(selection.obscureIdentifier).mkString(",")}")
             Future.successful(Seq())

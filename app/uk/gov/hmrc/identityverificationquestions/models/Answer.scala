@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identityverificationquestions.models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 sealed trait Answer
 
@@ -47,7 +47,6 @@ object Answer {
       }
       override def writes(a: Answer): JsValue = a match {
         case SimpleAnswer(value) => JsString(value)
-        case a => throw new IllegalArgumentException(s"Unable to serialize value: $a")
       }
     }
   }

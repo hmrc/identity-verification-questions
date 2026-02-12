@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.identityverificationquestions.sources.sa
 
-import java.time.LocalDate
-import play.api.libs.json._
-import play.api.mvc.Request
+import play.api.libs.json.*
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.MongoAnswerConnector
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.{SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion}
-import uk.gov.hmrc.identityverificationquestions.models._
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.repository.QuestionMongoRepository
 
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -34,7 +33,7 @@ import scala.concurrent.ExecutionContext
 class SAAnswerConnector @Inject()(appConfig: AppConfig, questionRepo: QuestionMongoRepository, auditService: AuditService)
                                  (implicit ec: ExecutionContext) extends MongoAnswerConnector(questionRepo, auditService) {
 
-  override def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails)(implicit request: Request[_]): Score = {
+  override def checkResult(questionDataCaches: Seq[QuestionDataCache], answerDetails: AnswerDetails): Score = {
 
     answerDetails.questionKey match {
       case SelfAssessedIncomeFromPensionsQuestion => handleSAIncomeFromPensionsQuestion(questionDataCaches, answerDetails)

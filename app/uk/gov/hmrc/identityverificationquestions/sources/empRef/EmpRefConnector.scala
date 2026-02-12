@@ -17,13 +17,13 @@
 package uk.gov.hmrc.identityverificationquestions.sources.empRef
 
 import play.api.Logging
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.connectors.utilities.HodConnectorConfig
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.TaxYearBuilder
 
@@ -49,7 +49,7 @@ class EmpRefConnector @Inject()(val http: HttpClientV2, metricsService: MetricsS
       val headers = desHeaders.headers(List("Authorization", "X-Request-Id")) ++ desHeaders.extraHeaders
 
       metricsService.timeToGetResponseWithMetrics[Seq[PayePaymentsDetails]](metricsService.payeConnectorTimer.time()) {
-        http.get(url"$url")(desHeaders).setHeader(headers:_*).execute[PayePaymentsDetails].map { allPayePaymentsDetails =>
+        http.get(url"$url")(using desHeaders).setHeader(headers*).execute[PayePaymentsDetails].map { allPayePaymentsDetails =>
           val lastTwoYearsPayments: PayePaymentsDetails = allPayePaymentsDetails.payments.getOrElse(List()) match {
             case Nil => PayePaymentsDetails(None)
             case payments => lastTwoYearsOfPayments(payments)

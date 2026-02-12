@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.identityverificationquestions.config.{AppConfig, Outage}
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
-import uk.gov.hmrc.identityverificationquestions.models._
+import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
@@ -72,14 +72,14 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
     "isUserAllowed" should {
       "return true" when {
         "The user-agent is not on the denied list for p60" in new Setup {
-          (mockAppConfig.deniedUserAgentListForP60 _).expects().returning(Seq("identity-verification"))
+          (() => mockAppConfig.deniedUserAgentListForP60).expects().returning(Seq("identity-verification"))
           service.isUserAllowed("lost-credentials") shouldBe true
         }
       }
 
       "return false" when {
         "The user-agent is on the denied list for p60" in new Setup {
-          (mockAppConfig.deniedUserAgentListForP60 _).expects().returning(Seq("identity-verification"))
+          (() => mockAppConfig.deniedUserAgentListForP60).expects().returning(Seq("identity-verification"))
           service.isUserAllowed("identity-verification") shouldBe false
         }
       }
@@ -114,10 +114,10 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
         "connector returns an unhealthy service exception" in new Setup {
           (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
 
-          (service3.eventDispatcher.dispatchEvent(_: MonitoringEvent)(_: Request[_], _: HeaderCarrier, _: ExecutionContext))
+          (service3.eventDispatcher.dispatchEvent(_: MonitoringEvent)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
             .expects(ServiceUnavailableEvent("p60Service"),*,*,*)
 
-          (service3.auditService.sendCircuitBreakerEvent(_: Selection, _: String)(_: HeaderCarrier, _: ExecutionContext))
+          (service3.auditService.sendCircuitBreakerEvent(_: Selection, _: String)(using _: HeaderCarrier, _: ExecutionContext))
             .expects(Selection(ninoIdentifier,saUtrIdentifier),"p60Service",*,*)
 
           service3.questions(Selection(ninoIdentifier, saUtrIdentifier), corrId).futureValue shouldBe Seq()
