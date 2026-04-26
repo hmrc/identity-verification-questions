@@ -25,7 +25,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.{SelfAssessedIncomeFromPensionsQuestion, SelfAssessedPaymentQuestion}
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, Selection}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -99,13 +98,12 @@ class SAServiceSpec extends UnitSpec {
 
     protected val mockSaPensionService: SAPensionService = mock[SAPensionService]
     protected val mockSaPaymentService: SAPaymentService = mock[SAPaymentService]
-    private val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     private val mockAuditService: AuditService = mock[AuditService]
 
 
     val paymentQuestion: QuestionWithAnswers = QuestionWithAnswers(SelfAssessedPaymentQuestion,  Seq("123.11"))
     val pensionQuestion: QuestionWithAnswers = QuestionWithAnswers(SelfAssessedIncomeFromPensionsQuestion, Seq("456.22"))
     private val metricsService: MetricsService = mock[MetricsService]
-    val service = new SAService(appConfig, mockSaPensionService, mockSaPaymentService, mockEventDispatcher, mockAuditService, metricsService)
+    val service = new SAService(appConfig, mockSaPensionService, mockSaPaymentService, mockAuditService, metricsService)
   }
 }

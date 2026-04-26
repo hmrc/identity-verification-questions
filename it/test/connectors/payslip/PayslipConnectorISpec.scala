@@ -131,12 +131,14 @@ class PayslipConnectorISpec extends BaseISpec with LogCapturing with WireMockStu
 
     "return UpstreamErrorResponse and empty Seq() when P60 data not found" in {
       withCaptureOfLoggingFrom[PayslipConnector] { logs =>
+        val url2 = s"/rti/individual/payments/nino/${ninoIdentifier.withoutSuffix}/tax-year/${currentTaxYearWithBuffer(3).yearForUrl}"
         stubGetWithResponseBody(url, NOT_FOUND, responseBody)
+        stubGetWithResponseBody(url2, NOT_FOUND, responseBody)
         val result: Seq[Payment] = await(connector.getRecords(selectionNino))
         result shouldBe Seq.empty
 
         val infoLogs = logs.filter(_.getLevel == Level.INFO)
-        infoLogs.size shouldBe 1
+        infoLogs.size shouldBe 2
         infoLogs.head.getMessage should include ("payslipService is not available for user:")
       }
     }

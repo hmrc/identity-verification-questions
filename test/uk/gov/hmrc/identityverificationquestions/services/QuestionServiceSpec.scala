@@ -29,7 +29,6 @@ import uk.gov.hmrc.identityverificationquestions.models.P60.PaymentToDate
 import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
-import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, MonitoringEvent, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.CheckAvailability
 
 import java.time.LocalDateTime
@@ -113,9 +112,6 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
 
         "connector returns an unhealthy service exception" in new Setup {
           (mockAppConfig.serviceStatus(_: ServiceName)).expects(p60Service).returning(mockAppConfig.ServiceState(None, List("nino", "utr")))
-
-          (service3.eventDispatcher.dispatchEvent(_: MonitoringEvent)(using _: Request[?], _: HeaderCarrier, _: ExecutionContext))
-            .expects(ServiceUnavailableEvent("p60Service"),*,*,*)
 
           (service3.auditService.sendCircuitBreakerEvent(_: Selection, _: String)(using _: HeaderCarrier, _: ExecutionContext))
             .expects(Selection(ninoIdentifier,saUtrIdentifier),"p60Service",*,*)
@@ -204,7 +200,6 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override def evidenceTransformer(records: Seq[TestRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
 
       override def metricsService: MetricsService = testMetricsService
@@ -224,7 +219,6 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override def evidenceTransformer(records: Seq[TestRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
       override def metricsService: MetricsService = testMetricsService
       override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForP60
@@ -243,7 +237,6 @@ class QuestionServiceSpec extends UnitSpec with LogCapturing {
       override def evidenceTransformer(records: Seq[TestRecord], corrId: CorrelationId): Seq[QuestionWithAnswers] = records.map(r => QuestionWithAnswers(PaymentToDate, Seq(r.toString))).toList
 
       override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val eventDispatcher: EventDispatcher = mock[EventDispatcher]
       override implicit val auditService: AuditService = mock[AuditService]
       override def metricsService: MetricsService = testMetricsService
       override def deniedUserAgentList: Seq[String] = appConfig.deniedUserAgentListForP60

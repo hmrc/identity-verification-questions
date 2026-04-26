@@ -25,7 +25,6 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.P45.{PaymentToDate, TaxToDate}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, p45Service}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
@@ -80,10 +79,9 @@ class P45ServiceSpec extends UnitSpec with LogCapturing {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockAppConfig: AppConfig = mock[AppConfig]
     val mockP45Connector: P45Connector = mock[P45Connector]
-    val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
     val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
-    val service: P45Service = new P45Service(mockP45Connector, mockEventDispatcher, mockAuditService, mockAppConfig, metricsService) {
+    val service: P45Service = new P45Service(mockP45Connector, mockAuditService, mockAppConfig, metricsService) {
       override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
   }

@@ -78,8 +78,6 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   def questionRecordTTL: Duration = Duration.ofSeconds(getIntOrDefault("question.record.duration", 86400))
 
-  lazy val platformAnalyticsUrl: String = servicesConfig.baseUrl("platform-analytics")
-
   def minimumMeoQuestionCount(serviceName: String): Int = {
     servicesConfig.getInt(s"microservice.services.$serviceName.minimumMeoQuestions")
   }

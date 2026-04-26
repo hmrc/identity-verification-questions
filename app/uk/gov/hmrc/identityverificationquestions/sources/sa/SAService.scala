@@ -21,7 +21,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors
 import uk.gov.hmrc.identityverificationquestions.models.*
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
@@ -34,7 +33,6 @@ class SAService @Inject() (
     val appConfig: AppConfig,
     val saPensionService: SAPensionService,
     val saPaymentService: SAPaymentService,
-    val eventDispatcher: EventDispatcher,
     val auditService: AuditService,
     val metricsService: MetricsService) extends QuestionService
     with CheckAvailability

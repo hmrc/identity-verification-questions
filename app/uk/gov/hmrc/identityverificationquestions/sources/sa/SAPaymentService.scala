@@ -25,7 +25,6 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{Broken, Good, MetricsService, Unhealthy}
-import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
 import uk.gov.hmrc.identityverificationquestions.sources.QuestionServiceMeoMinimumNumberOfQuestions
 
@@ -34,7 +33,6 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SAPaymentService @Inject()(saPaymentsConnector: SAPaymentsConnector,
-                                 val eventDispatcher: EventDispatcher,
                                  val auditService: AuditService,
                                  val appConfig: AppConfig,
                                  val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
@@ -76,7 +74,6 @@ class SAPaymentService @Inject()(saPaymentsConnector: SAPaymentsConnector,
       } recover {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
-          eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           logger.error(s"$serviceName threw UnhealthyServiceException, origin: $origin")
           metricsService.setHealthState(serviceName.toString, Unhealthy)
           Seq()

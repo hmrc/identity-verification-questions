@@ -20,7 +20,6 @@ import play.api.Logging
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.*
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration, PenceAnswerConvertor, TaxYearBuilder}
@@ -30,7 +29,6 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class EmpRefService @Inject()(empRefConnector: EmpRefConnector,
-                              val eventDispatcher: EventDispatcher,
                               val auditService: AuditService,
                               val appConfig: AppConfig,
                               val metricsService: MetricsService)
