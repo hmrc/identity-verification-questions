@@ -25,7 +25,6 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.Payslip.{IncomeTax, NationalInsurance}
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, ServiceName, payslipService}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{HealthState, MetricsService}
 
@@ -79,10 +78,9 @@ class PayslipServiceSpec extends UnitSpec with LogCapturing {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockAppConfig: AppConfig = mock[AppConfig]
     val mockPayslipConnector: PayslipConnector = mock[PayslipConnector]
-    val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
     val mockMetricsService: MetricsService = mock[MetricsService]
-    val service: PayslipService = new PayslipService(mockPayslipConnector, mockEventDispatcher, mockAuditService, mockAppConfig, mockMetricsService) {
+    val service: PayslipService = new PayslipService(mockPayslipConnector, mockAuditService, mockAppConfig, mockMetricsService) {
       override def today: LocalDate = LocalDate.parse("2020-06-28", ISO_LOCAL_DATE)
     }
   }

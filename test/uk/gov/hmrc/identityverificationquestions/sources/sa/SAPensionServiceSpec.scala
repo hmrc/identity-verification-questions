@@ -25,7 +25,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection, selfAssessmentService}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
@@ -141,7 +140,6 @@ class SAPensionServiceSpec extends UnitSpec {
     private val fixedDate: Instant = Instant.parse("2020-06-01T00:00:00Z")
 
     protected val mockConnector: SAPensionsConnector = mock[SAPensionsConnector]
-    private val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     private val mockAuditService: AuditService = mock[AuditService]
 
     val testRecords : Seq[SAReturn] = Seq(
@@ -162,7 +160,7 @@ class SAPensionServiceSpec extends UnitSpec {
     )
     private val metricsService: MetricsService = app.injector.instanceOf[MetricsService]
     val selection: Selection = Selection(Nino("AA000003D"))
-    val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockEventDispatcher, mockAuditService, metricsService) {
+    val service: SAPensionService = new SAPensionService(appConfig, mockConnector, mockAuditService, metricsService) {
       override def currentDate: Instant = fixedDate
     }
   }

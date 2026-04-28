@@ -31,7 +31,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedPaymentQuestion
 import uk.gov.hmrc.identityverificationquestions.models.{QuestionWithAnswers, Selection}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -200,7 +199,6 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
     private val fixedDate: LocalDate = LocalDate.parse("2020-06-01")
 
     protected val mockConnector: SAPaymentsConnector = mock[SAPaymentsConnector]
-    private val mockEventDispatcher: EventDispatcher = mock[EventDispatcher]
     private val mockAuditService: AuditService = mock[AuditService]
 
     val sautr: SaUtr = SaUtr("123456789")
@@ -212,7 +210,7 @@ class SAPaymentServiceSpec extends UnitSpec with Eventually with LogCapturing wi
       SAPayment(BigDecimal(15.51), Some(fixedDate.minusYears(3)), Some("PYT"))
     )))
 
-    val service: SAPaymentService = new SAPaymentService(mockConnector, mockEventDispatcher, mockAuditService, appConfig, metricsService) {
+    val service: SAPaymentService = new SAPaymentService(mockConnector, mockAuditService, appConfig, metricsService) {
       override def currentDate: LocalDate = fixedDate
     }
 

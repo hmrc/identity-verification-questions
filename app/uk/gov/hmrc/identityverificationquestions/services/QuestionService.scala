@@ -24,15 +24,12 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, Selection, ServiceName}
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.{Broken, Good, MetricsService, Unhealthy}
-import uk.gov.hmrc.identityverificationquestions.monitoring.{EventDispatcher, ServiceUnavailableEvent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait QuestionService extends UsingCircuitBreaker with Logging {
 
   type Record
-
-  implicit val eventDispatcher: EventDispatcher
 
   implicit val auditService: AuditService
 
@@ -77,7 +74,6 @@ trait QuestionService extends UsingCircuitBreaker with Logging {
       } recover {
         case _: UnhealthyServiceException =>
           auditService.sendCircuitBreakerEvent(selection, serviceName.toString)
-          eventDispatcher.dispatchEvent(ServiceUnavailableEvent(serviceName.toString))
           metricsService.setHealthState(serviceName.toString, Unhealthy)
           logger.error(s"$serviceName threw UnhealthyServiceException, origin: $origin")
           Seq()

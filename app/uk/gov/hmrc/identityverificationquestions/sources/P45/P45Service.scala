@@ -21,7 +21,6 @@ import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.P45.*
 import uk.gov.hmrc.identityverificationquestions.models.payment.Payment
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.*
@@ -32,7 +31,6 @@ import scala.collection.SortedSet
 
 @Singleton
 class P45Service @Inject()(p45Connector: P45Connector,
-                           val eventDispatcher: EventDispatcher,
                            val auditService: AuditService,
                            val appConfig: AppConfig,
                            val metricsService: MetricsService)

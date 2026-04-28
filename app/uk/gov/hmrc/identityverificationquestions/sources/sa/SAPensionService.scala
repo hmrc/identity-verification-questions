@@ -19,7 +19,6 @@ package uk.gov.hmrc.identityverificationquestions.sources.sa
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.SelfAssessment.SelfAssessedIncomeFromPensionsQuestion
 import uk.gov.hmrc.identityverificationquestions.models.{CorrelationId, QuestionWithAnswers, ServiceName, selfAssessmentService}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.utilities.{CheckAvailability, CircuitBreakerConfiguration}
@@ -31,7 +30,6 @@ import javax.inject.Inject
 class SAPensionService @Inject() (
     val appConfig: AppConfig,
     saPensionsConnector: SAPensionsConnector,
-    val eventDispatcher: EventDispatcher,
     val auditService: AuditService,
     val metricsService: MetricsService) extends QuestionServiceMeoMinimumNumberOfQuestions
   with CheckAvailability

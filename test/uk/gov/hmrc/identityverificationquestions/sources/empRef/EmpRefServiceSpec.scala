@@ -20,7 +20,6 @@ import Utils.{LogCapturing, UnitSpec}
 import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.models.PayeRefQuestion.{AmountOfPayment, DateOfPayment}
 import uk.gov.hmrc.identityverificationquestions.models._
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 
@@ -70,10 +69,9 @@ class EmpRefServiceSpec extends UnitSpec with LogCapturing {
   trait Setup {
     val mockAppConfig: AppConfig = mock[AppConfig]
     val mockEmpRefConnector: EmpRefConnector = mock[EmpRefConnector]
-    val mockEventDispatcher:EventDispatcher = mock[EventDispatcher]
     val mockAuditService: AuditService = mock[AuditService]
     val metricsService: MetricsService = mock[MetricsService]
-    val service: EmpRefService = new EmpRefService(mockEmpRefConnector, mockEventDispatcher, mockAuditService, mockAppConfig, metricsService)
+    val service: EmpRefService = new EmpRefService(mockEmpRefConnector, mockAuditService, mockAppConfig, metricsService)
   }
 
 }

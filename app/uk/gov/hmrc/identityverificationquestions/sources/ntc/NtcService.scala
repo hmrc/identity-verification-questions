@@ -20,7 +20,6 @@ import uk.gov.hmrc.identityverificationquestions.config.AppConfig
 import uk.gov.hmrc.identityverificationquestions.connectors.QuestionConnector
 import uk.gov.hmrc.identityverificationquestions.models.*
 import uk.gov.hmrc.identityverificationquestions.models.taxcredit.{TaxCreditBankAccount, TaxCreditClaim, TaxCreditPayment, TaxCreditRecord}
-import uk.gov.hmrc.identityverificationquestions.monitoring.EventDispatcher
 import uk.gov.hmrc.identityverificationquestions.monitoring.auditing.AuditService
 import uk.gov.hmrc.identityverificationquestions.monitoring.metric.MetricsService
 import uk.gov.hmrc.identityverificationquestions.services.QuestionService
@@ -31,7 +30,6 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class NtcService @Inject()(ntcConnector: NtcConnector,
-                           val eventDispatcher: EventDispatcher,
                            val auditService: AuditService,
                            val appConfig: AppConfig,
                            val metricsService: MetricsService)
