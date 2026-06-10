@@ -168,13 +168,13 @@ class P60ConnectorISpec extends BaseISpec with LogCapturing with WireMockStubs w
     "return UpstreamErrorResponse and empty Seq() when P60 data not found" in {
       withCaptureOfLoggingFrom[P60Connector] { logs =>
         val url2 = s"/rti/individual/payments/nino/${ninoIdentifier.withoutSuffix}/tax-year/${currentTaxYearWithBuffer(2).previous.yearForUrl}"
-        stubGetWithResponseBody(url, NOT_FOUND, responseBody)
-        stubGetWithResponseBody(url2, NOT_FOUND, responseBody)
+        val taxYearUrls = Set(url, url2)
+        taxYearUrls.foreach(u => stubGetWithResponseBody(u, NOT_FOUND, responseBody))
         val result: Seq[Payment] = await(connector.getRecords(selectionNino))
         result shouldBe Seq.empty
 
         val infoLogs = logs.filter(_.getLevel == Level.INFO)
-        infoLogs.size shouldBe 2
+        infoLogs.size shouldBe taxYearUrls.size
         infoLogs.head.getMessage should include ("p60Service is not available for user:")
       }
     }
