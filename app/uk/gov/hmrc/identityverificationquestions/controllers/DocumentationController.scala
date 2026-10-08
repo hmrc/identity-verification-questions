@@ -43,7 +43,7 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
       |        "status": "STABLE",
       |        "endpointsEnabled": true,
       |        "access": {
-      |              "type": "PRIVATE"
+      |              "type": "INTERNAL"
       |             }
       |      }
       |    ]
