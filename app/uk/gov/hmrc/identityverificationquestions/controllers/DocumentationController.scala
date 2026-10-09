@@ -42,9 +42,7 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
       |        "version": "1.0",
       |        "status": "STABLE",
       |        "endpointsEnabled": true,
-      |        "access": {
-      |              "type": "INTERNAL"
-      |             }
+      |        "access": "INTERNAL"
       |      }
       |    ]
       |  }
